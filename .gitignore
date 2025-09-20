@@ -27,10 +27,14 @@ dist-ssr
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+*.so
+*.egg-info/
 
 # Entorno virtual
 venv/
 env/
+ENV/
 
 # Base de datos local
 db.sqlite3
@@ -56,3 +60,4 @@ dist/
 # ---- IDEs / Editor ----
 .vscode/
 .idea/
+*.swp

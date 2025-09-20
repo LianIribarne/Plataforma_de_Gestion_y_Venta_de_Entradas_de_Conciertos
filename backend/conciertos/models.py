@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 
 # Create your models here.
@@ -19,7 +19,6 @@ class Usuario(AbstractUser):
         password
         first_name
         last_name
-        email
     ya estan definidos por defecto
     """
 
@@ -30,6 +29,7 @@ class Usuario(AbstractUser):
     ]
     genero = models.CharField(max_length=20, choices=GENEROS)
     fecha_nacimiento = models.DateField()
+    email = models.EmailField(unique=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -37,6 +37,19 @@ class Usuario(AbstractUser):
     username = None
     is_staff = None
     is_superuser = None
+
+    groups = models.ManyToManyField(
+        Group,
+        related_name="usuario_set",
+        blank=True,
+        help_text="Los grupos a los que pertenece este usuario.",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="usuario_set",
+        blank=True,
+        help_text="Permisos específicos para este usuario.",
+    )
 
     # Foreing Key
     rol = models.ForeignKey(Rol, on_delete=models.CASCADE)
