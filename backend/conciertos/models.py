@@ -47,6 +47,7 @@ class Usuario(AbstractUser):
         blank=True,
         help_text="Los grupos a los que pertenece este usuario.",
     )
+    
     user_permissions = models.ManyToManyField(
         Permission,
         related_name="usuario_set",
