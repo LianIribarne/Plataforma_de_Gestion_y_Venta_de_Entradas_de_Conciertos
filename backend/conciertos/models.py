@@ -3,7 +3,6 @@ from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
-# Create your models here.
 class Rol(models.Model):
     ROLES = [
         ('Administrador', 'Administrador'),
@@ -17,7 +16,7 @@ class Rol(models.Model):
 
 class Usuario(AbstractUser):
     """
-    Los campos:
+    Campos:
         password
         first_name
         last_name
@@ -40,7 +39,11 @@ class Usuario(AbstractUser):
     username = None
     is_staff = None
     is_superuser = None
+    date_joined = None
+    last_login = None
+    is_active = None
 
+    # Necesarios definirlos pasa el uso de AbstractUser
     groups = models.ManyToManyField(
         Group,
         related_name="usuario_set",
@@ -58,6 +61,7 @@ class Usuario(AbstractUser):
     # Foreing Key
     rol = models.ForeignKey(Rol, on_delete=models.CASCADE)
 
+    # Calcula la edad a partir de fecha_nacimiento y devulve un entero
     def calcular_edad(self):
         if not self.fecha_nacimiento:
             return None
@@ -67,19 +71,34 @@ class Usuario(AbstractUser):
             edad -= 1
         return edad
 
+    # Verifica si el usuario es mayor de 18 años
     def clean(self):
         if self.fecha_nacimiento:
             edad = self.calcular_edad()
             if edad is not None and edad < 18:
                 raise ValidationError('Debes ser mayor de 18 años.')
-
-    def __str__(self):
-        return f'{self.first_name} {self.last_name} ({self.email})'
     
     def save(self, *args, **kwargs):
-        self.full_clean()
-        self.edad = self.calcular_edad()
+        self.edad = self.calcular_edad() # Completa el campo edad
+        self.full_clean() # Realiza las validaciones necesarias
+        
         super().save(*args, **kwargs)
+    
+    # Verificaciones de si el usuario es de tal rol
+    @property
+    def es_administrador(self):
+        return self.rol.nombre == 'Administrador'
+    
+    @property
+    def es_organizador(self):
+        return self.rol.nombre == 'Organizador'
+    
+    @property
+    def es_cliente(self):
+        return self.rol.nombre == 'Cliente'
+    
+    def __str__(self):
+        return f'{self.first_name} {self.last_name} ({self.email} - {self.rol.nombre})'
 
 class Categoria(models.Model):
     CATEGORIAS = [
@@ -108,7 +127,6 @@ class Evento(models.Model):
     cant_entradas = models.PositiveIntegerField()
     fecha_hora = models.DateTimeField()
     lugar = models.CharField(max_length=255)
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
     imagen = models.ImageField(upload_to='eventos/')
 
     # Foreing Key
@@ -140,7 +158,8 @@ class Entrada(models.Model):
         ('Vendida', 'Vendida'),
         ('Cancelada', 'Cancelada'),
     ]
-    estado = models.CharField(choices=ESTADOS, default='Disponible')
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='Disponible')
+    reserva_expira = models.DateTimeField(null=True, blank=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     tipo = models.CharField(max_length=20, choices=[('Normal', 'Normal'), ('VIP', 'VIP')])
 
