@@ -9,7 +9,7 @@ import Pago from '../components/Pago';
 
 const pagos = [
   {
-    codigo: '#ABCD-1234-EFGH',
+    codigo: 'A9F3C1B27E',
     fecha: '02.11.2025',
     hora: '15:01',
     monto: 20000,

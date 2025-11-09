@@ -20,7 +20,7 @@ const entradas = [
     estado: 'Programado',
     entradas: [
       {
-        codigo: 24192419,
+        codigo: 'A9F3C1B27EF4',
         qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
         artista: "Ghost",
         titulo: 'Metal Nights Patagonia',

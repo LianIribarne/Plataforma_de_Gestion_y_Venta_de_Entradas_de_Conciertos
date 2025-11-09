@@ -18,7 +18,7 @@ export default function Datos({ rol, first_name, last_name, email, fecha_nacimie
       <ModalOverlay backdropFilter='blur(2px)' />
       <ModalContent borderRadius={30}>
         <ModalHeader align='center' color='gray.700' fontSize='2xl'>
-        <b>{first_name}{' '}{last_name}{!rol ? '' : ` - ${rol}`}</b>
+        <b>{first_name}{' '}{last_name}{!rol || rol === 'cliente' ? '' : ` - ${rol}`}</b>
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody align='center'>

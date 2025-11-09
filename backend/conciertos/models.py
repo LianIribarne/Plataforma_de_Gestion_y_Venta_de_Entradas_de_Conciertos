@@ -1,7 +1,11 @@
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+import uuid
+
+def generar_codigo():
+    return uuid.uuid4().hex[:10].upper()
 
 class Rol(models.Model):
     ROLES = [
@@ -13,6 +17,28 @@ class Rol(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class UsuarioManager(BaseUserManager):
+    use_in_migrations = True
+
+    def _create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError('El email es obligatorio')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        return self._create_user(email, password, **extra_fields)
+
+    def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self._create_user(email, password, **extra_fields)
 
 class Usuario(AbstractUser):
     """
@@ -37,8 +63,8 @@ class Usuario(AbstractUser):
     REQUIRED_FIELDS = []
 
     username = None
-    is_staff = None
-    is_superuser = None
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     date_joined = None
     last_login = None
     is_active = None
@@ -59,7 +85,9 @@ class Usuario(AbstractUser):
     )
 
     # Foreing Key
-    rol = models.ForeignKey(Rol, on_delete=models.CASCADE)
+    rol = models.ForeignKey(Rol, on_delete=models.PROTECT)
+
+    objects = UsuarioManager()
 
     # Calcula la edad a partir de fecha_nacimiento y devulve un entero
     def calcular_edad(self):
@@ -114,6 +142,45 @@ class Categoria(models.Model):
     def __str__(self):
         return self.nombre
 
+class Artista(models.Model):
+    nombre = models.CharField(max_length=255)
+    pais_origen = models.CharField(max_length=120)
+    imagen = models.ImageField(upload_to='artistas/')
+
+    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.nombre
+
+class Provincia(models.Model):
+    nombre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nombre
+
+class Ciudad(models.Model):
+    nombre = models.CharField(max_length=120)
+
+    provincia = models.ForeignKey(Provincia, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ('nombre', 'provincia')
+
+    def __str__(self):
+        return self.nombre
+
+class Lugar(models.Model):
+    nombre = models.CharField(max_length=255)
+    direccion = models.CharField(max_length=255)
+
+    ciudad = models.ForeignKey(Ciudad, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ('nombre', 'ciudad')
+
+    def __str__(self):
+        return self.nombre
+
 class Evento(models.Model):
     ESTADOS = [
         ('Programado', 'Programado'),
@@ -124,18 +191,20 @@ class Evento(models.Model):
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Programado')
-    cant_entradas = models.PositiveIntegerField()
-    fecha_hora = models.DateTimeField()
-    lugar = models.CharField(max_length=255)
+    fecha = models.DateField()
+    show_hora = models.TimeField()
+    puertas_hora = models.TimeField()
+    limite_reserva_total = models.PositiveIntegerField()
     imagen = models.ImageField(upload_to='eventos/')
 
     # Foreing Key
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+    lugar = models.ForeignKey(Lugar, on_delete=models.PROTECT)
     organizador = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    artista = models.ForeignKey(Artista, on_delete=models.PROTECT)
     
     def clean(self):
-        if self.fecha_hora and self.fecha_hora <= timezone.now():
-            raise ValidationError('La fecha y hora deben ser futuras.')
+        if self.fecha and self.fecha <= timezone.now():
+            raise ValidationError('La fecha debe ser futuro.')
 
     def __str__(self):
         return self.titulo
@@ -144,9 +213,27 @@ class Evento(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+class TipoEntrada(models.Model):
+    nombre = models.CharField(max_length=100)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    cantidad_total = models.PositiveIntegerField()
+    limite_reserva = models.PositiveIntegerField()
+
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('nombre', 'evento')
+
+    def __str__(self):
+        return f"{self.nombre} - {self.evento}"
+
 class Pago(models.Model):
+    codigo = models.CharField(max_length=12, unique=True, default=generar_codigo, editable=False)
+    cant_entradas = models.PositiveIntegerField()
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_hora = models.DateTimeField(auto_now_add=True)
+
+    cliente = models.ForeignKey(Usuario, on_delete=models.PROTECT)
 
     def __str__(self):
         return f'Monto: {self.monto} - Fecha y hora: {self.fecha_hora}'
@@ -159,14 +246,13 @@ class Entrada(models.Model):
         ('Cancelada', 'Cancelada'),
     ]
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Disponible')
+    codigo = models.CharField(max_length=12, unique=True, default=generar_codigo, editable=False)
     reserva_expira = models.DateTimeField(null=True, blank=True)
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
-    tipo = models.CharField(max_length=20, choices=[('Normal', 'Normal'), ('VIP', 'VIP')])
 
     # Foreing Key
-    evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
     pago = models.ForeignKey(Pago, on_delete=models.PROTECT, null=True, blank=True)
+    tipo = models.ForeignKey(TipoEntrada, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Usuario, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f'Evento: {self.evento} - Usuario: {self.usuario} - Pago: {self.pago}'
+        return f'Usuario: {self.usuario} - Pago: {self.pago}'

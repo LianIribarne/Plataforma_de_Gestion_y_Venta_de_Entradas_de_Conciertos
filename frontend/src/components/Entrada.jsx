@@ -157,7 +157,7 @@ export default function Entrada({ qr, artista, titulo, fecha, puertas, show, pre
                   color='gray.900' 
                   sx={{ writingMode: "vertical-rl" }}
                 >
-                  #{codigo}
+                  {codigo}
                 </Text>
               </Box>
             </HStack>
