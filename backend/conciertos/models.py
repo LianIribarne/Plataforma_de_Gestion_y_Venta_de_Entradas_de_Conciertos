@@ -63,26 +63,13 @@ class Usuario(AbstractUser):
     REQUIRED_FIELDS = []
 
     username = None
+    is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    date_joined = None
-    last_login = None
-    is_active = None
 
     # Necesarios definirlos pasa el uso de AbstractUser
-    groups = models.ManyToManyField(
-        Group,
-        related_name="usuario_set",
-        blank=True,
-        help_text="Los grupos a los que pertenece este usuario.",
-    )
-    
-    user_permissions = models.ManyToManyField(
-        Permission,
-        related_name="usuario_set",
-        blank=True,
-        help_text="Permisos específicos para este usuario.",
-    )
+    groups = models.ManyToManyField(Group, related_name="usuario_set", blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name="usuario_set", blank=True)
 
     # Foreing Key
     rol = models.ForeignKey(Rol, on_delete=models.PROTECT)

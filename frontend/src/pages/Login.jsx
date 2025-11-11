@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from "axios";
 import {
   Box,
   AbsoluteCenter,
@@ -11,12 +12,17 @@ import {
   Button,
   FormControl,
   FormLabel,
-  FormErrorMessage, 
+  Link,
   Tooltip,
+  useToast,
 } from "@chakra-ui/react";
-import { ViewIcon, ViewOffIcon, AtSignIcon } from '@chakra-ui/icons';
+import { ViewIcon, ViewOffIcon, AtSignIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { useNavigate } from "react-router-dom";
 
 export default function Form() {
+  const toast = useToast();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = React.useState({
     email: "",
     password: "",
@@ -48,14 +54,58 @@ export default function Form() {
     setFormData({ ...formData, [field]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
   
-    if (Object.keys(validationErrors).length === 0) {
-      console.log("Formulario válido:", formData);
-      // acá podrías enviar los datos al servidor
+    if (Object.keys(validationErrors).length > 0) return;
+    
+    try {
+      const payload = {
+        email: formData.email,
+        password: formData.password
+      };
+
+      const res = await axios.post(
+        "http://127.0.0.1:8000/api/login/", 
+        payload, 
+        {
+          withCredentials: true,
+        }
+      );
+
+      const mensaje = res?.data?.message ?? "Bienvenido";
+
+      toast({
+        title: mensaje,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+
+      navigate("/eventos");
+
+    } catch (error) {
+      let msg = "Error inesperado";
+      const data = error?.response?.data;
+
+      if (data && typeof data === "object") {
+        const firstField = Object.keys(data)[0];
+        const raw = data[firstField];
+      
+        msg = Array.isArray(raw) ? raw[0] : raw;
+      }
+
+      toast({
+        title: "Error",
+        description: msg,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
     }
   };
 
@@ -137,10 +187,13 @@ export default function Form() {
           </FormControl>
 
           {/* Submit */}
-          <Button type="submit" colorScheme='teal' size='lg' rounded='full' mt={4}>
+          <Button type="submit" colorScheme='teal' size='lg' rounded='full' my={4}>
               Iniciar Sesion
           </Button>
         </form>
+        <Link href='http://localhost:5173/register' fontSize={14} color='white'>
+          No tienes una cuenta? Registrate <ExternalLinkIcon mx='2px' />
+        </Link>
       </AbsoluteCenter>
     </Box>
   );

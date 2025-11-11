@@ -1,25 +1,32 @@
 from rest_framework import serializers
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.validators import UniqueValidator
 from .models import Usuario, Evento, Pago, Entrada, Artista, TipoEntrada, Lugar
 
 class RegistroSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=Usuario.objects.all(), message="Este email ya está registrado")]
+    )
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("La contraseña debe tener al menos 8 caracteres")
+        return value
+
     rol = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Usuario
-        fields = ('email', 'password', 'first_name', 'last_name', 'fecha_nacimiento', 'genero', 'rol')
+        fields = ['email', 'password', 'first_name', 'last_name', 'fecha_nacimiento', 'genero', 'rol']
 
     def create(self, validated_data):
-        rol = validated_data.pop('rol')
-        usuario = Usuario.objects.create_user(
-            email=validated_data['email'],
-            password=validated_data['password'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', ''),
-            fecha_nacimiento=validated_data.get('fecha_nacimiento'),
-            genero=validated_data.get('genero'),
-            rol_id=rol
-        )
+        password = validated_data.pop("password")
+        rol = validated_data.pop("rol")
+        usuario = Usuario(**validated_data, rol_id=rol)
+        usuario.set_password(password)
+        usuario.save()
         return usuario
 
 # USUARIO ------------------------------------------
