@@ -84,17 +84,6 @@ export default function EntradaInfo({ tipo, disponibles, reservadas, precio, can
             >
               <b>{tipo} <ArrowRightIcon mb={1} boxSize={4} /> ${precio}</b>
             </Text>
-            {/* <Text 
-              fontSize='lg' 
-              ml={20}
-              color='cyan.900' 
-              bg='cyan.400'
-              display="inline-block" 
-              px={2} 
-              rounded='full'
-            >
-              <b>Precio unitario <ArrowRightIcon mb={1} /> ${precio}</b>
-            </Text> */}
           </Box>
           <AccordionIcon />
         </AccordionButton>

@@ -16,6 +16,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   Tooltip,
+  useToast,
 } from "@chakra-ui/react";
 import React, { useState, useEffect } from 'react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
@@ -213,334 +214,359 @@ export default function CrearEvento() {
 
   return (
     <Box p={5} align='center'>
-      <Heading mb={4} align='center' color='white'>Crear Evento</Heading>
-      <Box 
-        display="flex" 
-        w="60%" 
-        bg='whiteAlpha.400'
-        borderRadius={20}
-        p={5}
-        mb={6}
-      >
-        <Box flex="1">
-          <FormControl mb={2} isInvalid={errors.titulo} isRequired>
-            <FormLabel color='white'>Titulo</FormLabel>
-            <Tooltip
-              label={errors.titulo}
-              isOpen={!!errors.titulo}
-              placement="top"
-              bg="red.500"
-              color="white"
-              hasArrow
-            >
-              <Input
-                placeholder="Ingrese un titulo"
-                variant='custom'
-                value={formData.titulo} 
-                onChange={handleChange("titulo")}
-              />
-            </Tooltip>
-          </FormControl>
-
-          <FormControl mb={2} isInvalid={errors.descripcion} isRequired>
-            <FormLabel color='white'>Descripción</FormLabel>
-            <Tooltip
-              label={errors.descripcion}
-              isOpen={!!errors.descripcion}
-              placement="top"
-              bg="red.500"
-              color="white"
-              hasArrow
-            >
-              <Textarea 
-                placeholder='Ingrese una descripción' 
-                resize='none' 
-                variant='custom'
-                value={formData.descripcion} 
-                onChange={handleChange("descripcion")}
-              />
-            </Tooltip>
-          </FormControl>
-
-          <HStack mb={2}>
-            <FormControl isInvalid={errors.fecha} isRequired>
-              <FormLabel color='white'>Fecha</FormLabel>
-              <Tooltip
-                label={errors.fecha}
-                isOpen={!!errors.fecha}
-                placement="top-end"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Input
-                  type="date"
-                  variant='custom'
-                  value={formData.fecha} 
-                  onChange={handleChange("fecha")}
-                />
-              </Tooltip>
-            </FormControl>
-
-            <FormControl isInvalid={errors.show} isRequired>
-              <FormLabel color='white'>Show</FormLabel>
-              <Tooltip
-                label={errors.show}
-                isOpen={!!errors.show}
-                placement="top-end"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Input
-                  type="time"
-                  variant='custom'
-                  value={formData.show} 
-                  onChange={handleChange("show")}
-                />
-              </Tooltip>
-            </FormControl>
-
-            <FormControl isInvalid={errors.puertas} isRequired>
-              <FormLabel color='white'>Puertas</FormLabel>
-              <Tooltip
-                label={errors.puertas}
-                isOpen={!!errors.puertas}
-                placement="top-end"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Input
-                  type="time"
-                  variant='custom'
-                  value={formData.puertas} 
-                  onChange={handleChange("puertas")}
-                />
-              </Tooltip>
-            </FormControl>
-          </HStack>
-
-          <HStack>
-            <FormControl isInvalid={errors.lugar} isRequired>
-              <FormLabel color='white'>Lugar</FormLabel>
-              <Tooltip
-                label={errors.lugar}
-                isOpen={!!errors.lugar}
-                placement="top"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Select 
-                  placeholder='Seleccione un lugar'
-                  variant='custom'
-                  value={formData.lugar} 
-                  onChange={handleChange("lugar")}
-                >
-                  <option value='option1'>Option 1</option>
-                  <option value='option2'>Option 2</option>
-                  <option value='option3'>Option 3</option>
-                </Select>
-              </Tooltip>
-            </FormControl>
-            
-            <FormControl isInvalid={errors.artista} isRequired>
-              <FormLabel color='white'>Artista</FormLabel>
-              <Tooltip
-                label={errors.artista}
-                isOpen={!!errors.artista}
-                placement="top"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Select 
-                  placeholder='Seleccione un artista'
-                  variant='custom'
-                  value={formData.artista} 
-                  onChange={handleChange("artista")}
-                >
-                  <option value='option1'>Option 1</option>
-                  <option value='option2'>Option 2</option>
-                  <option value='option3'>Option 3</option>
-                </Select>
-              </Tooltip>
-            </FormControl>
-          </HStack>
-        </Box>
-
+      <Heading mb={4} align='center' color='white'>Crear Concierto</Heading>
+      <Box display='flex'>
         <Box 
-          w="300px" 
-          ml={2} 
+          display="flex" 
+          w="60%" 
+          bg='whiteAlpha.400'
+          borderRadius={20}
+          p={5}
+          mb={6}
         >
-          <FormControl mb={2} isInvalid={errors.imagen}>
-            <FormLabel color='white'>Imagen</FormLabel>
-            <Tooltip
-              label={errors.imagen}
-              isOpen={!!errors.imagen}
-              placement="top-end"
-              bg="red.500"
-              color="white"
-              hasArrow
-            >
-              <Input
-                ref={inputFileRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFile}
-                variant='unstyled'
-                bg='whiteAlpha.400'
-              />
-            </Tooltip>
-          </FormControl>
+          <Box flex="1">
+            <FormControl mb={2} isInvalid={errors.titulo}>
+              <FormLabel color='white'>Titulo</FormLabel>
+              <Tooltip
+                label={errors.titulo}
+                isOpen={!!errors.titulo}
+                placement="top"
+                bg="red.500"
+                color="white"
+                hasArrow
+              >
+                <Input
+                  placeholder="Ingrese un titulo"
+                  variant='custom'
+                  value={formData.titulo} 
+                  onChange={handleChange("titulo")}
+                />
+              </Tooltip>
+            </FormControl>
+
+            <FormControl mb={2} isInvalid={errors.descripcion}>
+              <FormLabel color='white'>Descripción</FormLabel>
+              <Tooltip
+                label={errors.descripcion}
+                isOpen={!!errors.descripcion}
+                placement="top"
+                bg="red.500"
+                color="white"
+                hasArrow
+              >
+                <Textarea 
+                  placeholder='Ingrese una descripción' 
+                  resize='none' 
+                  variant='custom'
+                  value={formData.descripcion} 
+                  onChange={handleChange("descripcion")}
+                />
+              </Tooltip>
+            </FormControl>
+
+            <HStack mb={2}>
+              <FormControl isInvalid={errors.fecha}>
+                <FormLabel color='white'>Fecha</FormLabel>
+                <Tooltip
+                  label={errors.fecha}
+                  isOpen={!!errors.fecha}
+                  placement="top-end"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <Input
+                    type="date"
+                    variant='custom'
+                    value={formData.fecha} 
+                    onChange={handleChange("fecha")}
+                  />
+                </Tooltip>
+              </FormControl>
+
+              <FormControl isInvalid={errors.show}>
+                <FormLabel color='white'>Show</FormLabel>
+                <Tooltip
+                  label={errors.show}
+                  isOpen={!!errors.show}
+                  placement="top-end"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <Input
+                    type="time"
+                    variant='custom'
+                    value={formData.show} 
+                    onChange={handleChange("show")}
+                  />
+                </Tooltip>
+              </FormControl>
+
+              <FormControl isInvalid={errors.puertas}>
+                <FormLabel color='white'>Puertas</FormLabel>
+                <Tooltip
+                  label={errors.puertas}
+                  isOpen={!!errors.puertas}
+                  placement="top-end"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <Input
+                    type="time"
+                    variant='custom'
+                    value={formData.puertas} 
+                    onChange={handleChange("puertas")}
+                  />
+                </Tooltip>
+              </FormControl>
+            </HStack>
+
+            <HStack>
+              <FormControl isInvalid={errors.lugar}>
+                <FormLabel color='white'>Lugar</FormLabel>
+                <Tooltip
+                  label={errors.lugar}
+                  isOpen={!!errors.lugar}
+                  placement="top"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <Select 
+                    placeholder='Seleccione un lugar'
+                    variant='custom'
+                    value={formData.lugar} 
+                    onChange={handleChange("lugar")}
+                  >
+                    <option value='option1'>Niceto Club - Humboldt 1356, Palermo, Buenos Aires</option>
+                    <option value='option2'>Option 2</option>
+                    <option value='option3'>Option 3</option>
+                  </Select>
+                </Tooltip>
+              </FormControl>
+
+              <FormControl isInvalid={errors.artista}>
+                <FormLabel color='white'>Artista</FormLabel>
+                <Tooltip
+                  label={errors.artista}
+                  isOpen={!!errors.artista}
+                  placement="top"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <Select 
+                    placeholder='Seleccione un artista'
+                    variant='custom'
+                    value={formData.artista} 
+                    onChange={handleChange("artista")}
+                  >
+                    <option value='option1'>Pale Waves</option>
+                    <option value='option2'>Option 2</option>
+                    <option value='option3'>Option 3</option>
+                  </Select>
+                </Tooltip>
+              </FormControl>
+            </HStack>
+          </Box>
 
           <Box 
-            minH={290}
-            py={5}
-            bg='whiteAlpha.300'
-            borderRadius={10}
-            align='center'
+            w="300px" 
+            ml={2} 
           >
-            {preview ? (
-                <Image src={preview} alt="preview" style={{ maxWidth: 250, maxHeight: 250, borderRadius: 10 }} />
-            ) : (
-                <Text align='center' mt='14vh' color='whiteAlpha.700'><b>Vista previa de la imagen</b></Text>
-            )}
-          </Box>
-        </Box>
-      </Box>
-
-      <Box
-        p={5} 
-        bg='whiteAlpha.400' 
-        borderRadius={20}
-        w='42%'
-      >
-        <Text mb={6} fontSize='2xl' align='center' color='white'><b>Tipos de Entradas</b></Text>
-        {entradas.map((item, i) => (
-          <HStack mb={2} key={i}>
-            <FormControl isInvalid={!item.nombre} isRequired>
-              <FormLabel color='white'>Nombre</FormLabel>
+            <FormControl mb={2} isInvalid={errors.imagen}>
+              <FormLabel color='white'>Imagen (opcional)</FormLabel>
               <Tooltip
-                label={errors?.entradas?.[i]?.nombre}
-                isOpen={!!errors?.entradas?.[i]?.nombre}
+                label={errors.imagen}
+                isOpen={!!errors.imagen}
                 placement="top-end"
                 bg="red.500"
                 color="white"
                 hasArrow
               >
                 <Input
-                  placeholder="Ingrese un nombre"
-                  variant='custom'
-                  value={item.nombre}
-                  onChange={(e) => handleEntradaChange(i, "nombre", e.target.value)}
+                  ref={inputFileRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFile}
+                  variant='unstyled'
+                  bg='whiteAlpha.400'
                 />
               </Tooltip>
             </FormControl>
 
-            <FormControl isInvalid={!item.precio} isRequired>
-              <FormLabel color='white'>Precio</FormLabel>
-              <NumberInput
-                min={500}
-                max={1000000}
-                value={format(item.precio)}
-                onChange={(vStr) => {
-                  const num = parse(vStr);
-                  handleEntradaChange(i, "precio", num);
-                }}
-                variant='custom'
-                precision={2}
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-
-            <FormControl isInvalid={!item.cantidad} isRequired>
-              <FormLabel color='white'>Cantidad</FormLabel>
-              <NumberInput
-                min={1}
-                max={10000}
-                value={item.cantidad}
-                onChange={(v) => handleEntradaChange(i, "cantidad", v)}
-                variant='custom'
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-
-            <FormControl isInvalid={!item.limite} isRequired>
-              <FormLabel color='white'>Limite reserva</FormLabel>
-              <NumberInput
-                min={1}
-                max={6}
-                value={item.limite}
-                onChange={(v) => handleEntradaChange(i, "limite", v)}
-                variant='custom'
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-
-            <Button onClick={() => removeEntrada(i)} display={i === 0 ? 'none' : 'grid'} mt={8}><DeleteIcon /></Button>
-          </HStack>
-        ))}
-
-        <Button onClick={addEntrada}>Agregar<AddIcon ml={1} mt={1} boxSize={3} /></Button>
-
-        <FormControl isInvalid={errors.limite_reserva} mt={4} isRequired>
-          <FormLabel color='white' textAlign='center'>Limite de reserva total</FormLabel>
-          <Tooltip
-            label={errors.limite_reserva}
-            isOpen={!!errors.limite_reserva}
-            placement="top"
-            bg="red.500"
-            color="white"
-            hasArrow
-          >
-            <NumberInput
-              min={2}
-              max={8}
-              value={formData.limite_reserva} 
-              onChange={(valueString) =>
-                setFormData((p) => ({ ...p, limite_reserva: valueString }))
-              }
-              variant='custom'
-              maxW={100}
+            <Box 
+              w={250}
+              h={250}
+              bg='whiteAlpha.300'
+              borderRadius={10}
+              align='center'
+              mt={7}
             >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </Tooltip>
-        </FormControl>
+              {preview ? (
+                  <Image src={preview} alt="preview" style={{ maxWidth: 250, maxHeight: 250, borderRadius: 10 }} />
+              ) : (
+                  <Text align='center' pt='14vh' color='whiteAlpha.700'><b>Vista previa de la imagen</b></Text>
+              )}
+            </Box>
+          </Box>
+        </Box>
+
+        <Box
+          p={5} 
+          bg='whiteAlpha.400' 
+          borderRadius={20}
+          w='42%'
+          maxH='400px'
+          ml={4}
+        >
+          <Text mb={6} fontSize='2xl' align='center' color='white'><b>Tipos de Entradas</b></Text>
+          <Box 
+            overflowY="auto" 
+            maxH='220px'
+            sx={{
+              "&::-webkit-scrollbar": {
+                width: "6px",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                background: "white",
+                borderRadius: "8px",
+              },
+              "&::-webkit-scrollbar-thumb:hover": {
+                background: "gray.300",
+              },
+            }}
+          >
+            {entradas.map((item, i) => (
+              <HStack mb={2} mr={1} key={i}>
+                <FormControl isInvalid={!item.nombre}>
+                  <FormLabel color='white'>Nombre</FormLabel>
+                  <Tooltip
+                    label={errors?.entradas?.[i]?.nombre}
+                    isOpen={!!errors?.entradas?.[i]?.nombre}
+                    placement="top-end"
+                    bg="red.500"
+                    color="white"
+                    hasArrow
+                  >
+                    <Input
+                      placeholder="Ingrese un nombre"
+                      variant='custom'
+                      value={item.nombre}
+                      onChange={(e) => handleEntradaChange(i, "nombre", e.target.value)}
+                    />
+                  </Tooltip>
+                </FormControl>
+            
+                <FormControl isInvalid={!item.precio}>
+                  <FormLabel color='white'>Precio</FormLabel>
+                  <NumberInput
+                    min={500}
+                    max={1000000}
+                    value={format(item.precio)}
+                    onChange={(vStr) => {
+                      const num = parse(vStr);
+                      handleEntradaChange(i, "precio", num);
+                    }}
+                    variant='custom'
+                    precision={2}
+                  >
+                    <NumberInputField />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </FormControl>
+                  
+                <FormControl isInvalid={!item.cantidad}>
+                  <FormLabel color='white'>Cantidad</FormLabel>
+                  <NumberInput
+                    min={1}
+                    max={10000}
+                    value={item.cantidad}
+                    onChange={(v) => handleEntradaChange(i, "cantidad", v)}
+                    variant='custom'
+                  >
+                    <NumberInputField />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </FormControl>
+                  
+                <FormControl isInvalid={!item.limite}>
+                  <FormLabel color='white'>Limite reserva</FormLabel>
+                  <NumberInput
+                    min={1}
+                    max={6}
+                    value={item.limite}
+                    onChange={(v) => handleEntradaChange(i, "limite", v)}
+                    variant='custom'
+                  >
+                    <NumberInputField />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </FormControl>
+                  
+                <Button onClick={() => removeEntrada(i)} display={i === 0 ? 'none' : 'grid'} mt={8}><DeleteIcon /></Button>
+              </HStack>
+            ))}
+
+            {entradas.length < 4 && (
+              <Button onClick={addEntrada}>
+                Agregar<AddIcon ml={1} mt={1} boxSize={3} />
+              </Button>
+            )}
+          </Box>
+          <FormControl isInvalid={errors.limite_reserva} mt={4}>
+            <FormLabel color='white' textAlign='center'>Limite de reserva total</FormLabel>
+            <Tooltip
+              label={errors.limite_reserva}
+              isOpen={!!errors.limite_reserva}
+              placement="top"
+              bg="red.500"
+              color="white"
+              hasArrow
+            >
+              <NumberInput
+                min={2}
+                max={8}
+                value={formData.limite_reserva} 
+                onChange={(valueString) =>
+                  setFormData((p) => ({ ...p, limite_reserva: valueString }))
+                }
+                variant='custom'
+                maxW={100}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </Tooltip>
+          </FormControl>
+        </Box>
       </Box>
 
       <Button 
-          ml={2}
-          rounded='full'
-          colorScheme='teal'
-          transition="all 0.3s ease"
-          _hover={{ transform: 'scale(1.1)' }}
-          onClick={handleSubmit}
-          mt={4}
-          size='lg'
+        rounded='full'
+        colorScheme='whiteAlpha'
+        transition="all 0.3s ease"
+        _hover={{ transform: 'scale(1.1)' }}
+        onClick={handleSubmit}
+        fontSize={26}
+        p={6}
+        py={7}
       >
-          Crear
+        Crear
       </Button>
     </Box>
   )

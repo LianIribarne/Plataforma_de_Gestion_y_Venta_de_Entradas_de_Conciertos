@@ -117,11 +117,11 @@ export default function Form() {
       w='100%' 
       bgGradient='radial(circle at center, cyan.600, teal.800)'
     >
-      <AbsoluteCenter w="70vh" color="gray.700" bg='whiteAlpha.400' borderRadius={30} p={10} axis="both">
-        <Heading mb={5} textAlign="center" bg='teal.500' display='inline-block' rounded='full' p='7' color='white'>
-          Inicio de Sesion
+      <AbsoluteCenter w="70vh" color="gray.700" axis="both">
+        <Heading textAlign="center" color='white' mb={4} fontSize='6xl'>
+          Ingresar
         </Heading>
-
+        <Box bg='whiteAlpha.400' borderRadius={30} p={5}>
         <form onSubmit={handleSubmit}>
 
           {/* Email */}
@@ -136,7 +136,7 @@ export default function Form() {
                 hasArrow
               >
                 <InputGroup variant='custom'>
-                  <InputLeftAddon pointerEvents="none" bg='teal.500'>
+                  <InputLeftAddon pointerEvents="none" bg='teal.400'>
                     <AtSignIcon color="white" />
                   </InputLeftAddon>
                   <Input
@@ -174,7 +174,7 @@ export default function Form() {
                   }}
                 />
                 {/* Icono con funcionalidad */}
-                <InputRightAddon p="0" bg='teal.500'>
+                <InputRightAddon p="0" bg='teal.400'>
                   <IconButton
                     variant="link"
                     onClick={() => setShow(!show)}
@@ -187,13 +187,14 @@ export default function Form() {
           </FormControl>
 
           {/* Submit */}
-          <Button type="submit" colorScheme='teal' size='lg' rounded='full' my={4}>
+          <Button type="submit" colorScheme='whiteAlpha' size='lg' rounded='full' my={4}>
               Iniciar Sesion
           </Button>
         </form>
         <Link href='http://localhost:5173/register' fontSize={14} color='white'>
-          No tienes una cuenta? Registrate <ExternalLinkIcon mx='2px' />
+          No tienes una cuenta? Registrarse <ExternalLinkIcon mx='2px' />
         </Link>
+        </Box>
       </AbsoluteCenter>
     </Box>
   );

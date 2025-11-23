@@ -21,24 +21,17 @@ import EntradaInfo from '../components/ReservaEntrada';
 const entradas = [
   {
     tipo: 'General',
-    disponibles: 2034,
-    reservadas: 7,
-    precio: 3044,
-    cantMax: 6
+    disponibles: 581,
+    reservadas: 9,
+    precio: 25000,
+    cantMax: 4
   },
   {
     tipo: 'VIP',
-    disponibles: 2034,
-    reservadas: 7,
-    precio: 4300,
-    cantMax: 3
-  },
-  {
-    tipo: 'VIP+',
-    disponibles: 2034,
-    reservadas: 7,
-    precio: 5020,
-    cantMax: 1
+    disponibles: 102,
+    reservadas: 2,
+    precio: 45000,
+    cantMax: 2
   },
 ]
 
@@ -153,7 +146,7 @@ export default function EventoDetalle() {
         w='70%'
         fontSize='sm'
       >
-        Artista: Avatar Metal - Categoria: Metal - Pais de origen: Suecia
+        Artista: Pale Waves - Categoria: Indie Rock - Pais de origen: Reino Unido
       </Heading>
 
       {/* Evento */}
@@ -175,8 +168,8 @@ export default function EventoDetalle() {
                 <CalendarIcon mb={1} />
               </Heading>
               <Box display='inline-block' border='2px' borderColor='whiteAlpha.500' borderRadius={8} p={3}>
-                <b>30<br />
-                Noviembre</b>
+                <b>04<br />
+                Diciembre</b>
               </Box><br />
               <Heading fontSize='2xl' my={3}>
                 <TimeIcon mb={1} />{' '}
@@ -184,8 +177,8 @@ export default function EventoDetalle() {
                 <TimeIcon mb={1} />
               </Heading>
               <Box display='inline-block' border='2px' borderColor='whiteAlpha.500' borderRadius={8} p={3}>
-                <b>Puertas <ArrowRightIcon mb={1} boxSize={4} /> 19:20hs<br />
-                Show <ArrowRightIcon mb={1} boxSize={4} /> 19:50hs</b>
+                <b>Puertas <ArrowRightIcon mb={1} boxSize={4} /> 19:30hs<br />
+                Show <ArrowRightIcon mb={1} boxSize={4} /> 21:00hs</b>
               </Box>
             </Box>
           </SimpleGrid>
@@ -193,7 +186,7 @@ export default function EventoDetalle() {
           {/* Acerca del concierto */}
           <Heading fontSize='4xl' mt={6} mb={4}>Acerca del Concierto</Heading>
           <Text as='b'>
-            Pale Waves es una banda británica de indie rock de Manchester, formada en 2014. Se fundó originalmente como Creek cuando la cantante y guitarrista Heather Baron-Gracie conoció a la baterista Ciara Doran mientras asistía a la universidad en Manchester.
+            Pale Waves llega por primera vez a Buenos Aires con un show completo de su gira Unwanted Tour. La banda británica de indie pop/rock presentará sus éxitos como "Television Romance", "There's a Honey", "Easy" y nuevos temas del último álbum. Una noche con estética oscura, energía emo-pop y un sonido envolvente característico de la banda.
           </Text>
         </GridItem>
 
@@ -261,10 +254,10 @@ export default function EventoDetalle() {
                 <FaMapMarkerAlt style={{ display: 'inline', marginBottom: '-4' }} />
               </Heading>
               <Text as='b' color='gray.200'>
-                Direccion <ArrowRightIcon mb={1} boxSize={3} /> Paso de los Andes 3013<br />
-                Ciudad <ArrowRightIcon mb={1} boxSize={3} /> Rio Grande<br />
-                Provincia <ArrowRightIcon mb={1} boxSize={3} /> Tierra del Fuego<br />
-                Lugar <ArrowRightIcon mb={1} boxSize={3} /> Movistar Arena
+                Direccion <ArrowRightIcon mb={1} boxSize={3} /> Av. Federico Lacroze 3455<br />
+                Ciudad <ArrowRightIcon mb={1} boxSize={3} /> Buenos Aires<br />
+                Provincia <ArrowRightIcon mb={1} boxSize={3} /> Buenos Aires<br />
+                Lugar <ArrowRightIcon mb={1} boxSize={3} /> Teatro Vorterix
               </Text>
             </Box>
             <AspectRatio 
@@ -275,7 +268,7 @@ export default function EventoDetalle() {
                 style={{ border: 0, borderRadius: '12px' }}
                 loading="lazy"
                 allowFullScreen
-                src='https://www.google.com/maps?q=Paso+de+los+Andes+3013+Río+Grande+Tierra+del+Fuego&output=embed' //aca hay que colocar variables: provincia, ciudad, y direccion
+                src='https://www.google.com/maps?q=Av.+Federico+Lacroze+3455+Buenos+Aires+Buenos+Aires+Teatro+Vorterix&output=embed' //aca hay que colocar variables: provincia, ciudad, y direccion
               ></iframe>
             </AspectRatio>
           </SimpleGrid>

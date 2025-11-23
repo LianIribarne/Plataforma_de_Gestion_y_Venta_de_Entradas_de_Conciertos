@@ -3,26 +3,64 @@ import {
   Heading,
   Grid,
   GridItem,
-  SimpleGrid,
-  Select,
   Box,
-  Text,
-  Checkbox,
+  useDisclosure,
   Button,
 } from "@chakra-ui/react";
+import { useState, useEffect } from 'react';
 import Evento from "../components/Evento";
+import Carrusel from "../components/Artistas";
+import FiltrosEventos from '../components/FiltrosEventos';
 
 const eventos = [
   {
     id: '1',
-    imagen: 'https://www.heavyblogisheavy.com/content/images/2015/06/meliora.jpg',
-    artista: 'Ghost',
-    titulo: 'Metal Nights Patagonia: Ghost, Avatar y lo Mejor del Heavy Escandinavo en una Noche Inolvidable',
-    genero: 'Metal'
-  }
+    imagen: 'https://www.musikblog.de/wp-content/uploads/2022/08/Pale_Waves_Credit_Dirty_Hit-8.jpg',
+    artista: 'Pale Waves',
+    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
+    fecha: '04.11.2025',
+    genero: 'Indie Pop',
+    estado: 'Programado'
+  },
+  {
+    id: '2',
+    imagen: 'https://i.scdn.co/image/ab67616d0000b2730315d0b066cebbdd7128a764',
+    artista: 'Chaos Chaos',
+    titulo: 'Chaos Chaos – “Bright Futures Live Set”',
+    fecha: '04.11.2025',
+    genero: 'Indie Electronic',
+    estado: 'Programado'
+  },
+  {
+    id: '3',
+    imagen: 'https://i.scdn.co/image/ab67616d0000b273df51a3d66223e5b01813e0c4',
+    artista: 'Bring Me The Horizon',
+    titulo: 'Bring Me The Horizon (BMTH) – “Post Human World Tour”',
+    fecha: '04.11.2025',
+    genero: 'Metalcore',
+    estado: 'Cancelado'
+  },
+  {
+    id: '4',
+    imagen: 'https://i.scdn.co/image/ab67616d0000b273d6dfb454b77efaccc1371d14',
+    artista: 'iDKHOW',
+    titulo: 'iDKHOW – “RetroFuture Live Experience”',
+    fecha: '04.11.2025',
+    genero: 'Alternative Pop',
+    estado: 'Programado'
+  },
 ]
 
 export default function Eventos() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const [eventos, setEventos] = useState([]);
+
+  const handleApplyFilters = async (filtros) => {
+    const params = new URLSearchParams(filtros);
+    const res = await axios.get(`/api/eventos/?${params.toString()}`);
+    setEventos(res.data);
+  };
+
   return (
     <Box>
       {/* Imagen */}
@@ -61,75 +99,28 @@ export default function Eventos() {
         >
           TU ENTRADA AL SONIDO EN VIVO
         </Heading>
-
-        <SimpleGrid 
-          columns={4} 
-          spacing={6}
-          p={4}
-          borderRadius={10}
+        
+        <Button 
+          colorScheme="whiteAlpha" 
+          rounded='full' 
+          fontSize='2xl' 
+          borderColor='white'
+          border='2px'
+          size='lg' 
+          onClick={onOpen}
         >
-          <Select
-            placeholder='Categoria'
-            color='gray.900'
-            bg='whiteAlpha.800'
-            variant='custom'
-          >
-            <option value='Rock'>Rock</option>
-            <option value='Metal'>Metal</option>
-            <option value='Pop'>Pop</option>
-            <option value='Electronica'>Electronica</option>
-            <option value='Indie'>Indie</option>
-            <option value='Hip-Hop'>Hip-Hop</option>
-          </Select>
-          <Select
-            placeholder='Provincia'
-            color='gray.900'
-            bg='whiteAlpha.800'
-            variant='custom'
-          >
-            <option value='Rock'>Rock</option>
-            <option value='Metal'>Metal</option>
-            <option value='Pop'>Pop</option>
-            <option value='Electronica'>Electronica</option>
-            <option value='Indie'>Indie</option>
-            <option value='Hip-Hop'>Hip-Hop</option>
-          </Select>
-          <Select
-            placeholder='Artista'
-            color='gray.900'
-            bg='whiteAlpha.800'
-            variant='custom'
-          >
-            <option value='Rock'>Rock</option>
-            <option value='Metal'>Metal</option>
-            <option value='Pop'>Pop</option>
-            <option value='Electronica'>Electronica</option>
-            <option value='Indie'>Indie</option>
-            <option value='Hip-Hop'>Hip-Hop</option>
-          </Select>
-          <Box 
-            alignItems='center' 
-            bg='whiteAlpha.800' 
-            gap={1}
-            whiteSpace='nowrap' 
-            borderRadius={6}
-            display='flex'
-          >
-            <Text ml={1}>
-              Con disponibilidad
-            </Text>
-            <Checkbox 
-              colorScheme="teal" 
-              size='lg' 
-              borderColor='teal' 
-              defaultChecked={true}
-            />
-          </Box>
-        </SimpleGrid>
-        <Button>Buscar</Button>
+          Filtros
+        </Button>
+
+        <FiltrosEventos
+          isOpen={isOpen} 
+          onClose={onClose} 
+          onApply={handleApplyFilters}
+        />
       </Box>
 
       {/* Nuevos Eventos */}
+      <Carrusel />
       <Heading ml={5} color='gray.200'>Lo más nuevo</Heading>
       <Grid templateColumns='repeat(auto-fill, minmax(200px, 1fr))' columnGap={16} px={5} py={5}>
         {eventos.map((e) => (
@@ -142,48 +133,11 @@ export default function Eventos() {
       {/* Eventos */}
       <Heading ml={5} mt={5} color='gray.200'>Todos los conciertos</Heading>
       <Grid templateColumns='repeat(auto-fill, minmax(200px, 1fr))' columnGap={16} rowGap={4} px={5} py={5}>
-        <Evento
-          id='2'
-          imagen='https://www.heavyblogisheavy.com/content/images/2015/06/meliora.jpg'
-          artista='Ghost'
-          titulo='Metal Nights Patagonia: Ghost, Avatar y lo Mejor del Heavy Escandinavo en una Noche Inolvidable'
-          genero='Metal'
-        />
-        <Evento
-          id='3'
-          imagen='https://f4.bcbits.com/img/a2261034888_16.jpg'
-          artista='Pale Waves'
-          titulo='Pale Waves'
-          genero='Indie'
-        />
-        <Evento
-          id='4'
-          imagen='https://f4.bcbits.com/img/a2261034888_16.jpg'
-          artista='Pale Waves'
-          titulo='Pale Waves Pale Waves Pale Waves Pale Waves Pale Waves'
-          genero='Electronica'
-        />
-        <Evento
-          id='5'
-          imagen='https://f4.bcbits.com/img/a2261034888_16.jpg'
-          artista='Pale Waves'
-          titulo='Pale Waves Pale Waves Pale Waves Pale Waves Pale Waves'
-          genero='Hip-Hop'
-        />
-        <Evento
-          id='6'
-          imagen='https://f4.bcbits.com/img/a2261034888_16.jpg'
-          artista='Pale Waves'
-          titulo='Pale Waves Pale Waves Pale Waves Pale Waves Pale Waves'
-          genero='Pop'
-        />
-        <Evento
-          id='7'
-          imagen='https://f4.bcbits.com/img/a2261034888_16.jpg'
-          artista='Pale Waves'
-          titulo='Pale Waves Pale Waves Pale Waves Pale Waves Pale Waves'
-          genero='Rock'
-        />
+        {eventos.map((e) => (
+          <GridItem key={e.id}>
+            <Evento {...e}/>
+          </GridItem>
+        ))}
       </Grid>
     </Box>
   );

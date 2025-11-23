@@ -16,31 +16,31 @@ import Entrada from '../components/Entrada'
 
 const entradas = [
   {
-    titulo: 'Metal Nights Patagonia',
+    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
     estado: 'Programado',
     entradas: [
       {
         codigo: 'A9F3C1B27EF4',
         qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
-        artista: "Ghost",
-        titulo: 'Metal Nights Patagonia',
-        fecha: "2.11.2025",
-        puertas: "19:20hs",
-        show: "19:50hs",
+        artista: "Pale Waves",
+        titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
+        fecha: "04.12.2025",
+        puertas: "19:30hs",
+        show: "21:00hs",
         tipo: "General",
-        precio: 1000,
+        precio: 25000,
         estado: 'Disponible'
       },
       {
         codigo: 77880011,
         qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
-        artista: "Daft Punk",
-        titulo: 'Metal Nights Patagonia',
-        fecha: "30.12.2025",
-        puertas: "20:00hs",
+        artista: "Pale Waves",
+        titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
+        fecha: "04.12.2025",
+        puertas: "19:30hs",
         show: "21:00hs",
-        tipo: "VIP",
-        precio: 5000,
+        tipo: "VIP Early Access",
+        precio: 45000,
         estado: 'Disponible'
       }
     ]
@@ -52,13 +52,13 @@ const entradas = [
       {
         codigo: 2419,
         qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
-        artista: "Ghost",
-        titulo: 'Metal Nights Patagonia',
-        fecha: "2.11.2025",
-        puertas: "19:20hs",
-        show: "19:50hs",
+        artista: "Pale Waves",
+        titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
+        fecha: "04.12.2025",
+        puertas: "19:30hs",
+        show: "21:00hs",
         tipo: "General",
-        precio: 1000,
+        precio: 25000,
         estado: 'Cancelado'
       },
       {
@@ -97,6 +97,15 @@ export default function Entradas() {
 
   return entradas.length > 0 ? (
     <>
+      <Heading 
+        align='center' 
+        fontSize='6xl' 
+        color='white' 
+        mb={8}
+      >
+        Tus Entradas
+      </Heading>
+      
       {entradas.map((ev) => {
         const allChecked = ev.entradas.every((x) => selected[x.codigo]);
 

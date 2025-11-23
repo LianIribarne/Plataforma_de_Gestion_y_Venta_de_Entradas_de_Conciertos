@@ -150,11 +150,12 @@ export default function Form() {
       textAlign="center" 
       bgGradient='radial(circle at center, cyan.600, teal.800)'
     >
-      <AbsoluteCenter w="70vh" color="gray.700" bg='whiteAlpha.400' borderRadius={30} p={10} axis="both">
-        <Heading mb={5} display='inline-block' textAlign="center" bg='teal.500' p='7' color='white' rounded='full'>
-          Registrate
+      <AbsoluteCenter w="70vh" color="gray.700" axis="both">
+        <Heading mb={5} color='white' fontSize='6xl'>
+          Registrarse
         </Heading>
 
+        <Box bg='whiteAlpha.400' borderRadius={30} p={5}>
         <form onSubmit={handleSubmit}>
 
           <GridItem>
@@ -223,7 +224,7 @@ export default function Form() {
                 hasArrow
               >
                 <InputGroup variant='custom'>
-                  <InputLeftAddon pointerEvents="none" bg='teal.500'>
+                  <InputLeftAddon pointerEvents="none" bg='teal.400'>
                     <AtSignIcon color="white" />
                   </InputLeftAddon>
                   <Input
@@ -251,7 +252,7 @@ export default function Form() {
                 hasArrow
               >
                 <InputGroup variant='custom'>
-                  <InputLeftAddon pointerEvents="none" bg='teal.500'>
+                  <InputLeftAddon pointerEvents="none" bg='teal.400'>
                     <CalendarIcon color="white" />
                   </InputLeftAddon>
                   <Input
@@ -289,7 +290,7 @@ export default function Form() {
                   }}
                 />
                 {/* Icono con funcionalidad */}
-                <InputRightAddon p="0" bg='teal.500'>
+                <InputRightAddon p="0" bg='teal.400'>
                   <IconButton
                     variant="link"
                     onClick={() => setShow(!show)}
@@ -320,14 +321,15 @@ export default function Form() {
           </FormControl>
 
           {/* Submit */}
-          <Button type="submit" colorScheme='teal' size='lg' rounded='full' my={4}>
+          <Button type="submit" colorScheme='whiteAlpha' size='lg' rounded='full' my={4}>
               Registrarse
           </Button>
 
         </form>
         <Link href='http://localhost:5173/login' fontSize={14} color='white'>
-          Ya tienes una cuenta? Inicia sesion <ExternalLinkIcon mx='2px' />
+          Ya tienes una cuenta? Ingresa <ExternalLinkIcon mx='2px' />
         </Link>
+        </Box>
       </AbsoluteCenter>
     </Box>
   );

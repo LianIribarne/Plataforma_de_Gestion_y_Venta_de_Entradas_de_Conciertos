@@ -38,6 +38,7 @@ export default function DashboardLayout() {
   const btnRef = React.useRef()
 
   const isCrearEvento = location.pathname.startsWith('/eventos/crear_evento');
+  const isCrearArtista = location.pathname.startsWith('/eventos/crear_artista');
   const isCrearOrganizador = location.pathname.startsWith('/usuarios/crear_organizador');
   
   const tabIndex = (() => {
@@ -73,8 +74,9 @@ export default function DashboardLayout() {
         left="10px"
         right="10px"
         zIndex="10000"
+        pointerEvents="none"
       >
-        <TabList as={Flex} justifyContent="space-between" alignItems="center">
+        <TabList as={Flex} justifyContent="space-between" alignItems="center" pointerEvents="auto">
           <Flex>
             {secciones.map((s) => (
               <Seccion 
@@ -97,18 +99,33 @@ export default function DashboardLayout() {
           />
         </TabList>
 
-        {tabIndex === 0 && !isCrearEvento && (
-          <Button
-            as={Link}
-            to='/eventos/crear_evento'
-            colorScheme='teal'
-            mt={2} 
-            rounded='full'
-            transition="all 0.3s ease"
-            _hover={{ transform: "translateY(-4px)" }}
-          >
-            Crear Evento<AddIcon boxSize={3} ml={1} />
-          </Button>
+        {tabIndex === 0 && !isCrearEvento && !isCrearArtista && (
+          <Box>
+            <Button
+              as={Link}
+              to='/eventos/crear_evento'
+              colorScheme='teal'
+              mt={2} 
+              rounded='full'
+              transition="all 0.3s ease"
+              _hover={{ transform: "translateY(-4px)" }}
+              pointerEvents="auto"
+            >
+              Crear Concierto<AddIcon boxSize={3} ml={1} />
+            </Button><br />
+            <Button
+              as={Link}
+              to='/eventos/crear_artista'
+              colorScheme='teal'
+              mt={2} 
+              rounded='full'
+              transition="all 0.3s ease"
+              _hover={{ transform: "translateY(-4px)" }}
+              pointerEvents="auto"
+            >
+              Añadir Artista<AddIcon boxSize={3} ml={1} />
+            </Button>
+          </Box>
         )}
         {tabIndex === 1 && !isCrearOrganizador && (
           <Button 
@@ -120,6 +137,7 @@ export default function DashboardLayout() {
             rounded='full'
             transition="all 0.3s ease"
             _hover={{ transform: "translateY(-4px)" }}
+            pointerEvents="auto"
           >
             Crear Organizador<AddIcon boxSize={3} ml={1} />
           </Button>
