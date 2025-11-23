@@ -1,11 +1,16 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from .models import Usuario
+from entradas.serializers import EntradaSerializer
+from pagos.serializers import PagoSerializer
 
 class RegistroSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     email = serializers.EmailField(
-        validators=[UniqueValidator(queryset=Usuario.objects.all(), message="Este email ya está registrado")]
+        validators=[UniqueValidator(
+            queryset=Usuario.objects.all(),
+            message="Este email ya está registrado"
+        )]
     )
 
     def validate_password(self, value):
@@ -22,15 +27,29 @@ class RegistroSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop("password")
         rol = validated_data.pop("rol")
-        usuario = Usuario(**validated_data, rol_id=rol)
+        usuario = Usuario(
+            **validated_data,
+            rol_id=rol
+        )
         usuario.set_password(password)
         usuario.save()
         return usuario
 
 class UsuarioSerializer(serializers.ModelSerializer):
-    entradas = EntradaSerializer(source='entrada_set', many=True, read_only=True)
-    pagos = PagoSerializer(source='pago_set', many=True, read_only=True)
-    rol = serializers.SlugRelatedField(read_only=True, slug_field='nombre')
+    entradas = EntradaSerializer(
+        source='entrada_set',
+        many=True,
+        read_only=True
+    )
+    pagos = PagoSerializer(
+        source='pago_set',
+        many=True,
+        read_only=True
+    )
+    rol = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='nombre'
+    )
 
     class Meta:
         model = Usuario

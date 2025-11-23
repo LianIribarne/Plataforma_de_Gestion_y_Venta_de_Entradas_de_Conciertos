@@ -11,7 +11,7 @@ api.interceptors.response.use(
   async (err) => {
     if (err.response?.status === 401) {
       try {
-        await api.post("/refresh/");
+        await api.post("/usuarios/refresh/");
         return api(err.config);
       } catch {
         // logout forzado

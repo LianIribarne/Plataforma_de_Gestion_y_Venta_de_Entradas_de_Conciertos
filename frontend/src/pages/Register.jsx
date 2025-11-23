@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon, AtSignIcon, CalendarIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 export default function Form() {
   const [show, setShow] = React.useState(false);
@@ -105,7 +106,7 @@ export default function Form() {
         rol: 3
       };
 
-      const res = await axios.post("http://127.0.0.1:8000/api/registro/", payload);
+      const res = await api.post("/usuarios/registro/", payload);
 
       const mensaje = res?.data?.message ?? "Registro exitoso";
 
