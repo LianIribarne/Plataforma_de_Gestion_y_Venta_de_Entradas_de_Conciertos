@@ -6,6 +6,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics, status
 from .serializers import RegistroSerializer
 from django.contrib.auth import authenticate
+from django.conf import settings
+
+access_lifetime = settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
+refresh_lifetime = settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
 
 User = get_user_model()
 
@@ -48,17 +52,17 @@ class LoginCookieView(APIView):
             key="access",
             value=access,
             httponly=True,
-            secure=False,   # TRUE si usás HTTPS
+            secure=False,   # poner True en producción
             samesite="Lax",
-            max_age=5 * 60,
+            max_age=int(access_lifetime),
         )
         res.set_cookie(
             key="refresh",
             value=str(refresh),
             httponly=True,
-            secure=False,   # TRUE si usás HTTPS
+            secure=False,   # poner True en producción
             samesite="Lax",
-            max_age=60 * 60 * 24,
+            max_age=int(refresh_lifetime),
         )
 
         return res
@@ -66,27 +70,39 @@ class LoginCookieView(APIView):
 class RefreshCookieView(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get("refresh")
-
         if not refresh_token:
-            return Response({"error": "No hay refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
-
+            return Response({"error": "No hay refresh token"}, status=401)
         try:
             refresh = RefreshToken(refresh_token)
             access = str(refresh.access_token)
+
+            # Rotar refresh token si corresponde
+            if settings.SIMPLE_JWT.get("ROTATE_REFRESH_TOKENS"):
+                new_refresh = str(refresh)
+            else:
+                new_refresh = refresh_token
 
             res = Response({"message": "Token renovado"})
             res.set_cookie(
                 key="access",
                 value=access,
                 httponly=True,
-                secure=False,
+                secure=False,   # poner True en producción
                 samesite="Lax",
-                max_age=60 * 60,
+                max_age=int(access_lifetime),
+            )
+            res.set_cookie(
+                key="refresh",
+                value=new_refresh,
+                httponly=True,
+                secure=False,   # poner True en producción
+                samesite="Lax",
+                max_age=int(refresh_lifetime),
             )
             return res
 
         except:
-            return Response({"error": "Refresh inválido"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Refresh inválido"}, status=401)
 
 class LogoutView(APIView):
     def post(self, request):
