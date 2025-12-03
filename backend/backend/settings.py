@@ -32,7 +32,7 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 
-AUTH_USER_MODEL = 'conciertos.Usuario'
+AUTH_USER_MODEL = 'usuarios.Usuario'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",

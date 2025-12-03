@@ -1,8 +1,5 @@
 from django.db import models
-import uuid
-
-def generar_codigo():
-    return uuid.uuid4().hex[:10].upper()
+from backend.utils.generarCodigo import generar_codigo
 
 class Reserva(models.Model):
     reservar_hasta = models.DateTimeField()
@@ -11,7 +8,7 @@ class Reserva(models.Model):
     cliente = models.OneToOneField(
         "usuarios.Usuario",
         on_delete=models.CASCADE,
-        related_name='clientes'
+        related_name='reservas'
     )
 
     def __str__(self):

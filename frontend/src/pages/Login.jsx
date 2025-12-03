@@ -86,7 +86,7 @@ export default function Form() {
         position: 'top',
       });
 
-      navigate("/eventos");
+      navigate("/conciertos");
 
     } catch (error) {
       let msg = "Error inesperado";

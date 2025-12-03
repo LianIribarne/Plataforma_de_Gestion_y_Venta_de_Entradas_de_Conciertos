@@ -1,27 +1,15 @@
 import { 
-  SimpleGrid,
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  Text,
-  Heading,
-  Image,
-  InputGroup,
-  InputRightElement,
-  Flex,
-  Tooltip,
-  Select,
+  Wrap, WrapItem, Button, FormControl,
+  FormLabel, Input, Stat, StatLabel,
+  StatNumber, StatHelpText, Text, Heading,
+  Image, InputGroup, InputRightElement, Flex,
+  Tooltip, Select, Box, SimpleGrid,
 } from "@chakra-ui/react";
 import { useState, useEffect } from 'react';
 import { MdLocalGroceryStore } from "react-icons/md";
-import { LockIcon, UnlockIcon, ArrowForwardIcon, MinusIcon } from "@chakra-ui/icons"
+import { LockIcon, UnlockIcon } from "@chakra-ui/icons"
 import provinciasCiudades from "../data/provincias_ciudades.json";
+import formatoPrecio from '../utils/FormatoPrecio'
 
 const reservas = [
   {
@@ -189,18 +177,17 @@ export default function ProcesoPago() {
     0
   );
 
-  function formatoPrecio(precio) {
-    const precioFormateado = precio.toLocaleString("es-AR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })
-
-    return precioFormateado
-  }
-
   return (
     <Box p={5}>
-      <Heading mb={8} align='center'>Tu reserva expira en: 07:32</Heading>
+      <Box
+        mb={8} 
+        align='center' 
+        color='white' 
+      >
+        <Heading display='inline-block' bg='whiteAlpha.400' p={2} borderRadius={20}>
+          Tu reserva expira en 07:32
+        </Heading>
+      </Box>
 
       <form onSubmit={handleSubmit}>
       <SimpleGrid 
@@ -216,11 +203,11 @@ export default function ProcesoPago() {
           bg='whiteAlpha.400'
           borderRadius={18}
         >
-          <Heading mb={4}>Método de Pago</Heading>
+          <Heading mb={4} color='white'>Método de Pago</Heading>
 
           <Flex gap={2} align="flex-end">
             <FormControl isInvalid={errors.numero} maxW={240}>
-              <FormLabel>Número de tarjeta</FormLabel>
+              <FormLabel color='white'>Número de tarjeta</FormLabel>
               <Tooltip
                 label={errors.numero}
                 isOpen={!!errors.numero}
@@ -258,7 +245,7 @@ export default function ProcesoPago() {
             </FormControl>
               
             <FormControl isInvalid={errors.fecha} maxW={160}>
-              <FormLabel>Fecha de caducidad</FormLabel>
+              <FormLabel color='white'>Fecha de caducidad</FormLabel>
               <Tooltip
                 label={errors.fecha}
                 isOpen={!!errors.fecha}
@@ -282,7 +269,7 @@ export default function ProcesoPago() {
             </FormControl>
               
             <FormControl isInvalid={errors.cvv} maxW={70}>
-              <FormLabel>CVV</FormLabel>
+              <FormLabel color='white'>CVV</FormLabel>
               <Tooltip
                 label={errors.cvv}
                 isOpen={!!errors.cvv}
@@ -307,10 +294,10 @@ export default function ProcesoPago() {
             </FormControl>
           </Flex>
 
-          <Heading mt={8}>Información de Facturación</Heading>
+          <Heading mt={8} color='white'>Información de Facturación</Heading>
           <SimpleGrid columns={2} spacing={2}>
             <FormControl mt={2}>
-              <FormLabel>Nombre</FormLabel>
+              <FormLabel color='white'>Nombre</FormLabel>
               <Tooltip
                 label={errors.nombre}
                 isOpen={!!errors.nombre}
@@ -331,7 +318,7 @@ export default function ProcesoPago() {
             </FormControl>
 
             <FormControl mt={2}>
-              <FormLabel>Apellido</FormLabel>
+              <FormLabel color='white'>Apellido</FormLabel>
               <Tooltip
                 label={errors.apellido}
                 isOpen={!!errors.apellido}
@@ -417,7 +404,7 @@ export default function ProcesoPago() {
           </SimpleGrid>
 
           <FormControl>
-            <FormLabel>Dirección</FormLabel>
+            <FormLabel color='white'>Dirección</FormLabel>
             <Tooltip
               label={errors.direccion}
               isOpen={!!errors.direccion}
@@ -443,9 +430,10 @@ export default function ProcesoPago() {
           p={5}
           bg='whiteAlpha.400'
           borderRadius={18}
+           color='white'
         >
-          <Heading mb={3}>Información de Compra</Heading>
-          <Heading mb={4} fontSize='3xl'>
+          <Heading>Información de Compra</Heading>
+          <Heading mb={6} mt={2} fontSize='2xl'>
             <MdLocalGroceryStore 
               style={{ 
                 display: 'inline-block', 
@@ -457,41 +445,31 @@ export default function ProcesoPago() {
           </Heading>
 
           <Box>
-            <SimpleGrid columns={2} spacing={2}>
-              {reservas.map((r, i) => {
-                const isLast = i === reservas.length - 1;
-                const isOdd = reservas.length % 2 === 1;
-
-                return (
-                  <Box>
-                    <Stat 
-                      bg='whiteAlpha.400' 
-                      borderRadius={10} 
-                      key={r.tipo}
-                      left={isLast && isOdd ? '50%' : 'none'}
-                    >
+            <Wrap justify='center' align='center' spacing={4} w='90%'>
+              {reservas.map((r) => (
+                  <WrapItem key={r.tipo} bg='whiteAlpha.400' borderRadius={20} p={2}>
+                    <Stat>
                       <StatLabel>{r.tipo} (Cant. {r.cantidad})</StatLabel>
-                      <StatNumber>${formatoPrecio(r.precio * r.cantidad)}</StatNumber>
-                      <StatHelpText>Precio unidad ${r.precio}</StatHelpText>
+                      <StatNumber>${formatoPrecio((r.precio * r.cantidad))}</StatNumber>
+                      <StatHelpText>Precio unidad ${formatoPrecio(r.precio)}</StatHelpText>
                     </Stat>
                     <Button 
                       position='absolute' 
-                      mt='-13vh' 
-                      ml='11vh' 
+                      mt='-3vh' 
+                      ml='16vh' 
                       size='xs' 
-                      colorScheme="blackAlpha" 
+                      colorScheme="red" 
                       rounded='full'
                     >
                       Quitar 1
                     </Button>
-                  </Box>
-                )
-              })}
-            </SimpleGrid>
+                  </WrapItem>
+              ))}
+            </Wrap>
           </Box>
 
           <Box mt={6}>
-            <Text as='b' fontSize='2xl' display='inline-block' bg='whiteAlpha.400' p={3} borderRadius={10}>
+            <Text as='b' fontSize='2xl' display='inline-block' bg='whiteAlpha.400' p={3} borderRadius={20}>
               Monto total $
               {formatoPrecio(totalPagar)}
             </Text>
@@ -500,7 +478,7 @@ export default function ProcesoPago() {
           <Box display='inline-block'>
             <Button 
               mt={6} 
-              colorScheme="blackAlpha" 
+              colorScheme="red" 
               rounded='full'
               size='lg'
             >

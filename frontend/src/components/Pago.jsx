@@ -1,95 +1,48 @@
 import {
-  Card, 
-  Stack, 
-  StackDivider, 
-  CardBody, 
-  CardHeader,
-  Heading, 
-  SimpleGrid,
-  Text, 
   Box, 
-  Tooltip,
-  Divider,
+  Heading, 
+  Text,
+  Divider, 
 } from "@chakra-ui/react";
-import { IoTicketSharp } from "react-icons/io5";
+import formatoPrecio from "../utils/FormatoPrecio";
 
-export default function Pago({ codigo, fecha, hora, cantidad, monto, evento, artista }) {
+export default function Pago({ titulo, codigo, fecha, hora, monto, entradas }) {
   return (
-    <Box>
-      <Tooltip 
-        mx={1} 
-        hasArrow 
-        fontSize='sm' 
-        label={
-          <>
-            - Evento -<br />
-            {evento}<br />
-            <Divider borderColor='blackAlpha.600' my={1} />
-            - Artista -<br />
-            {artista}
-          </>
-        }
-        textAlign='center'
-        placement="left"
-      >
-        <Card 
-          maxW='250px' 
-          py={8}
-          borderRadius={0} 
-          align='center'
-          transition="all 0.3s ease"
-          _hover={{ transform: "translateY(-10px)", boxShadow: 'dark-lg' }}
-        >
-          <CardHeader borderBottom='2px' borderStyle='dashed' borderColor='gray.300'>
-            <Heading size='md'>{codigo}</Heading>
-          </CardHeader>
+    <Box 
+      maxW='300px' 
+      bg='whiteAlpha.900'
+      py={3}
+      px={4}
+      color='gray.600'
+      fontWeight='medium'
+      transition="all 0.3s ease"
+      _hover={{ 
+        transform: "translateY(-10px)", 
+        boxShadow: 'dark-lg' 
+      }}
+    >
+      <Heading size='md' textAlign='left' mb={2}>RECIBO - {codigo}</Heading>
+      <Text textAlign='left' mb={2}>Concierto: {titulo}</Text>
 
-          <CardBody align='center'>
-            <Stack divider={<StackDivider />} spacing='4'>
-              <Box>
-                <SimpleGrid columns={2} spacingX={2}>
-                  <Box>
-                    <Heading size='xs' textTransform='uppercase'>
-                      Fecha
-                    </Heading>
-                    <Text pt='2' fontSize='sm'>
-                      {fecha}
-                    </Text>
-                  </Box>
-                  <Box>
-                    <Heading size='xs' textTransform='uppercase'>
-                      Hora
-                    </Heading>
-                    <Text pt='2' fontSize='sm'>
-                      {hora}
-                    </Text>
-                  </Box>
-                </SimpleGrid>
-              </Box>
-              <Box>
-                <SimpleGrid columns={2} spacingX={2}>
-                  <Box>
-                    <Heading size='xs' textTransform='uppercase'>
-                      Cant. <IoTicketSharp style={{ display: 'inline-block ' }} />
-                    </Heading>
-                    <Text pt='2' fontSize='sm'>
-                      {cantidad}
-                    </Text>
-                  </Box>
-                  <Box>
-                    <Heading size='xs' textTransform='uppercase'>
-                      Monto
-                    </Heading>
-                    <Text pt='2' fontSize='sm'>
-                      ${monto}
-                    </Text>
-                  </Box>
-                </SimpleGrid>
-              </Box>
-            </Stack>
-          </CardBody>
-        </Card>
-      </Tooltip>
+      <Box display="flex" justifyContent="space-between">
+        <Text>Fecha: {fecha}</Text>
+        <Text>Hora: {hora}</Text>
+      </Box>
+
+      <Divider my={2} borderColor='gray.600' borderWidth={1} />
+
+      <Box my={3}>
+        {entradas.map((e) => (
+          <Box display="flex" justifyContent="space-between" key={e.nombre}>
+            <Text>{e.nombre}{e.cantidad > 1 ? `(${e.cantidad})`: undefined}</Text>
+            <Text>${formatoPrecio((e.precio * e.cantidad))}</Text>
+          </Box>
+        ))}
+      </Box>
+
+      <Divider my={2} borderColor='gray.600' borderWidth={1} />
+
+      <Text textAlign="right">Total: ${formatoPrecio(monto)}</Text>
     </Box>
   )
 }

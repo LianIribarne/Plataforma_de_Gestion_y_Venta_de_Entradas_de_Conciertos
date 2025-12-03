@@ -14,8 +14,9 @@ import {
   MenuItem,
   Badge,
 } from "@chakra-ui/react";
-import { SettingsIcon, DeleteIcon, NotAllowedIcon, InfoIcon, TriangleDownIcon } from '@chakra-ui/icons';
+import { SettingsIcon, DeleteIcon, InfoIcon, TriangleDownIcon } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
+import { TbReportAnalytics } from "react-icons/tb";
 import { IoTicketSharp } from "react-icons/io5";
 
 const slugify = (str) =>
@@ -26,22 +27,34 @@ export default function Evento({ imagen, artista, titulo, genero, estado, fecha 
   const cancelado = estado === 'Cancelado';
 
   return (
-    <Box>
+    <Box maxW={250}>
       <Card
         borderRadius={14}
         maxW='xs'
         bg={cancelado ? 'blackAlpha.400' : 'whiteAlpha.400'}
         variant='unstyled'
-        transition="transform 0.3s ease"
-        _hover={{ transform: "translateY(-10px)", zIndex: 1000 }}
+        transition="all 0.3s ease"
+        _hover={{ transform: "translateY(-10px)", zIndex: 1000, boxShadow: 'md' }}
       >
+        <Badge
+          bg={cancelado ? "red.100" : "teal.100"}
+          color={cancelado ? 'red.700' : 'teal.700'}
+          position='absolute'
+          zIndex={1}
+          variant='solid'
+          fontSize='16px'
+          align='center'
+        >
+          <span>
+            {genero}
+          </span>
+        </Badge>
         <CardBody pb={3}>
           <Box position='relative'>
             <Image
               src={imagen}
               borderTopRadius={14}
-              filter={!cancelado ? 'grayscale(1%)' : 'blur(3px)'} 
-              p={cancelado ? 0.9 : 0}
+              filter={!cancelado ? 'grayscale(1%)' : 'brightness(50%)'} 
             />
             <Box 
               fontSize='3xl' 
@@ -61,20 +74,6 @@ export default function Evento({ imagen, artista, titulo, genero, estado, fecha 
               <b>CANCELADO</b>
             </Box>
           </Box>
-          <Badge
-            bg={cancelado ? "red.100" : "teal.100"}
-            color={cancelado ? 'red.700' : 'teal.700'}
-            position='absolute'
-            variant='solid'
-            fontSize='16px'
-            ml='-10px'
-            mt='-34vh'
-            align='center'
-          >
-            <span>
-              {genero}
-            </span>
-          </Badge>
           <Stack spacing='3'>
             <Container>
               <Heading 
@@ -97,11 +96,11 @@ export default function Evento({ imagen, artista, titulo, genero, estado, fecha 
               >
                 {fecha}
               </Heading>
-              <Grid templateColumns="100px 1fr" mt={3} display={cancelado ? 'none' : 'grid'}>
+              <Grid templateColumns="100px 1fr" mt={3}>
                 <Button
                   as={Link}
-                  to={`/eventos/${slug}`}
-                  state={{ titulo, imagen }}
+                  to={`/conciertos/${slug}`}
+                  state={{ titulo, imagen, estado }}
                   rounded='full'
                   colorScheme='whiteAlpha'
                   leftIcon={<InfoIcon />}
@@ -109,9 +108,9 @@ export default function Evento({ imagen, artista, titulo, genero, estado, fecha 
                 >
                   Más info
                 </Button>
-                <Button
+                {/* <Button
                   as={Link}
-                  to={`/eventos/${slug}`}
+                  to={`/conciertos/${slug}`}
                   state={{ titulo, imagen }}
                   rounded='full'
                   colorScheme='whiteAlpha'
@@ -120,8 +119,8 @@ export default function Evento({ imagen, artista, titulo, genero, estado, fecha 
                   ml={2}
                 >
                   Adquirir
-                </Button>
-                {/* <Menu>
+                </Button> */}
+                <Menu>
                   <MenuButton
                     as={Button}
                     rounded='full'
@@ -133,11 +132,29 @@ export default function Evento({ imagen, artista, titulo, genero, estado, fecha 
                     Opciones
                   </MenuButton>
                   <MenuList minWidth='170px'>
-                    <MenuItem icon={<SettingsIcon />}>Modificar</MenuItem>
-                    <MenuItem icon={<NotAllowedIcon />}>Cancelar</MenuItem>
-                    <MenuItem icon={<DeleteIcon />}>Eliminar</MenuItem>
+                    <MenuItem 
+                      // as={Link}
+                      // to='conciertos/analitica'
+                      icon={<SettingsIcon boxSize={18} />}
+                    >
+                      Modificar
+                    </MenuItem>
+                    <MenuItem 
+                      as={Link}
+                      to='/analitica'
+                      icon={<TbReportAnalytics size={18} />}
+                    >
+                      Analítica
+                    </MenuItem>
+                    <MenuItem 
+                      // as={Link}
+                      // to='conciertos/analitica'
+                      icon={<DeleteIcon boxSize={18} />}
+                    >
+                      Eliminar
+                    </MenuItem>
                   </MenuList>
-                </Menu> */}
+                </Menu>
               </Grid>
             </Container>
           </Stack>

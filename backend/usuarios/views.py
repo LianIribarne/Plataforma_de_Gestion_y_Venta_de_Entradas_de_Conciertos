@@ -30,7 +30,18 @@ class LoginCookieView(APIView):
         access = str(refresh.access_token)
 
         # Respuesta normal
-        res = Response({"message": "Bienvenido"}, status=status.HTTP_200_OK)
+        res = Response({
+            "message": "Bienvenido",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "rol": user.rol.nombre,
+                "nombre": user.first_name,
+                "apellido": user.last_name,
+                "fecha_nacimiento": user.fecha_nacimiento,
+                "genero": user.genero,
+            }
+        }, status=status.HTTP_200_OK)
 
         # Guardar cookies httpOnly
         res.set_cookie(

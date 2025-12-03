@@ -49,7 +49,7 @@ const artistas = [
     },
 ]
 
-export default function Carrusel() {
+export default function Carrusel({ onSelectArtista, artistaSeleccionado }) {
   const scrollRef = useRef(null);
 
   const scroll = (direction) => {
@@ -73,6 +73,7 @@ export default function Carrusel() {
         py={4}
         pt={8}
         scrollBehavior="smooth"
+        justify={artistas.length < 13 ? 'center' : undefined}
         css={{
           scrollbarWidth: "none",
           "&::-webkit-scrollbar": { display: "none" },
@@ -84,19 +85,25 @@ export default function Carrusel() {
             label={a.nombre} 
             hasArrow  
             placement="top"  
-            mb={4} 
             bg="gray.100" 
             color='gray.900'
+            closeOnClick={false}
+            openDelay={250}
           >
             <Avatar 
               key={a.nombre} 
               name={a.nombre} 
               src={a.img} 
               boxSize="100px" 
+              onClick={() => onSelectArtista(a.nombre)}
+              filter={artistaSeleccionado === '' || artistaSeleccionado === a.nombre ? 'grayscale(1%)' : 'blur(2px)'}
               sx={{
+                cursor: "pointer",
                 transition: "transform 0.25s ease",
+                transform: artistaSeleccionado === a.nombre ? 'scale(1.3) translateY(-10px)': undefined,
                 "&:hover": {
                   transform: "scale(1.3) translateY(-10px)",
+                  filter: 'blur(0px)',
                 },
               }}
             />
@@ -104,7 +111,7 @@ export default function Carrusel() {
         ))}
       </HStack>
 
-      <Box ml='46.3%'>
+      <Box align='center' display={artistas.length > 13 ? 'block' : 'none'}>
         {/* flecha izq */}
         <IconButton
           colorScheme='whiteAlpha'

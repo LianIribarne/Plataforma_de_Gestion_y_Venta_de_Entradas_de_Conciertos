@@ -1,17 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from PIL import Image
-
-def validar_tamano_imagen(value):
-    max_size = 5 * 1024 * 1024  # 5 MB
-    if value.size > max_size:
-        raise ValidationError("El archivo es demasiado grande (máx 5MB).")
-
-def validar_cuadrada(value):
-    image = Image.open(value)
-    if image.width != image.height:
-        raise ValidationError("La imagen debe ser cuadrada.")
+from backend.utils.validarImagen import validar_tamano_imagen, validar_cuadrada
 
 class Categoria(models.Model):
     nombre = models.CharField(
@@ -82,12 +72,12 @@ class Lugar(models.Model):
     def __str__(self):
         return self.nombre
 
-class Evento(models.Model):
+class Concierto(models.Model):
     ESTADOS = [
-        ('Programado', 'Programado'),
-        ('En curso', 'En curso'),
-        ('Finalizado', 'Finalizado'),
-        ('Cancelado', 'Cancelado'),
+        ('programado', 'Programado'),
+        ('agotado', 'Agotado'),
+        ('finalizado', 'Finalizado'),
+        ('cancelado', 'Cancelado'),
     ]
     MOOD = [
         ("bailable", "Para bailar"),
@@ -113,7 +103,7 @@ class Evento(models.Model):
     puertas_hora = models.TimeField()
     limite_reserva_total = models.PositiveIntegerField()
     imagen = models.ImageField(
-        upload_to='eventos/',
+        upload_to='conciertos/',
         validators=[
             validar_tamano_imagen,
             validar_cuadrada
@@ -159,7 +149,7 @@ class TipoEntrada(models.Model):
 
     # Foreing Key
     evento = models.ForeignKey(
-        Evento,
+        Concierto,
         on_delete=models.CASCADE,
         related_name='eventos'
     )

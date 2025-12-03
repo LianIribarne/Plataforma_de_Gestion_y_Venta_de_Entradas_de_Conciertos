@@ -1,8 +1,5 @@
 from django.db import models
-import uuid
-
-def generar_codigo():
-    return uuid.uuid4().hex[:10].upper()
+from backend.utils.generarCodigo import generar_codigo
 
 class Pago(models.Model):
     codigo = models.CharField(
@@ -22,8 +19,8 @@ class Pago(models.Model):
     cliente = models.ForeignKey(
         "usuarios.Usuario",
         on_delete=models.PROTECT,
-        related_name='clientes'
+        related_name='pagos'
     )
 
     def __str__(self):
-        return f'Monto: {self.monto} - Fecha y hora: {self.fecha_hora} - Cliente: {self.cliente.email}'
+        return f'Codigo: {self.codigo}'

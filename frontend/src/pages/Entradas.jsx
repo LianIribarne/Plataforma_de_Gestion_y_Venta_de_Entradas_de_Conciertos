@@ -3,6 +3,8 @@ import {
   HStack,
   Grid, 
   GridItem,
+  Wrap,
+  WrapItem,
   Text, 
   Box, 
   Checkbox,
@@ -42,7 +44,19 @@ const entradas = [
         tipo: "VIP Early Access",
         precio: 45000,
         estado: 'Disponible'
-      }
+      },
+      {
+        codigo: 77880011,
+        qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
+        artista: "Pale Waves",
+        titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
+        fecha: "04.12.2025",
+        puertas: "19:30hs",
+        show: "21:00hs",
+        tipo: "VIP Early Access",
+        precio: 45000,
+        estado: 'Disponible'
+      },
     ]
   },
   {
@@ -61,18 +75,6 @@ const entradas = [
         precio: 25000,
         estado: 'Cancelado'
       },
-      {
-        codigo: 7788,
-        qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
-        artista: "Daft Punk",
-        titulo: 'Metal Nights Patagonia',
-        fecha: "30.12.2025",
-        puertas: "20:00hs",
-        show: "21:00hs",
-        tipo: "VIP",
-        precio: 5000,
-        estado: 'Cancelado'
-      }
     ]
   }
 ]
@@ -96,12 +98,11 @@ export default function Entradas() {
   const anySelected = Object.values(selected).some(Boolean);
 
   return entradas.length > 0 ? (
-    <>
+    <Box py={5}>
       <Heading 
         align='center' 
-        fontSize='6xl' 
+        fontSize='5xl' 
         color='white' 
-        mb={8}
       >
         Tus Entradas
       </Heading>
@@ -110,12 +111,13 @@ export default function Entradas() {
         const allChecked = ev.entradas.every((x) => selected[x.codigo]);
 
         return (
-          <div key={ev.titulo}>
+          <Box key={ev.titulo} mt={5}>
             <HStack>
-              <Heading ml={3} color='white'>{ev.titulo}</Heading>
+              <Heading ml={4} color='white'>{ev.titulo}</Heading>
               <Button 
                 onClick={imprimir} 
                 size='sm' 
+                rounded='full'
                 mt={3}
                 display={ev.estado === 'Cancelado' ? 'none' : 'block'}
                 isDisabled={!anySelected}
@@ -125,61 +127,60 @@ export default function Entradas() {
             </HStack>
 
             {/* checkbox general del evento */}
-            <Checkbox
-              isChecked={allChecked}
-              onChange={() => toggleEvento(ev)}
-              mt={2}
-              ml={3}
-              size='lg'
-              colorScheme="whiteAlpha"
-              color='white'
-              display={ev.estado === 'Cancelado' ? 'none' : 'inline-block' }
-            />
-            
-            <Text 
-              mt={1}
-              ml={2}
-              color='white'
-              fontSize='lg'
-              display={ev.estado === 'Cancelado' ? 'none' : 'inline-block' }
-            >
-              <b>Seleccionar todas</b>
-            </Text>
+            <Box>
+              <Checkbox
+                isChecked={allChecked}
+                onChange={() => toggleEvento(ev)}
+                mt={2}
+                ml={4}
+                size='lg'
+                colorScheme="whiteAlpha"
+                color='white'
+                display={ev.estado === 'Cancelado' ? 'none' : 'inline-block' }
+              />
+              
+              <Text 
+                mt={1}
+                ml={2}
+                color='white'
+                fontSize='lg'
+                display={ev.estado === 'Cancelado' ? 'none' : 'inline-block' }
+              >
+                <b>Seleccionar todas</b>
+              </Text>
+            </Box>
 
-            <Grid
-              gap={4}
-              rowGap={8}
-              templateColumns="repeat(2, 740px)"
-              p={3}
-            >
+            <Wrap spacing={6} justify='center' align='center' mt={4}>
               {ev.entradas.map((x) => (
-                <GridItem key={x.codigo}>
-                  <Entrada {...x} />
+                <WrapItem key={x.codigo}>
+                  <Box>
+                    <Entrada {...x} />
 
-                  <HStack>
-                    <Checkbox
-                      isChecked={!!selected[x.codigo]}
-                      onChange={() => toggleEntrada(x.codigo)}
-                      size='lg'
-                      colorScheme="whiteAlpha"
-                      mt={2}
-                      color='white'
-                      display={x.estado === 'Cancelado' ? 'none' : 'inline-block' }
-                    />
-                    
-                    <Text 
-                      mt={1}
-                      color='white'
-                      fontSize='lg'
-                      display={x.estado === 'Cancelado' ? 'none' : 'inline-block' }
-                    >
-                      <b>Seleccionar</b>
-                    </Text>
-                  </HStack>
-                </GridItem>
+                    <HStack>
+                      <Checkbox
+                        isChecked={!!selected[x.codigo]}
+                        onChange={() => toggleEntrada(x.codigo)}
+                        size='lg'
+                        colorScheme="whiteAlpha"
+                        mt={2}
+                        color='white'
+                        display={x.estado === 'Cancelado' ? 'none' : 'inline-block' }
+                      />
+                      
+                      <Text 
+                        mt={1}
+                        color='white'
+                        fontSize='lg'
+                        display={x.estado === 'Cancelado' ? 'none' : 'inline-block' }
+                      >
+                        <b>Seleccionar</b>
+                      </Text>
+                    </HStack>
+                  </Box>
+                </WrapItem>
               ))}
-            </Grid>
-          </div>
+            </Wrap>
+          </Box>
         );
       })}
 
@@ -190,7 +191,7 @@ export default function Entradas() {
             .map((x) => <Entrada key={x.codigo} {...x} />)
         )}
       </div>
-    </>
+    </Box>
   ) : (
     <AbsoluteCenter>
       <Box bg='whiteAlpha.500' p={4} borderRadius={8} color='white'>

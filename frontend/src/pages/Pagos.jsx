@@ -4,77 +4,68 @@ import {
   GridItem,
   Box, 
   AbsoluteCenter,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react";
 import Pago from '../components/Pago';
 
 const pagos = [
   {
+    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
     codigo: 'A9F3C1B27E',
     fecha: '02.11.2025',
     hora: '15:01',
-    monto: 20000,
-    cantidad: 4,
-    evento: 'Metal del bueno en buenos aires',
-    artista: 'Avatar Metal',
+    monto: 310000,
+    entradas: [
+      {
+        nombre: 'General',
+        cantidad: 2,
+        precio: 25000,
+      },
+      {
+        nombre: 'VIP',
+        cantidad: 1,
+        precio: 45000,
+      },
+      {
+        nombre: 'VIP Access Early',
+        cantidad: 3,
+        precio: 55000,
+      },
+      {
+        nombre: 'OH YEAH!',
+        cantidad: 1,
+        precio: 50000,
+      },
+    ]
   },
   {
-    codigo: '#ABCD-1235-EFGH',
+    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
+    codigo: 'A9F2C1B27E',
     fecha: '02.11.2025',
-    hora: '15:01',
-    monto: 20000,
-    cantidad: 4,
-    evento: 'Metal del bueno en buenos aires',
-    artista: 'Avatar Metal',
-  },
-  {
-    codigo: '#ABCD-1236-EFGH',
-    fecha: '02.11.2025',
-    hora: '15:01',
-    monto: 20000,
-    cantidad: 4,
-    evento: 'Metal del bueno en buenos aires',
-    artista: 'Avatar Metal',
-  },
-  {
-    codigo: '#ABCD-1237-EFGH',
-    fecha: '02.11.2025',
-    hora: '15:01',
-    monto: 20000,
-    cantidad: 4,
-    evento: 'Metal del bueno en buenos aires',
-    artista: 'Avatar Metal',
-  },
-  {
-    codigo: '#ABCD-1238-EFGH',
-    fecha: '02.11.2025',
-    hora: '15:01',
-    monto: 20000,
-    cantidad: 4,
-    evento: 'Metal del bueno en buenos aires',
-    artista: 'Avatar Metal',
-  },
-  {
-    codigo: '#ABCD-1239-EFGH',
-    fecha: '02.11.2025',
-    hora: '15:01',
-    monto: 20000,
-    cantidad: 4,
-    evento: 'Metal del bueno en buenos aires',
-    artista: 'Avatar Metal',
+    hora: '13:37',
+    monto: 50000,
+    entradas: [
+      {
+        nombre: 'General',
+        cantidad: 2,
+        precio: 25000,
+      },
+    ]
   },
 ]
 
 export default function Pagos() {
   return pagos.length > 0 ? (
-    <Box pb={5}>
+    <Box p={5}>
       <Heading mb={10} align='center' color='gray.50' size='2xl'>Tus pagos</Heading>
-      <Grid gap={10} templateColumns="repeat(5, 1fr)" mx={5}>
+      <Wrap spacing={10} align='center' justify='center'>
         {pagos.map((p) => (
-          <GridItem align='center' key={p.codigo}>
+          <WrapItem align='center' key={p.codigo}>
             <Pago {...p}/>
-          </GridItem>
+          </WrapItem>
         ))}
-      </Grid>
+      </Wrap>
     </Box>
   ) : (
     <AbsoluteCenter>

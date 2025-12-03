@@ -2,13 +2,15 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from backend.utils.validarImagen import validar_tamano_imagen, validar_cuadrada
+
+ROLES = [
+    ('admin', 'Administrador'),
+    ('organizador', 'Organizador'),
+    ('cliente', 'Cliente'),
+]
 
 class Rol(models.Model):
-    ROLES = [
-        ('Administrador', 'Administrador'),
-        ('Organizador', 'Organizador'),
-        ('Cliente', 'Cliente'),
-    ]
     nombre = models.CharField(
         max_length=20,
         choices=ROLES,
@@ -73,9 +75,9 @@ class Usuario(AbstractUser):
     """
 
     GENEROS = [
-        ('Hombre', 'Hombre'),
-        ('Mujer', 'Mujer'),
-        ('Otro', 'Otro'),
+        ('hombre', 'Hombre'),
+        ('mujer', 'Mujer'),
+        ('otro', 'Otro'),
     ]
     genero = models.CharField(
         max_length=20,
@@ -83,6 +85,15 @@ class Usuario(AbstractUser):
     )
     fecha_nacimiento = models.DateField()
     email = models.EmailField(unique=True)
+    imagen = models.ImageField(
+        upload_to='usuarios/',
+        validators=[
+            validar_tamano_imagen,
+            validar_cuadrada
+        ],
+        blank=True,
+        null=True
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -130,7 +141,7 @@ class Usuario(AbstractUser):
                 raise ValidationError('Debes ser mayor de 18 años.')
     
     def save(self, *args, **kwargs):
-        self.edad = self.calcular_edad() # Completa el campo edad
+        # self.edad = self.calcular_edad()
         self.full_clean() # Realiza las validaciones necesarias
         
         super().save(*args, **kwargs)

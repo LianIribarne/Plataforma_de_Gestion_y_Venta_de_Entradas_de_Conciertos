@@ -1,161 +1,204 @@
 import { 
-  Table,
-  Thead,
-  Tbody,
-  Tfoot,
-  Tr,
-  Th,
-  Td,
-  TableCaption,
-  TableContainer,
-  IconButton,
-  Tooltip,
   Box,
   Heading,
+  Avatar,
+  AvatarBadge,
+  Text,
+  Wrap,
+  WrapItem,
+  IconButton,
+  Button,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverHeader,
+  PopoverBody,
+  PopoverArrow,
+  PopoverCloseButton,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { SettingsIcon, InfoIcon, DeleteIcon } from '@chakra-ui/icons';
+import { InfoIcon, EditIcon, DeleteIcon } from '@chakra-ui/icons';
+import { Link } from 'react-router-dom';
 
-function Organizador({ email, nombre, apellido }) {
+function Usuario({ email, nombre, apellido, activo }) {
+  const { isOpen, onToggle, onClose } = useDisclosure();
+
   return (
-    <Tr color='gray.700'>
-      <Td>
-        <b>{email}</b>
-      </Td>
-      <Td>
-        <b>{nombre}</b>
-      </Td>
-      <Td>
-        <b>{apellido}</b>
-      </Td>
-      <Td maxW={12}>
-        <Tooltip hasArrow label='Modificar' placement='top'>
-          <IconButton
-            variant='unstyled'
-            icon={<SettingsIcon boxSize={5} />}
-          />
-        </Tooltip>
-        <Tooltip hasArrow label='Detalles' placement='top'>
-          <IconButton
-            color='teal.500'
-            variant='unstyled'
-            icon={<InfoIcon boxSize={5} />}
-          />
-        </Tooltip>
-        <Tooltip hasArrow label='Eliminar' bg='red.500' color='white' placement='top'>
-          <IconButton
-            color='red.500'
-            variant='unstyled'
-            icon={<DeleteIcon boxSize={5} />}
-            />
-        </Tooltip>
-      </Td>
-    </Tr>
+    <Popover isOpen={isOpen} onClose={onClose}>
+      <PopoverTrigger>
+        <WrapItem
+          as="button"
+          onClick={onToggle}
+          bg='whiteAlpha.300'
+          borderRadius={30}
+          transition="transform 0.3s ease"
+          _hover={{ background: 'whiteAlpha.500', cursor: 'pointer', transform: 'translateY(-6px)' }}
+        >
+          <Box p={4}>
+            <Avatar bg='whiteAlpha.600' mb={2}>
+              <AvatarBadge 
+                boxSize='1em' 
+                bg={activo ? 'green.400' : 'gray.400'}
+                borderColor={activo ? 'green.100' : 'gray.100'}
+                mr={1}
+                mb={1}
+              />
+            </Avatar>
+            <Box maxW={150}>
+              <Text color='whiteAlpha.800' as='b' fontSize='lg'>{email}</Text><br />
+              <Text color='whiteAlpha.800' as='b' fontSize='sm'>{nombre} {apellido}</Text>
+            </Box>
+          </Box>
+        </WrapItem>
+      </PopoverTrigger>   
+
+      <PopoverContent bg='gray.200'>
+        <PopoverArrow bg='gray.200' />
+        <PopoverCloseButton />
+        <PopoverHeader color='blackAlpha.700'><b>Opciones</b></PopoverHeader>
+        <PopoverBody>
+          <Button 
+              as={Link}
+              to='/detalle_organizador'
+              leftIcon={<InfoIcon />} 
+              colorScheme='blackAlpha'
+              size='sm'
+              rounded='full' 
+              variant='solid'
+              mr={2}
+            >
+              Detalles
+            </Button>
+            <Button 
+              leftIcon={<EditIcon />} 
+              colorScheme='blackAlpha'
+              size='sm'
+              rounded='full' 
+              variant='solid'
+            >
+              Modificar
+            </Button>
+            <Button 
+              leftIcon={<DeleteIcon />} 
+              colorScheme='red'
+              size='sm'
+              rounded='full' 
+              variant='solid'
+              mt={2}
+            >
+              Eliminar
+            </Button>
+        </PopoverBody>
+      </PopoverContent>
+    </Popover>
   )
 }
 
-const organizadores = [
+const users = [
   {
     email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
+    nombre: 'Lian Lian',
+    apellido: 'Iribarne Iribarne Iribarne',
+    activo: true,
   },
   {
     email: 'lian@gmail.com',
     nombre: 'Lian',
     apellido: 'Iribarne',
+    activo: false,
   },
   {
     email: 'lian@gmail.com',
     nombre: 'Lian',
     apellido: 'Iribarne',
+    activo: true,
   },
   {
     email: 'lian@gmail.com',
     nombre: 'Lian',
     apellido: 'Iribarne',
+    activo: false,
+  },
+  {
+    email: 'lian@gmail.com',
+    nombre: 'Lian',
+    apellido: 'Iribarne',
+    activo: true,
+  },
+  {
+    email: 'lian@gmail.com',
+    nombre: 'Lian',
+    apellido: 'Iribarne',
+    activo: false,
+  },
+  {
+    email: 'lian@gmail.com',
+    nombre: 'Lian',
+    apellido: 'Iribarne',
+    activo: true,
+  },
+  {
+    email: 'lian@gmail.com',
+    nombre: 'Lian',
+    apellido: 'Iribarne',
+    activo: false,
+  },
+  {
+    email: 'lian@gmail.com',
+    nombre: 'Lian',
+    apellido: 'Iribarne',
+    activo: true,
+  },
+  {
+    email: 'lian@gmail.com',
+    nombre: 'Lian',
+    apellido: 'Iribarne',
+    activo: false,
+  },
+  {
+    email: 'lian@gmail.com',
+    nombre: 'Lian',
+    apellido: 'Iribarne',
+    activo: true,
+  },
+  {
+    email: 'lian@gmail.com',
+    nombre: 'Lian',
+    apellido: 'Iribarne',
+    activo: false,
   },
 ]
 
-export default function Organizadores() {
+export default function Usuarios() {
   return (
     <Box p={5}>
       <Box align='center'>
-        <Heading color='white'>Organizadores</Heading>
-        <TableContainer bg='whiteAlpha.700' borderRadius={10} mt={4} w='70%'>
-          <Table variant='striped' colorScheme='blackAlpha' size='sm'>
-            <TableCaption>Lista completa de organizadores</TableCaption>
-            <Thead>
-              <Tr>
-                <Th>Email</Th>
-                <Th>Nombre</Th>
-                <Th>Apellido</Th>
-                <Th maxW={12}>Opciones</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {organizadores.map((e) => (
-                <Organizador 
-                  email={e.email}
-                  nombre={e.nombre}
-                  apellido={e.apellido}
-                />
-              ))}
-            </Tbody>
-            <Tfoot>
-              <Tr>
-                <Th>Email</Th>
-                <Th>Nombre</Th>
-                <Th>Apellido</Th>
-                <Th maxW={12}>Opciones</Th>
-              </Tr>
-            </Tfoot>
-          </Table>
-        </TableContainer>
+        <Heading color='white' mb={4}>Organizadores</Heading>
+        <Wrap justify='center' align='center' spacing='10px'>
+          {users.map((e) => (
+            <Usuario
+              email={e.email}
+              nombre={e.nombre}
+              apellido={e.apellido}
+              activo={e.activo}
+            />
+          ))}
+        </Wrap>
       </Box>
 
-      <Box align='center' mt={8}>
-        <Heading color='white'>Clientes</Heading>
-        <TableContainer bg='whiteAlpha.700' borderRadius={10} mt={4} w='70%'>
-          <Table variant='striped' colorScheme='blackAlpha' size='sm'>
-            <TableCaption>Lista completa de organizadores</TableCaption>
-            <Thead>
-              <Tr>
-                <Th>Email</Th>
-                <Th>Nombre</Th>
-                <Th>Apellido</Th>
-                <Th maxW={12}>Opciones</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {organizadores.map((e) => (
-                <Organizador 
-                  email={e.email}
-                  nombre={e.nombre}
-                  apellido={e.apellido}
-                />
-              ))}
-            </Tbody>
-            <Tfoot>
-              <Tr>
-                <Th>Email</Th>
-                <Th>Nombre</Th>
-                <Th>Apellido</Th>
-                <Th maxW={12}>Opciones</Th>
-              </Tr>
-            </Tfoot>
-          </Table>
-        </TableContainer>
+      <Box align='center' mt={10}>
+        <Heading color='white' mb={4}>Clientes</Heading>
+        <Wrap justify='center' align='center' spacing='10px'>
+          {users.map((e) => (
+            <Usuario
+              email={e.email}
+              nombre={e.nombre}
+              apellido={e.apellido}
+              activo={e.activo}
+            />
+          ))}
+        </Wrap>
       </Box>
-
-      {/* <Datos 
-        first_name='Lian'
-        last_name='Iribarne'
-        email='lian@gmail.com'
-        fecha_nacimiento='18.12.2003'
-        genero='Hombre'
-        isOpen={isOpen}
-        onClose={onClose}
-      /> */}
     </Box>
   );
 }

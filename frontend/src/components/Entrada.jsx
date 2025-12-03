@@ -11,6 +11,7 @@ import {
   Box, 
 } from "@chakra-ui/react";
 import { ArrowRightIcon } from '@chakra-ui/icons';
+import formatoPrecio from '../utils/FormatoPrecio';
 
 export default function Entrada({ qr, artista, titulo, fecha, puertas, show, precio, codigo, tipo, estado }) {
   const disponible = estado === 'Disponible';
@@ -105,7 +106,7 @@ export default function Entrada({ qr, artista, titulo, fecha, puertas, show, pre
                         mb={1} 
                         mx={1}
                       /> 
-                        {show}
+                      {show}
                     </Text>
                   </Box>
                 </GridItem>
@@ -126,7 +127,7 @@ export default function Entrada({ qr, artista, titulo, fecha, puertas, show, pre
                         {tipo}
                     </Text><br />
                     <Text as='b'>
-                      ${precio}
+                      ${formatoPrecio(precio)}
                     </Text>
                   </Box>
                 </GridItem>

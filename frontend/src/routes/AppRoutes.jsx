@@ -1,17 +1,15 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
-import Eventos from '../pages/eventos';
-import EventoInfo from '../pages/eventoInfo';
-import CrearEvento from '../pages/CrearEvento';
-import CrearArtista from '../pages/CrearArtista';
-import Usuarios from '../pages/usuarios';
-import CrearOrganizador from '../pages/crearOrganizador';
+import Conciertos from '../pages/Conciertos';
+import InfoConcierto from '../pages/InfoConcierto';
+import AnaliticaConcierto from '../pages/AnaliticaConcierto';
+import Usuarios from '../pages/Usuarios';
+import DetallesOrganizador from '../pages/DetallesOrganizador';
 import Pagos from '../pages/pagos';
 import Entradas from '../pages/entradas';
 import Register from '../pages/register';
 import Login from '../pages/login';
 import ProcesoPago from '../pages/procesoPago';
-// import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function AppRoutes() {
   return (
@@ -20,16 +18,23 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
 
       <Route path="/" element={<DashboardLayout />}>
-        <Route index element={<Navigate to="/eventos" replace />} />
-        <Route path="/eventos" element={<Eventos />} />
-        <Route path="/eventos/:slug" element={<EventoInfo />} />
-        <Route path="/eventos/crear_evento" element={<CrearEvento />} />
-        <Route path="/eventos/crear_artista" element={<CrearArtista />} />
+        <Route index element={<Navigate to="/conciertos" replace />} />
+
+        {/* CONCIERTOS */}
+        <Route path="/conciertos" element={<Conciertos />} />
+        <Route path="/conciertos/:slug" element={<InfoConcierto />} />
+        <Route path="/analitica" element={<AnaliticaConcierto />} />
+
+        {/* USUARIOS */}
         <Route path="/usuarios" element={<Usuarios />} />
-        <Route path="/usuarios/crear_organizador" element={<CrearOrganizador />} />
+        <Route path="/detalle_organizador" element={<DetallesOrganizador />} />
+
+        {/* PAGOS */}
         <Route path="/pagos" element={<Pagos />} />
-        <Route path="/entradas" element={<Entradas />} />
         <Route path="/pagos/proceso_pago" element={<ProcesoPago />} />
+
+        {/* ENTRADAS */}
+        <Route path="/entradas" element={<Entradas />} />
       </Route>
     </Routes>
   );

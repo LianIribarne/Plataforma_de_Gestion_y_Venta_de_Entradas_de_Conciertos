@@ -4,16 +4,21 @@ import {
   TabList, 
   Tab, 
   Box, 
-  IconButton, 
   Avatar, 
   useDisclosure,
   Flex, 
   Button,
+  Tooltip,
 } from "@chakra-ui/react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { AddIcon } from '@chakra-ui/icons'
+import { AiOutlineUserAdd } from "react-icons/ai";
+import { AddIcon, TimeIcon } from '@chakra-ui/icons'
 import { Link } from 'react-router-dom';
-import Datos from '../components/DatosUsuario';
+import Perfil from '../components/PerfilUsuario';
+import CrearConcierto from '../components/CrearConcierto';
+import CrearArtista from '../components/CrearArtista';
+import CrearUsuario from '../components/CrearUsuario';
+import CrearLugar from '../components/CrearLugar';
 
 function Seccion({ url, label }) {
   return (
@@ -21,11 +26,15 @@ function Seccion({ url, label }) {
       as={NavLink} 
       to={url} 
       mr='4' 
-      bg='gray.500' 
-      color='gray.900'
-      _selected={{ bg: "teal.400", color: "white" }}
+      bg='blackAlpha.900' 
+      color='white'
+      _selected={{ bg: "whiteAlpha.900", color: "black" }}
       transition="all 0.3s ease"
-      _hover={{ background: "teal.400", color: "white", transform: 'scale(1.1)' }}
+      _hover={{ 
+        background: "whiteAlpha.800", 
+        color: "black", 
+        transform: 'scale(1.1)' 
+      }}
     >
       {label}
     </Tab>
@@ -34,12 +43,34 @@ function Seccion({ url, label }) {
 
 export default function DashboardLayout() {
   const location = useLocation();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const btnRef = React.useRef()
 
-  const isCrearEvento = location.pathname.startsWith('/eventos/crear_evento');
-  const isCrearArtista = location.pathname.startsWith('/eventos/crear_artista');
-  const isCrearOrganizador = location.pathname.startsWith('/usuarios/crear_organizador');
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const {
+    isOpen: isConciertoOpen,
+    onOpen: onConciertoOpen,
+    onClose: onConciertoClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isArtistaOpen,
+    onOpen: onArtistaOpen,
+    onClose: onArtistaClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isUsuarioOpen,
+    onOpen: onUsuarioOpen,
+    onClose: onUsuarioClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isLugarOpen,
+    onOpen: onLugarOpen,
+    onClose: onLugarClose
+  } = useDisclosure();
+
+  const btnRef = React.useRef()
   
   const tabIndex = (() => {
     if (location.pathname.startsWith("/usuarios")) return 1;
@@ -53,7 +84,7 @@ export default function DashboardLayout() {
   }, [location.pathname]);
 
   const secciones = [
-    { url: '/eventos', label: 'Eventos' },
+    { url: '/conciertos', label: 'Conciertos' },
     { url: '/usuarios', label: 'Usuarios' },
     { url: '/pagos', label: 'Pagos' },
     { url: '/entradas', label: 'Entradas' },
@@ -75,83 +106,175 @@ export default function DashboardLayout() {
         right="10px"
         zIndex="10000"
         pointerEvents="none"
+        // onChange={(i) => { tabIndex(i), onClose }}
       >
-        <TabList as={Flex} justifyContent="space-between" alignItems="center" pointerEvents="auto">
+        <TabList 
+          as={Flex} 
+          justifyContent="space-between" 
+          alignItems="center" 
+          pointerEvents="auto"
+        >
           <Flex>
             {secciones.map((s) => (
               <Seccion 
-                key={s.url}
+                key={s.label}
                 url={s.url}
                 label={s.label}
               />
             ))}
           </Flex>
 
-          <IconButton 
-            isRound={true} 
-            onClick={onOpen}
-            ref={btnRef}
-            aria-label="Usuario"
-            icon={<Avatar name="Lian Iribarne" />}
-            mt={-2}
-            transition="all 0.3s ease"
-            _hover={{ transform: 'scale(1.1)' }}
-          />
-        </TabList>
-
-        {tabIndex === 0 && !isCrearEvento && !isCrearArtista && (
           <Box>
             <Button
-              as={Link}
-              to='/eventos/crear_evento'
-              colorScheme='teal'
-              mt={2} 
               rounded='full'
+              bg='blackAlpha.900' 
+              color='white'
               transition="all 0.3s ease"
-              _hover={{ transform: "translateY(-4px)" }}
+              _hover={{ 
+                background: "whiteAlpha.800", 
+                color: "black", 
+                transform: 'scale(1.1)' 
+              }}
               pointerEvents="auto"
+              mr={4}
+              mt={1}
+              onClick={onConciertoOpen}
             >
               Crear Concierto<AddIcon boxSize={3} ml={1} />
-            </Button><br />
-            <Button
-              as={Link}
-              to='/eventos/crear_artista'
-              colorScheme='teal'
-              mt={2} 
-              rounded='full'
-              transition="all 0.3s ease"
-              _hover={{ transform: "translateY(-4px)" }}
-              pointerEvents="auto"
-            >
-              Añadir Artista<AddIcon boxSize={3} ml={1} />
             </Button>
+
+            <Button
+              bg='blackAlpha.900' 
+              color='white'
+              transition="all 0.3s ease"
+              _hover={{ 
+                background: "whiteAlpha.800", 
+                color: "black", 
+                transform: 'scale(1.1)' 
+              }}
+              pointerEvents="auto"
+              mr={4}
+              mt={1}
+              rounded='full'
+              onClick={onArtistaOpen}
+            >
+              Añadir Artista<AiOutlineUserAdd size={20} />
+            </Button>
+
+            <Button 
+              bg='blackAlpha.900' 
+              color='white'
+              transition="all 0.3s ease"
+              _hover={{ 
+                background: "whiteAlpha.800", 
+                color: "black", 
+                transform: 'scale(1.1)' 
+              }}
+              pointerEvents="auto"
+              mr={4}
+              mt={1}
+              rounded='full'
+              onClick={onUsuarioOpen}
+            >
+              Añadir Usuario<AiOutlineUserAdd size={20} />
+            </Button>
+
+            <Button 
+              bg='blackAlpha.900' 
+              color='white'
+              transition="all 0.3s ease"
+              _hover={{ 
+                background: "whiteAlpha.800", 
+                color: "black", 
+                transform: 'scale(1.1)' 
+              }}
+              pointerEvents="auto"
+              mr={4}
+              mt={1}
+              rounded='full'
+              onClick={onLugarOpen}
+            >
+              Añadir Lugar<AddIcon boxSize={3} ml={1} />
+            </Button>
+            
+            {location.pathname !== "/pagos/proceso_pago" && (
+              <Tooltip 
+                label={
+                  <Box display="flex" alignItems="center" gap={2}>
+                    7:32 <TimeIcon />
+                  </Box>
+                }
+                placement='left'
+                fontWeight='bold'
+                fontSize='2xl'
+                mr={1}
+                bg='red' 
+                closeOnClick={false} 
+                hasArrow 
+                isOpen
+              >
+                <Button 
+                  as={Link}
+                  to='/pagos/proceso_pago'
+                  bg='blackAlpha.900' 
+                  color='white'
+                  transition="all 0.3s ease"
+                  _hover={{ 
+                    background: "whiteAlpha.800", 
+                    color: "black", 
+                    transform: 'scale(1.1)' 
+                  }}
+                  pointerEvents="auto"
+                  mr={4}
+                  mt={1}
+                  rounded='full'
+                >
+                  Comprar Entradas
+                </Button>
+              </Tooltip>
+            )}
+
+            <Avatar 
+              as={Button}
+              onClick={onOpen}
+              ref={btnRef}
+              bg='whiteAlpha.500'
+              p={0}
+              transition="all 0.3s ease"
+              _hover={{ transform: 'scale(1.1)' }}
+            />
           </Box>
-        )}
-        {tabIndex === 1 && !isCrearOrganizador && (
-          <Button 
-            as={Link}
-            to='/usuarios/crear_organizador'
-            colorScheme='teal'
-            mt={2} 
-            ml='14vh' 
-            rounded='full'
-            transition="all 0.3s ease"
-            _hover={{ transform: "translateY(-4px)" }}
-            pointerEvents="auto"
-          >
-            Crear Organizador<AddIcon boxSize={3} ml={1} />
-          </Button>
-        )}
+        </TabList>
       </Tabs>
 
-      <Datos 
-        first_name='Lian'
-        last_name='Iribarne'
-        email='lian@gmail.com'
-        fecha_nacimiento='18.12.2003'
-        genero='Hombre'
+      {/* MODAL: PERFIL */}
+      <Perfil 
         isOpen={isOpen}
         onClose={onClose}
+      />
+      
+      {/* MODAL: CREAR CONCIERTO */}
+      <CrearConcierto 
+        isOpen={isConciertoOpen}
+        onClose={onConciertoClose} 
+      />
+
+      {/* MODAL: CREAR ARTISTA */}
+      <CrearArtista 
+        isOpen={isArtistaOpen}
+        onClose={onArtistaClose} 
+      />
+
+      {/* MODAL: CREAR USUARIO */}
+      <CrearUsuario 
+        isOpen={isUsuarioOpen}
+        onClose={onUsuarioClose}
+      />
+
+      {/* MODAL: CREAR LUGAR */}
+      <CrearLugar 
+        isOpen={isLugarOpen}
+        onClose={onLugarClose}
       />
 
       {/* Acá se mostrará el contenido de cada página */}

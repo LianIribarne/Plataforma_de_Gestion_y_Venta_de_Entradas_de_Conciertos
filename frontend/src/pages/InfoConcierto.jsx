@@ -17,6 +17,7 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import { IoTicketSharp } from "react-icons/io5";
 import { InfoOutlineIcon, ArrowRightIcon, CalendarIcon, TimeIcon } from '@chakra-ui/icons';
 import EntradaInfo from '../components/ReservaEntrada';
+import formatoPrecio from '../utils/FormatoPrecio';
 
 const entradas = [
   {
@@ -94,7 +95,7 @@ export default function EventoDetalle() {
         toast({
           id,
           title: 'Precio total',
-          description: `Total del precio por las entradas $${totalGlobal}`,
+          description: `Total del precio por las entradas $${formatoPrecio(totalGlobal)}`,
           position: 'top-right',
           containerStyle: {
             marginTop: 32,
@@ -105,7 +106,7 @@ export default function EventoDetalle() {
       } else {
         toast.update(id, {
           title: 'Precio total',
-          description: `Total del precio por las entradas $${totalGlobal}`,
+          description: `Total del precio por las entradas $${formatoPrecio(totalGlobal)}`,
           status: 'info',
         });
       }
@@ -130,6 +131,7 @@ export default function EventoDetalle() {
 
   return (
     <Box px={5} pb={5}>
+
       {/* Titulo */}
       <Heading 
         as='h1' 
@@ -190,8 +192,9 @@ export default function EventoDetalle() {
           </Text>
         </GridItem>
 
-        {/* Entradas */}
         <GridItem align='center'>
+
+          {/* Entradas */}
           <Heading 
             as='h2' 
             color='gray.200'
@@ -203,41 +206,43 @@ export default function EventoDetalle() {
             <IoTicketSharp style={{ display: 'inline', marginBottom: '-4' }} />
           </Heading>
 
-          <Accordion allowToggle bg='whiteAlpha.400' borderColor='whiteAlpha.50' py={5} width='600px' borderRadius={20}>
-            {entradas.map((e) => (
-              <EntradaInfo
-                key={e.tipo}
-                tipo={e.tipo}
-                disponibles={e.disponibles}
-                reservadas={e.reservadas}
-                precio={e.precio}
-                cantMax={e.cantMax}
-                onCantChange={handleCantidadChange}
-              />
-            ))}
-          </Accordion>
+          <Box>
+            <Accordion allowToggle bg='whiteAlpha.400' borderColor='whiteAlpha.50' py={5} width='600px' borderRadius={20}>
+              {entradas.map((e) => (
+                <EntradaInfo
+                  key={e.tipo}
+                  tipo={e.tipo}
+                  disponibles={e.disponibles}
+                  reservadas={e.reservadas}
+                  precio={e.precio}
+                  cantMax={e.cantMax}
+                  onCantChange={handleCantidadChange}
+                />
+              ))}
+            </Accordion>
 
-          {/* Boton para reservar */}
-          <Box align='center'>
-            <Text 
-              mt={2} 
-              fontSize={14} 
-              color='gray.200'
-            >
-              <InfoOutlineIcon boxSize={3} mb={0.5} /> Podés reservar hasta {TOTAL_MAX} entradas en total.
-            </Text>
+            {/* Boton para reservar */}
+            <Box align='center'>
+              <Text 
+                mt={2} 
+                fontSize={14} 
+                color='gray.200'
+              >
+                <InfoOutlineIcon boxSize={3} mb={0.5} /> Podés reservar hasta {TOTAL_MAX} entradas en total.
+              </Text>
 
-            <Button 
-              colorScheme='whiteAlpha'
-              mt={2}
-              isDisabled={totalReserva === 0 || limiteSuperado ? true: false}
-              size='lg'
-              rounded='full'
-              transition="all 0.3s ease"
-              _hover={{ transform: 'scale(1.1)' }}
-            >
-              Reservar
-            </Button>
+              <Button 
+                colorScheme='whiteAlpha'
+                mt={2}
+                isDisabled={totalReserva === 0 || limiteSuperado ? true: false}
+                size='lg'
+                rounded='full'
+                transition="all 0.3s ease"
+                _hover={{ transform: 'scale(1.1)' }}
+              >
+                Reservar
+              </Button>
+            </Box>
           </Box>
 
           {/* Lugar */}

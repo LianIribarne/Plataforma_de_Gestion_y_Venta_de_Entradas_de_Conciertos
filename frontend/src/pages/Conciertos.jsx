@@ -1,16 +1,16 @@
 import {
   Image,
   Heading,
-  Grid,
-  GridItem,
+  Wrap,
+  WrapItem,
   Box,
   useDisclosure,
   Button,
 } from "@chakra-ui/react";
 import { useState, useEffect } from 'react';
-import Evento from "../components/Evento";
+import Evento from "../components/Concierto";
 import Carrusel from "../components/Artistas";
-import FiltrosEventos from '../components/FiltrosEventos';
+import FiltrosEventos from '../components/FiltrosConciertos';
 
 const eventos = [
   {
@@ -29,7 +29,7 @@ const eventos = [
     titulo: 'Chaos Chaos – “Bright Futures Live Set”',
     fecha: '04.11.2025',
     genero: 'Indie Electronic',
-    estado: 'Programado'
+    estado: 'Agotado'
   },
   {
     id: '3',
@@ -53,6 +53,9 @@ const eventos = [
 
 export default function Eventos() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [selectedArtist, setSelectedArtist] = useState('');
+
   // const [eventos, setEventos] = useState([]);
 
   const handleApplyFilters = async (filtros) => {
@@ -61,8 +64,16 @@ export default function Eventos() {
     setEventos(res.data);
   };
 
+  const handleArtistFromCarrusel = (artistName) => {
+    setSelectedArtist(artistName);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedArtist('');
+  };
+
   return (
-    <Box>
+    <Box pb={5}>
       {/* Imagen */}
       <Image
         src='/concert.jpg'
@@ -101,11 +112,10 @@ export default function Eventos() {
         </Heading>
         
         <Button 
-          colorScheme="whiteAlpha" 
+          bg='whiteAlpha.800'
+          color='blackAlpha.800'
           rounded='full' 
           fontSize='2xl' 
-          borderColor='white'
-          border='2px'
           size='lg' 
           onClick={onOpen}
         >
@@ -116,29 +126,33 @@ export default function Eventos() {
           isOpen={isOpen} 
           onClose={onClose} 
           onApply={handleApplyFilters}
+          artistaSeleccionado={selectedArtist}
+          onClear={handleClearFilters}
         />
       </Box>
 
+      {/* Artistas */}
+      <Carrusel onSelectArtista={handleArtistFromCarrusel} artistaSeleccionado={selectedArtist} />
+
       {/* Nuevos Eventos */}
-      <Carrusel />
       <Heading ml={5} color='gray.200'>Lo más nuevo</Heading>
-      <Grid templateColumns='repeat(auto-fill, minmax(200px, 1fr))' columnGap={16} px={5} py={5}>
+      <Wrap spacing={10} justify='center' align='center'>
         {eventos.map((e) => (
-          <GridItem key={e.id}>
+          <WrapItem key={e.id}>
             <Evento {...e}/>
-          </GridItem>
+          </WrapItem>
         ))}
-      </Grid>
+      </Wrap>
 
       {/* Eventos */}
       <Heading ml={5} mt={5} color='gray.200'>Todos los conciertos</Heading>
-      <Grid templateColumns='repeat(auto-fill, minmax(200px, 1fr))' columnGap={16} rowGap={4} px={5} py={5}>
+      <Wrap spacing={10} justify='center' align='center'>
         {eventos.map((e) => (
-          <GridItem key={e.id}>
+          <WrapItem key={e.id}>
             <Evento {...e}/>
-          </GridItem>
+          </WrapItem>
         ))}
-      </Grid>
+      </Wrap>
     </Box>
   );
 }

@@ -1,25 +1,10 @@
 import React from 'react'
-import axios from "axios";
 import {
-  Box,
-  AbsoluteCenter,
-  Heading,
-  Grid,
-  GridItem,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  InputRightAddon,
-  IconButton,
-  RadioGroup,
-  Radio,
-  Stack,
-  Button,
-  FormControl,
-  FormLabel,
-  Tooltip, 
-  useToast,
-  Link,
+  Box, AbsoluteCenter, Heading, Grid,
+  GridItem, Input, InputGroup, InputLeftAddon,
+  InputRightAddon, IconButton, RadioGroup, Radio,
+  Stack, Button, FormControl, FormLabel,
+  Tooltip, useToast, Link,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon, AtSignIcon, CalendarIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { useNavigate } from "react-router-dom";
@@ -34,10 +19,9 @@ export default function Form() {
     nombre: "",
     apellido: "",
     email: "",
-    password: "",
-    confirmPassword: "",
-    genero: "Hombre",
     fechaNacimiento: "",
+    password: "",
+    genero: "Hombre",
   });
 
   const [errors, setErrors] = React.useState({});
@@ -314,9 +298,9 @@ export default function Form() {
               value={formData.genero}
             >
               <Stack direction="row" mt={3}>
-                <Radio size='lg' bg='white' value="Hombre">Hombre</Radio>
-                <Radio size='lg' bg='white' value="Mujer">Mujer</Radio>
-                <Radio size='lg' bg='white' value="Otro">Otro</Radio>
+                <Radio size='lg' bg='white' value="hombre">Hombre</Radio>
+                <Radio size='lg' bg='white' value="mujer">Mujer</Radio>
+                <Radio size='lg' bg='white' value="otro">Otro</Radio>
               </Stack>
             </RadioGroup>
           </FormControl>
