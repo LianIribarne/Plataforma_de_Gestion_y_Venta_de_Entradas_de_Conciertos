@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from "axios";
 import {
   Box,
   AbsoluteCenter,
@@ -18,9 +17,10 @@ import {
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon, AtSignIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import { useAuth } from "../services/AuthContext";
 
 export default function Form() {
+  const { loginUser } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -63,20 +63,9 @@ export default function Form() {
     if (Object.keys(validationErrors).length > 0) return;
     
     try {
-      const payload = {
-        email: formData.email,
-        password: formData.password
-      };
+      const data = await loginUser(formData.email, formData.password);
 
-      const res = await api.post(
-        "/usuarios/login/", 
-        payload, 
-        {
-          withCredentials: true,
-        }
-      );
-
-      const mensaje = res?.data?.message ?? "Bienvenido";
+      const mensaje = data?.message ?? "Bienvenido";
 
       toast({
         title: mensaje,

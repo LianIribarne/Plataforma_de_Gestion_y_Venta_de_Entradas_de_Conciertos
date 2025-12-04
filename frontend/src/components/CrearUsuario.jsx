@@ -20,7 +20,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
     email: "",
     fechaNacimiento: "",
     password: "",
-    genero: "Hombre",
+    genero: "hombre",
     rol: '1',
   });
 
@@ -90,7 +90,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
         rol: Number(formData.rol),
       };
 
-      // const res = await api.post("/usuarios/registro/", payload);
+      const res = await api.post("/usuarios/registro/", payload);
 
       const mensaje = res?.data?.message ?? "Se creo con éxito";
 
@@ -293,9 +293,9 @@ export default function CrearUsuario({ isOpen, onClose }) {
                 value={formData.genero}
               >
                 <Stack direction="row" color='white'>
-                  <Radio size='lg' value="Hombre">Hombre</Radio>
-                  <Radio size='lg' value="Mujer">Mujer</Radio>
-                  <Radio size='lg' value="Otro">Otro</Radio>
+                  <Radio size='lg' value="hombre">Hombre</Radio>
+                  <Radio size='lg' value="mujer">Mujer</Radio>
+                  <Radio size='lg' value="otro">Otro</Radio>
                 </Stack>
               </RadioGroup>
             </FormControl>

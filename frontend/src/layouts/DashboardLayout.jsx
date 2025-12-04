@@ -19,6 +19,7 @@ import CrearConcierto from '../components/CrearConcierto';
 import CrearArtista from '../components/CrearArtista';
 import CrearUsuario from '../components/CrearUsuario';
 import CrearLugar from '../components/CrearLugar';
+import { useAuth } from "../services/AuthContext";
 
 function Seccion({ url, label }) {
   return (
@@ -42,6 +43,7 @@ function Seccion({ url, label }) {
 }
 
 export default function DashboardLayout() {
+  const { user } = useAuth();
   const location = useLocation();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -72,23 +74,29 @@ export default function DashboardLayout() {
 
   const btnRef = React.useRef()
   
-  const tabIndex = (() => {
-    if (location.pathname.startsWith("/usuarios")) return 1;
-    if (location.pathname.startsWith("/pagos")) return 2;
-    if (location.pathname.startsWith("/entradas")) return 3;
-    return 0; // Eventos por defecto
-  })();
+  // const tabIndex = (() => {
+  //   if (location.pathname.startsWith("/usuarios")) return 1;
+  //   if (location.pathname.startsWith("/pagos")) return 2;
+  //   if (location.pathname.startsWith("/entradas")) return 3;
+  //   return 0; // Eventos por defecto
+  // })();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 
   const secciones = [
-    { url: '/conciertos', label: 'Conciertos' },
-    { url: '/usuarios', label: 'Usuarios' },
-    { url: '/pagos', label: 'Pagos' },
-    { url: '/entradas', label: 'Entradas' },
+    { url: '/conciertos', label: 'Conciertos', rol: ['admin', 'organizador', 'cliente'] },
+    { url: '/usuarios', label: 'Usuarios', rol: ['admin'] },
+    { url: '/pagos', label: 'Pagos', rol: ['cliente'] },
+    { url: '/entradas', label: 'Entradas', rol: ['cliente'] },
   ]
+
+  const seccionesVisibles = secciones.filter(s => s.rol.includes(user.rol));
+
+  const tabIndex = seccionesVisibles.findIndex(s => location.pathname.startsWith(s.url));
+
+  const tabIndexSafe = tabIndex === -1 ? 0 : tabIndex;
 
   return (
     <Box 
@@ -98,7 +106,7 @@ export default function DashboardLayout() {
       bgGradient='radial(circle at center, cyan.600, teal.800)'
     >
       <Tabs 
-        index={tabIndex} 
+        index={tabIndexSafe} 
         variant="soft-rounded" 
         mb={4}
         position="fixed"
@@ -115,7 +123,7 @@ export default function DashboardLayout() {
           pointerEvents="auto"
         >
           <Flex>
-            {secciones.map((s) => (
+            {secciones.map((s) => s.rol.includes(user.rol) && (
               <Seccion 
                 key={s.label}
                 url={s.url}
@@ -125,79 +133,85 @@ export default function DashboardLayout() {
           </Flex>
 
           <Box>
-            <Button
-              rounded='full'
-              bg='blackAlpha.900' 
-              color='white'
-              transition="all 0.3s ease"
-              _hover={{ 
-                background: "whiteAlpha.800", 
-                color: "black", 
-                transform: 'scale(1.1)' 
-              }}
-              pointerEvents="auto"
-              mr={4}
-              mt={1}
-              onClick={onConciertoOpen}
-            >
-              Crear Concierto<AddIcon boxSize={3} ml={1} />
-            </Button>
+            {user.rol === 'organizador' &&
+              <Button
+                rounded='full'
+                bg='blackAlpha.900' 
+                color='white'
+                transition="all 0.3s ease"
+                _hover={{ 
+                  background: "whiteAlpha.800", 
+                  color: "black", 
+                  transform: 'scale(1.1)' 
+                }}
+                pointerEvents="auto"
+                mr={4}
+                mt={1}
+                onClick={onConciertoOpen}
+              >
+                Crear Concierto<AddIcon boxSize={3} ml={1} />
+              </Button>
+            }
 
-            <Button
-              bg='blackAlpha.900' 
-              color='white'
-              transition="all 0.3s ease"
-              _hover={{ 
-                background: "whiteAlpha.800", 
-                color: "black", 
-                transform: 'scale(1.1)' 
-              }}
-              pointerEvents="auto"
-              mr={4}
-              mt={1}
-              rounded='full'
-              onClick={onArtistaOpen}
-            >
-              Añadir Artista<AiOutlineUserAdd size={20} />
-            </Button>
+            {user.rol === 'admin' && 
+              <>
+                <Button
+                  bg='blackAlpha.900' 
+                  color='white'
+                  transition="all 0.3s ease"
+                  _hover={{ 
+                    background: "whiteAlpha.800", 
+                    color: "black", 
+                    transform: 'scale(1.1)' 
+                  }}
+                  pointerEvents="auto"
+                  mr={4}
+                  mt={1}
+                  rounded='full'
+                  onClick={onArtistaOpen}
+                >
+                  Añadir Artista<AiOutlineUserAdd size={20} />
+                </Button>
 
-            <Button 
-              bg='blackAlpha.900' 
-              color='white'
-              transition="all 0.3s ease"
-              _hover={{ 
-                background: "whiteAlpha.800", 
-                color: "black", 
-                transform: 'scale(1.1)' 
-              }}
-              pointerEvents="auto"
-              mr={4}
-              mt={1}
-              rounded='full'
-              onClick={onUsuarioOpen}
-            >
-              Añadir Usuario<AiOutlineUserAdd size={20} />
-            </Button>
+                <Button 
+                  bg='blackAlpha.900' 
+                  color='white'
+                  transition="all 0.3s ease"
+                  _hover={{ 
+                    background: "whiteAlpha.800", 
+                    color: "black", 
+                    transform: 'scale(1.1)' 
+                  }}
+                  pointerEvents="auto"
+                  mr={4}
+                  mt={1}
+                  rounded='full'
+                  onClick={onUsuarioOpen}
+                >
+                  Añadir Usuario<AiOutlineUserAdd size={20} />
+                </Button>
 
-            <Button 
-              bg='blackAlpha.900' 
-              color='white'
-              transition="all 0.3s ease"
-              _hover={{ 
-                background: "whiteAlpha.800", 
-                color: "black", 
-                transform: 'scale(1.1)' 
-              }}
-              pointerEvents="auto"
-              mr={4}
-              mt={1}
-              rounded='full'
-              onClick={onLugarOpen}
-            >
-              Añadir Lugar<AddIcon boxSize={3} ml={1} />
-            </Button>
+                <Button 
+                  bg='blackAlpha.900' 
+                  color='white'
+                  transition="all 0.3s ease"
+                  _hover={{ 
+                    background: "whiteAlpha.800", 
+                    color: "black", 
+                    transform: 'scale(1.1)' 
+                  }}
+                  pointerEvents="auto"
+                  mr={4}
+                  mt={1}
+                  rounded='full'
+                  onClick={onLugarOpen}
+                >
+                  Añadir Lugar<AddIcon boxSize={3} ml={1} />
+                </Button>
+              </>
+            }
             
-            {location.pathname !== "/pagos/proceso_pago" && (
+            {user.rol === 'cliente' && location.pathname !== "/pagos/proceso_pago" && (
               <Tooltip 
                 label={
                   <Box display="flex" alignItems="center" gap={2}>
