@@ -141,7 +141,6 @@ class Usuario(AbstractUser):
                 raise ValidationError('Debes ser mayor de 18 años.')
     
     def save(self, *args, **kwargs):
-        # self.edad = self.calcular_edad()
         self.full_clean() # Realiza las validaciones necesarias
         
         super().save(*args, **kwargs)
@@ -149,15 +148,15 @@ class Usuario(AbstractUser):
     # Verificaciones de si el usuario es de tal rol
     @property
     def es_administrador(self):
-        return self.rol.nombre == 'Administrador'
+        return self.rol.nombre == 'admin'
     
     @property
     def es_organizador(self):
-        return self.rol.nombre == 'Organizador'
+        return self.rol.nombre == 'organizador'
     
     @property
     def es_cliente(self):
-        return self.rol.nombre == 'Cliente'
+        return self.rol.nombre == 'cliente'
     
     def __str__(self):
         return f'{self.first_name} {self.last_name} ({self.email} - {self.rol.nombre})'

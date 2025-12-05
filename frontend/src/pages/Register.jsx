@@ -21,7 +21,7 @@ export default function Form() {
     email: "",
     fechaNacimiento: "",
     password: "",
-    genero: "Hombre",
+    genero: "hombre",
   });
 
   const [errors, setErrors] = React.useState({});
@@ -87,7 +87,6 @@ export default function Form() {
         last_name: formData.apellido,
         fecha_nacimiento: formData.fechaNacimiento,
         genero: formData.genero,
-        rol: 3
       };
 
       const res = await api.post("/usuarios/registro/", payload);
@@ -149,7 +148,7 @@ export default function Form() {
               {/* Nombre */}
               <GridItem>
                 <FormControl isInvalid={!!errors.nombre}>
-                  <FormLabel>Nombre</FormLabel>
+                  <FormLabel color='white'>Nombre</FormLabel>
                   <Tooltip
                     label={errors.nombre}
                     isOpen={!!errors.nombre}
@@ -161,6 +160,7 @@ export default function Form() {
                     <Input
                       placeholder="Ingrese su nombre"
                       value={formData.nombre}
+                      rounded='full'
                       onChange={(e) => {
                         handleChange("nombre")(e)
                         setErrors(prev => ({ ...prev, nombre: "" }))
@@ -174,11 +174,11 @@ export default function Form() {
               {/* Apellido */}
               <GridItem>
                 <FormControl isInvalid={!!errors.apellido}>
-                  <FormLabel>Apellido</FormLabel>
+                  <FormLabel color='white'>Apellido</FormLabel>
                   <Tooltip
                     label={errors.apellido}
                     isOpen={!!errors.apellido}
-                    placement="bottom-end"
+                    placement="bottom"
                     bg="red.500"
                     color="white"
                     hasArrow
@@ -186,6 +186,7 @@ export default function Form() {
                     <Input
                       placeholder="Ingrese su apellido"
                       value={formData.apellido}
+                      rounded='full'
                       onChange={(e) => {
                         handleChange("apellido")(e)
                         setErrors(prev => ({ ...prev, apellido: "" }))
@@ -199,23 +200,24 @@ export default function Form() {
 
             {/* Email */}
             <FormControl isInvalid={!!errors.email} mt={3} mb={3}>
-              <FormLabel>Email</FormLabel>
+              <FormLabel color='white'>Email</FormLabel>
               <Tooltip
                 label={errors.email}
                 isOpen={!!errors.email}
-                placement="bottom-end"
+                placement="bottom"
                 bg="red.500"
                 color="white"
                 hasArrow
               >
                 <InputGroup variant='custom'>
-                  <InputLeftAddon pointerEvents="none" bg='teal.400'>
+                  <InputLeftAddon pointerEvents="none" bg='blackAlpha.400' borderLeftRadius='full'>
                     <AtSignIcon color="white" />
                   </InputLeftAddon>
                   <Input
                     type="email"
                     placeholder="Ingrese un email"
                     value={formData.email}
+                    rounded='full'
                     onChange={(e) => {
                       handleChange("email")(e)
                       setErrors(prev => ({ ...prev, email: "" }))
@@ -227,22 +229,23 @@ export default function Form() {
 
             {/* Fecha de nacimiento */}
             <FormControl isInvalid={!!errors.fechaNacimiento}>
-              <FormLabel>Fecha de nacimiento</FormLabel>
+              <FormLabel color='white'>Fecha de nacimiento</FormLabel>
               <Tooltip
                 label={errors.fechaNacimiento}
                 isOpen={!!errors.fechaNacimiento}
-                placement="bottom-end"
+                placement="bottom"
                 bg="red.500"
                 color="white"
                 hasArrow
               >
                 <InputGroup variant='custom'>
-                  <InputLeftAddon pointerEvents="none" bg='teal.400'>
+                  <InputLeftAddon pointerEvents="none" bg='blackAlpha.400' borderLeftRadius='full'>
                     <CalendarIcon color="white" />
                   </InputLeftAddon>
                   <Input
                     type="date"
                     value={formData.fechaNacimiento}
+                    rounded='full'
                     onChange={(e) => {
                       handleChange("fechaNacimiento")(e)
                       setErrors(prev => ({ ...prev, fechaNacimiento: "" }))
@@ -255,11 +258,11 @@ export default function Form() {
             
           {/* Contraseña */}
           <FormControl isInvalid={!!errors.password} my={3}>
-            <FormLabel>Contraseña</FormLabel>
+            <FormLabel color='white'>Contraseña</FormLabel>
             <Tooltip
               label={errors.password}
               isOpen={!!errors.password}
-              placement="bottom-end"
+              placement="bottom"
               bg="red.500"
               color="white"
               hasArrow
@@ -269,13 +272,14 @@ export default function Form() {
                   type={show ? "text" : "password"}
                   placeholder="Ingrese su contraseña"
                   value={formData.password}
+                  rounded='full'
                   onChange={(e) => {
                     handleChange("password")(e)
                     setErrors(prev => ({ ...prev, password: "" }))
                   }}
                 />
                 {/* Icono con funcionalidad */}
-                <InputRightAddon p="0" bg='teal.400'>
+                <InputRightAddon p="0" bg='blackAlpha.400' borderRightRadius='full'>
                   <IconButton
                     variant="link"
                     onClick={() => setShow(!show)}
@@ -288,25 +292,25 @@ export default function Form() {
           </FormControl>
 
           {/* Género */}
-          <FormControl>
+          <FormControl color='white'>
             <FormLabel>Género</FormLabel>
             <RadioGroup
-              colorScheme='teal'
+              colorScheme='whiteAlpha'
               onChange={(value) =>
                 setFormData({ ...formData, genero: value })
               }
               value={formData.genero}
             >
               <Stack direction="row" mt={3}>
-                <Radio size='lg' bg='white' value="hombre">Hombre</Radio>
-                <Radio size='lg' bg='white' value="mujer">Mujer</Radio>
-                <Radio size='lg' bg='white' value="otro">Otro</Radio>
+                <Radio size='lg' value="hombre">Hombre</Radio>
+                <Radio size='lg' value="mujer">Mujer</Radio>
+                <Radio size='lg' value="otro">Otro</Radio>
               </Stack>
             </RadioGroup>
           </FormControl>
 
           {/* Submit */}
-          <Button type="submit" colorScheme='whiteAlpha' size='lg' rounded='full' my={4}>
+          <Button type="submit" colorScheme='blackAlpha' size='lg' rounded='full' my={4}>
               Registrarse
           </Button>
 

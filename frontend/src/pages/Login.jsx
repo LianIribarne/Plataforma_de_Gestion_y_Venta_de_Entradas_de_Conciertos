@@ -116,7 +116,7 @@ export default function Form() {
 
           {/* Email */}
           <FormControl isInvalid={!!errors.email} mt={3} mb={3}>
-              <FormLabel>Email</FormLabel>
+              <FormLabel color='white'>Email</FormLabel>
               <Tooltip
                 label={errors.email}
                 isOpen={!!errors.email}
@@ -126,13 +126,14 @@ export default function Form() {
                 hasArrow
               >
                 <InputGroup variant='custom'>
-                  <InputLeftAddon pointerEvents="none" bg='teal.400'>
+                  <InputLeftAddon pointerEvents="none" bg='blackAlpha.400' borderLeftRadius='full'>
                     <AtSignIcon color="white" />
                   </InputLeftAddon>
                   <Input
                     type="email"
                     placeholder="Ingrese un email"
                     value={formData.email}
+                    rounded='full'
                     onChange={(e) => {
                       handleChange("email")(e)
                       setErrors(prev => ({ ...prev, email: "" }))
@@ -144,7 +145,7 @@ export default function Form() {
 
           {/* Contraseña */}
           <FormControl isInvalid={!!errors.password} my={3}>
-            <FormLabel>Contraseña</FormLabel>
+            <FormLabel color='white'>Contraseña</FormLabel>
             <Tooltip
               label={errors.password}
               isOpen={!!errors.password}
@@ -158,13 +159,14 @@ export default function Form() {
                   type={show ? "text" : "password"}
                   placeholder="Ingrese su contraseña"
                   value={formData.password}
+                  rounded='full'
                   onChange={(e) => {
                     handleChange("password")(e)
                     setErrors(prev => ({ ...prev, password: "" }))
                   }}
                 />
                 {/* Icono con funcionalidad */}
-                <InputRightAddon p="0" bg='teal.400'>
+                <InputRightAddon p="0" bg='blackAlpha.400' borderRightRadius='full'>
                   <IconButton
                     variant="link"
                     onClick={() => setShow(!show)}
@@ -177,7 +179,7 @@ export default function Form() {
           </FormControl>
 
           {/* Submit */}
-          <Button type="submit" colorScheme='whiteAlpha' size='lg' rounded='full' my={4}>
+          <Button type="submit" colorScheme='blackAlpha' size='lg' rounded='full' my={4}>
               Iniciar Sesion
           </Button>
         </form>

@@ -32,27 +32,27 @@ export default function AppRoutes() {
         <Route path="conciertos" element={<Conciertos />} />
         <Route path="conciertos/:slug" element={<InfoConcierto />} />
 
-        <Route element={<ProtectedRoute allowedRoles={['cliente']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
           <Route path="analitica" element={<AnaliticaConcierto />} />
         </Route>
 
         {/* USUARIOS */}
-        <Route element={<ProtectedRoute allowedRoles={['cliente', 'organizador']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['Cliente', 'Organizador']} />}>
           <Route path="usuarios" element={<Usuarios />} />
         </Route>
 
-        <Route element={<ProtectedRoute allowedRoles={['cliente']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
           <Route path="detalle_organizador" element={<DetallesOrganizador />} />
         </Route>
 
         {/* PAGOS */}
-        <Route element={<ProtectedRoute allowedRoles={['admin', 'organizador']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['Administrador', 'Organizador']} />}>
           <Route path="pagos" element={<Pagos />} />
           <Route path="pagos/proceso_pago" element={<ProcesoPago />} />
         </Route>
 
         {/* ENTRADAS */}
-        <Route element={<ProtectedRoute allowedRoles={['admin', 'organizador']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['Administrador', 'Organizador']} />}>
           <Route path="entradas" element={<Entradas />} />
         </Route>
       </Route>

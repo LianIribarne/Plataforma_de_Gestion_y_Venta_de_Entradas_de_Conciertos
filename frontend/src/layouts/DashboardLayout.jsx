@@ -86,10 +86,10 @@ export default function DashboardLayout() {
   }, [location.pathname]);
 
   const secciones = [
-    { url: '/conciertos', label: 'Conciertos', rol: ['admin', 'organizador', 'cliente'] },
-    { url: '/usuarios', label: 'Usuarios', rol: ['admin'] },
-    { url: '/pagos', label: 'Pagos', rol: ['cliente'] },
-    { url: '/entradas', label: 'Entradas', rol: ['cliente'] },
+    { url: '/conciertos', label: 'Conciertos', rol: ['Administrador', 'Organizador', 'Cliente'] },
+    { url: '/usuarios', label: 'Usuarios', rol: ['Administrador'] },
+    { url: '/pagos', label: 'Pagos', rol: ['Cliente'] },
+    { url: '/entradas', label: 'Entradas', rol: ['Cliente'] },
   ]
 
   const seccionesVisibles = secciones.filter(s => s.rol.includes(user.rol));
@@ -133,7 +133,7 @@ export default function DashboardLayout() {
           </Flex>
 
           <Box>
-            {user.rol === 'organizador' &&
+            {user.rol === 'Organizador' &&
               <Button
                 rounded='full'
                 bg='blackAlpha.900' 
@@ -147,13 +147,14 @@ export default function DashboardLayout() {
                 pointerEvents="auto"
                 mr={4}
                 mt={1}
-                onClick={onConciertoOpen}
+                onClick={user.rol === 'Organizador'? onConciertoOpen : undefined}
+                isDisabled={user.rol !== 'Organizador'}
               >
                 Crear Concierto<AddIcon boxSize={3} ml={1} />
               </Button>
             }
 
-            {user.rol === 'admin' && 
+            {user.rol === 'Administrador' && 
               <>
                 <Button
                   bg='blackAlpha.900' 
@@ -168,7 +169,8 @@ export default function DashboardLayout() {
                   mr={4}
                   mt={1}
                   rounded='full'
-                  onClick={onArtistaOpen}
+                  onClick={user.rol === 'Administrador'? onArtistaOpen : undefined}
+                  isDisabled={user.rol !== 'Administrador'}
                 >
                   Añadir Artista<AiOutlineUserAdd size={20} />
                 </Button>
@@ -186,7 +188,8 @@ export default function DashboardLayout() {
                   mr={4}
                   mt={1}
                   rounded='full'
-                  onClick={onUsuarioOpen}
+                  onClick={user.rol === 'Administrador'? onUsuarioOpen : undefined}
+                  isDisabled={user.rol !== 'Administrador'}
                 >
                   Añadir Usuario<AiOutlineUserAdd size={20} />
                 </Button>
@@ -204,14 +207,15 @@ export default function DashboardLayout() {
                   mr={4}
                   mt={1}
                   rounded='full'
-                  onClick={onLugarOpen}
+                  onClick={user.rol === 'Administrador'? onLugarOpen : undefined}
+                  isDisabled={user.rol !== 'Administrador'}
                 >
                   Añadir Lugar<AddIcon boxSize={3} ml={1} />
                 </Button>
               </>
             }
             
-            {user.rol === 'cliente' && location.pathname !== "/pagos/proceso_pago" && (
+            {user.rol === 'Cliente' && location.pathname !== "/pagos/proceso_pago" && (
               <Tooltip 
                 label={
                   <Box display="flex" alignItems="center" gap={2}>
@@ -242,6 +246,7 @@ export default function DashboardLayout() {
                   mr={4}
                   mt={1}
                   rounded='full'
+                  isDisabled={user.rol !== 'Cliente'}
                 >
                   Comprar Entradas
                 </Button>

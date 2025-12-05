@@ -106,8 +106,8 @@ export default function DetallesUsuarios() {
   const organizador = [
     { label: 'Email', value: 'lian@gmail.com' },
     { label: 'Fecha nacimiento', value: '18/12/2003' },
-    { label: 'Fecha en que se creó la cuenta', value: '11/11/2025' },
-    { label: 'Último inicio de sesión', value: '19/11/2025 17:23hs' },
+    { label: 'Cuando se creó la cuenta', value: '11/11/2025 23:01' },
+    { label: 'Último inicio de sesión', value: '19/11/2025 17:23' },
     { label: 'Suspendido?', value: 'No' },
     { label: 'Activo?', value: 'Si' },
   ]

@@ -1,26 +1,16 @@
 import { 
-  Box,
-  Heading,
-  Avatar,
-  AvatarBadge,
-  Text,
-  Wrap,
-  WrapItem,
-  IconButton,
-  Button,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverArrow,
-  PopoverCloseButton,
-  useDisclosure,
+  Box, Heading, Avatar, AvatarBadge,
+  Text, Wrap, WrapItem, HStack,
+  Button, Popover, PopoverTrigger, PopoverContent,
+  PopoverHeader, PopoverBody, PopoverArrow, PopoverCloseButton,
+  useDisclosure, SkeletonCircle, SkeletonText,
 } from '@chakra-ui/react';
+import { useState, useEffect } from 'react'
 import { InfoIcon, EditIcon, DeleteIcon } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
+import api from '../services/api'
 
-function Usuario({ email, nombre, apellido, activo }) {
+function Usuario({ id, email, nombre, apellido, activo }) {
   const { isOpen, onToggle, onClose } = useDisclosure();
 
   return (
@@ -44,7 +34,7 @@ function Usuario({ email, nombre, apellido, activo }) {
                 mb={1}
               />
             </Avatar>
-            <Box maxW={150}>
+            <Box>
               <Text color='whiteAlpha.800' as='b' fontSize='lg'>{email}</Text><br />
               <Text color='whiteAlpha.800' as='b' fontSize='sm'>{nombre} {apellido}</Text>
             </Box>
@@ -60,6 +50,7 @@ function Usuario({ email, nombre, apellido, activo }) {
           <Button 
               as={Link}
               to='/detalle_organizador'
+              state={ id }
               leftIcon={<InfoIcon />} 
               colorScheme='blackAlpha'
               size='sm'
@@ -70,6 +61,7 @@ function Usuario({ email, nombre, apellido, activo }) {
               Detalles
             </Button>
             <Button 
+              state={ id }
               leftIcon={<EditIcon />} 
               colorScheme='blackAlpha'
               size='sm'
@@ -79,6 +71,7 @@ function Usuario({ email, nombre, apellido, activo }) {
               Modificar
             </Button>
             <Button 
+              state={ id }
               leftIcon={<DeleteIcon />} 
               colorScheme='red'
               size='sm'
@@ -94,110 +87,81 @@ function Usuario({ email, nombre, apellido, activo }) {
   )
 }
 
-const users = [
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian Lian',
-    apellido: 'Iribarne Iribarne Iribarne',
-    activo: true,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: false,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: true,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: false,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: true,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: false,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: true,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: false,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: true,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: false,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: true,
-  },
-  {
-    email: 'lian@gmail.com',
-    nombre: 'Lian',
-    apellido: 'Iribarne',
-    activo: false,
-  },
-]
-
 export default function Usuarios() {
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      try {
+        const response = await api.get("/usuarios/admin/listar_usuarios");
+        setUsuarios(response.data.usuarios);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsuarios();
+  }, []);
+
   return (
     <Box p={5}>
       <Box align='center'>
         <Heading color='white' mb={4}>Organizadores</Heading>
-        <Wrap justify='center' align='center' spacing='10px'>
-          {users.map((e) => (
-            <Usuario
-              email={e.email}
-              nombre={e.nombre}
-              apellido={e.apellido}
-              activo={e.activo}
-            />
-          ))}
-        </Wrap>
+        {loading ? (
+          <HStack spacing={4} justify='center'>
+            {[...Array(3)].map((_, i) => (
+              <Box key={i} h={130} w={200} borderRadius={30} bg="whiteAlpha.300" p={4}>
+                <SkeletonCircle size={14} />
+                <SkeletonText noOfLines={2} mt={4} />
+              </Box>
+            ))}
+          </HStack>
+        ) : (
+          <Wrap justify='center' align='center' spacing='10px'>
+            {usuarios
+            .filter((u) => u.rol === "Organizador")
+            .map((e) => (
+              <Usuario
+                key={e.id}
+                id={e.id}
+                email={e.email}
+                nombre={e.first_name}
+                apellido={e.last_name}
+                activo={e.is_active}
+              />
+            ))}
+          </Wrap>
+        )}
       </Box>
 
       <Box align='center' mt={10}>
         <Heading color='white' mb={4}>Clientes</Heading>
-        <Wrap justify='center' align='center' spacing='10px'>
-          {users.map((e) => (
-            <Usuario
-              email={e.email}
-              nombre={e.nombre}
-              apellido={e.apellido}
-              activo={e.activo}
-            />
-          ))}
-        </Wrap>
+        {loading ? (
+          <HStack spacing={4} justify='center'>
+            {[...Array(3)].map((_, i) => (
+              <Box key={i} h={130} w={200} borderRadius={30} bg="whiteAlpha.300" p={4}>
+                <SkeletonCircle size={14} />
+                <SkeletonText noOfLines={2} mt={4} />
+              </Box>
+            ))}
+          </HStack>
+        ) : (
+          <Wrap justify='center' align='center' spacing='10px'>
+            {usuarios
+            .filter((u) => u.rol === "Cliente")
+            .map((e) => (
+              <Usuario
+                key={e.id}
+                id={e.id}
+                email={e.email}
+                nombre={e.first_name}
+                apellido={e.last_name}
+                activo={e.is_active}
+              />
+            ))}
+          </Wrap>
+        )}
       </Box>
     </Box>
   );

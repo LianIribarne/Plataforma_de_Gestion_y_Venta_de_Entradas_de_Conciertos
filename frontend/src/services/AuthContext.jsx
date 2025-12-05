@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { login, logout } from "./authService";
-import { checkSession } from "../services/sessionHeartbeat";
 import { registerForcedLogout } from "./authForcedLogout";
+import api from "./api";
 
 const AuthContext = createContext();
 
@@ -25,14 +25,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (!user) return;
+    const init = async () => {
+      const saved = localStorage.getItem("user");
+      if (!saved) return;
 
-    const interval = setInterval(() => {
-      checkSession();
-    }, 5 * 1000);
+      try {
+        await api.post("/usuarios/refresh/"); 
+        const res = await api.get("/usuarios/me/");
+        setUser(res.data.user);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+      } catch (err) {
+        localStorage.removeItem("user");
+        setUser(null);
+      }
+    };
 
-    return () => clearInterval(interval);
-  }, [user]);
+    init();
+  }, []);
 
   const logoutUser = async () => {
     await logout();

@@ -1,12 +1,22 @@
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics, status
-from .serializers import RegistroSerializer
+from django.contrib.auth.models import update_last_login
 from django.contrib.auth import authenticate
 from django.conf import settings
+from .permissions import EsAdministrador
+from .models import Usuario
+from .serializers import (
+    RegistroClienteSerializer,
+    RegistroUsuarioSerializer,
+    ActualizarUsuarioSerializer,
+    ChangePasswordSerializer,
+    AdminUsuarioSerializer,
+    AdminUsuarioListSerializer,
+)
 
 access_lifetime = settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_lifetime = settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
@@ -29,6 +39,8 @@ class LoginCookieView(APIView):
         if not user:
             return Response({"error": "Contraseña incorrecta"}, status=status.HTTP_401_UNAUTHORIZED)
 
+        update_last_login(None, user)
+
         # Generar Tokens
         refresh = RefreshToken.for_user(user)
         access = str(refresh.access_token)
@@ -39,11 +51,11 @@ class LoginCookieView(APIView):
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "rol": user.rol.nombre,
+                "rol": user.rol.get_nombre_display(),
                 "nombre": user.first_name,
                 "apellido": user.last_name,
-                "fecha_nacimiento": user.fecha_nacimiento,
-                "genero": user.genero,
+                "fecha_nacimiento": user.fecha_nacimiento.strftime("%d/%m/%Y"),
+                "genero": user.get_genero_display(),
             }
         }, status=status.HTTP_200_OK)
 
@@ -111,15 +123,121 @@ class LogoutView(APIView):
         res.delete_cookie("refresh", path='/')
         return res
 
-class RegistroUsuarioView(generics.CreateAPIView):
+class RegistroClienteView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        serializer = RegistroSerializer(data=request.data)
+        serializer = RegistroClienteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"message": "Registro exitoso"}, status=status.HTTP_201_CREATED)
 
-class ProtectedView(APIView):
+class RegistroUsuarioView(generics.CreateAPIView):
+    permission_classes = [EsAdministrador]
+    
+    def post(self, request):
+        serializer = RegistroUsuarioSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "Registro exitoso"}, status=status.HTTP_201_CREATED)
+
+class UserMeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({"message": f"Hola {request.user.email}"})
+        user = request.user
+
+        return Response({
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "rol": user.rol.get_nombre_display(),
+                "nombre": user.first_name,
+                "apellido": user.last_name,
+                "fecha_nacimiento": user.fecha_nacimiento.strftime("%d/%m/%Y"),
+                "genero": user.get_genero_display(),
+            }
+        }, status=status.HTTP_200_OK)
+
+class ActualizarUsuarioView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        serializer = ActualizarUsuarioSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+            context={"request": request}
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Perfil actualizado correctamente."})
+
+        return Response(serializer.errors, status=400)
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = ChangePasswordSerializer(
+            data=request.data,
+            context={'request': request},
+        )
+
+        if serializer.is_valid():
+            user = request.user
+            new_password = serializer.validated_data["new_password"]
+            user.set_password(new_password)
+            user.save()
+
+            return Response({"message": "Contraseña cambiada correctamente."})
+
+        return Response(serializer.errors, status=400)
+
+class AdminUsuarioUpdateView(generics.RetrieveUpdateAPIView):
+    permission_classes = [EsAdministrador]
+    serializer_class = AdminUsuarioSerializer
+    queryset = Usuario.objects.all()
+    lookup_field = 'id'
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data.copy()
+
+        serializer = self.get_serializer(
+            instance,
+            data=data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        password = serializer.validated_data.pop("password", None)
+        if password:
+            instance.set_password(password)
+
+        serializer.save()
+        return Response({"message": "Usuario actualizado correctamente."}, status=status.HTTP_200_OK)
+
+class AdminUsuarioDeleteView(generics.DestroyAPIView):
+    queryset = Usuario.objects.all()
+    permission_classes = [EsAdministrador]
+    lookup_field = "id"
+
+    def delete(self, request, *args, **kwargs):
+        usuario = self.get_object()
+
+        if usuario.es_administrador:
+            return Response({"error": "No puedes eliminar a otro administrador."}, status=403)
+
+        usuario.delete()
+        return Response({"message": "Usuario eliminado correctamente."})
+
+class AdminUsuarioListView(generics.ListAPIView):
+    permission_classes = [EsAdministrador]
+    queryset = Usuario.objects.exclude(rol__nombre='admin')
+
+    def list(self, request, *args, **kwargs):
+        usuarios = self.get_queryset()
+        serializer = AdminUsuarioListSerializer(usuarios, many=True)
+        return Response({"total": len(serializer.data), "usuarios": serializer.data})
