@@ -2,6 +2,13 @@ import api from "./api";
 import { refreshToken } from "./authService";
 import { forceLogout } from "./authForcedLogout";
 
+api.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
+  return config;
+});
+
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -10,14 +17,19 @@ const processQueue = (error) => {
   failedQueue = [];
 };
 
+const AUTH_ENDPOINTS = [
+  "/usuarios/login/",
+  "/usuarios/refresh/",
+  "/usuarios/register/",
+  "/usuarios/logout/",
+];
+
 api.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
 
-    if (originalRequest.url.includes("/usuarios/refresh") && error.response?.status === 401) {
-      forceLogout();
-      window.location.href = "/login";
+    if (AUTH_ENDPOINTS.some(url => originalRequest.url.includes(url))) {
       return Promise.reject(error);
     }
 
@@ -39,7 +51,9 @@ api.interceptors.response.use(
       } catch (err) {
         isRefreshing = false;
         processQueue(err);
-        throw err;
+        forceLogout();
+        window.location.href = "/login";
+        return Promise.reject(err);
       }
     }
 

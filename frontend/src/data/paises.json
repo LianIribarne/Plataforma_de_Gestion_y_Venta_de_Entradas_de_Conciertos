@@ -1,0 +1,14 @@
+[
+  { "id": 1, "tipo": "estado", "codigo": "borrador",   "nombre": "Borrador",   "orden": 1, "activo": true },
+  { "id": 2, "tipo": "estado", "codigo": "programado", "nombre": "Programado", "orden": 2, "activo": true },
+  { "id": 3, "tipo": "estado", "codigo": "agotado",    "nombre": "Agotado",    "orden": 3, "activo": true },
+  { "id": 4, "tipo": "estado", "codigo": "finalizado", "nombre": "Finalizado", "orden": 4, "activo": true },
+  { "id": 5, "tipo": "estado", "codigo": "cancelado",  "nombre": "Cancelado",  "orden": 5, "activo": true },
+
+  { "id": 6, "tipo": "mood", "codigo": "bailable",   "nombre": "Para bailar", "orden": 1, "activo": true },
+  { "id": 7, "tipo": "mood", "codigo": "fiestero",   "nombre": "Fiestero",    "orden": 2, "activo": true },
+  { "id": 8, "tipo": "mood", "codigo": "chill",      "nombre": "Chill",       "orden": 3, "activo": true },
+  { "id": 9, "tipo": "mood", "codigo": "romantico",  "nombre": "Romántico",   "orden": 4, "activo": true },
+  { "id": 10, "tipo": "mood","codigo": "intimo",     "nombre": "Íntimo",      "orden": 5, "activo": true },
+  { "id": 11, "tipo": "mood","codigo": "energetico", "nombre": "Enérgico",    "orden": 6, "activo": true }
+]

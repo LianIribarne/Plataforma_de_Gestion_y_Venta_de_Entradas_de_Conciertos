@@ -1,37 +1,36 @@
 import { useState, useEffect } from 'react';
 import {
-  Box,
-  Button,
-  Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Input,
+  Box, Button, Drawer, DrawerOverlay,
+  DrawerContent, DrawerBody, Menu, MenuButton,
+  MenuList, MenuItem, Input,
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons'
+import api from '../services/api'
+import { useAuth } from "../services/AuthContext";
 
 export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSeleccionado, onClear }) {
-  const [categoria, setCategoria] = useState('');
-  const [provincia, setProvincia] = useState('');
+  const [categoria, setCategoria] = useState(null);
+  const [provincia, setProvincia] = useState(null);
   const [entradas, setEntradas] = useState('');
-  const [estado, setEstado] = useState('');
-  const [mood, setMood] = useState('');
-  const [horario, setHorario] = useState('');
-  const [artista, setArtista] = useState('');
+  const [estado, setEstado] = useState(null);
+  const [mood, setMood] = useState(null);
+  const [rango_horario, setHorario] = useState('');
+  const [artista, setArtista] = useState(null);
+  const [artistaNombre, setArtistaNombre] = useState('');
 
   const limpiar = () => {
-    setCategoria('');
-    setProvincia('');
+    setCategoria(null);
+    setCategoriaSel('')
+    setProvincia(null);
+    setProvinciaSel('')
     setEntradas('');
-    setEstado('');
-    setMood('');
+    setEstado(null);
+    setEstadoSel('')
+    setMood(null);
+    setMoodSel('')
     setHorario('');
-    setArtista('');
+    setArtista(null);
+    setArtistaNombre('');
   };
 
   const handleApply = () => {
@@ -41,7 +40,7 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
       entradas,
       estado,
       mood,
-      horario,
+      rango_horario,
       artista,
     });
     onClose(); 
@@ -49,14 +48,64 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
 
   useEffect(() => {
     if (artistaSeleccionado) {
-      setArtista(artistaSeleccionado);
+      setArtista(artistaSeleccionado.id);
+      setArtistaNombre(artistaSeleccionado.nombre);
+    } else {
+      setArtista(null);
+      setArtistaNombre('');
     }
   }, [artistaSeleccionado]);
+
+  const [moods, setMoods] = useState([])
+  const [moodSel, setMoodSel] = useState('')
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    api.get("/conciertos/concierto-meta/?tipo=mood")
+      .then(res => setMoods(res.data.results))
+      .catch(console.error)
+  }, [isOpen])
+
+  const [estados, setEstados] = useState([])
+  const [estadoSel, setEstadoSel] = useState('')
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    api.get("/conciertos/concierto-meta/?tipo=estado")
+      .then(res => setEstados(res.data.results))
+      .catch(console.error)
+  }, [isOpen])
+
+  const [provincias, setProvincias] = useState([])
+  const [provinciaSel, setProvinciaSel] = useState(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    api.get("/conciertos/provincias/")
+      .then(res => setProvincias(res.data))
+      .catch(console.error)
+  }, [isOpen])
+
+  const [categorias, setCategorias] = useState([])
+  const [categoriaSel, setCategoriaSel] = useState("")
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    api.get("/conciertos/categorias/")
+      .then(res => setCategorias(res.data))
+      .catch(err => console.error(err));
+  }, [isOpen]);
+
+  const { user } = useAuth();
 
   return (
     <Drawer placement="right" isOpen={isOpen} onClose={onClose} size="xs">
       <DrawerOverlay />
-      <DrawerContent bg="whiteAlpha.700">
+      <DrawerContent bg="whiteAlpha.900">
         <DrawerBody alignSelf='center' align='center' mt={20}>
           
           {/* ENTRADAS */}
@@ -87,15 +136,20 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
               w="100%"
               bg="whiteAlpha.800"
             >
-              {categoria || "Categoría"}
+              {categoriaSel || "Categoría"}
             </MenuButton>
-            <MenuList>
-              <MenuItem onClick={() => setCategoria("Rock")}>Rock</MenuItem>
-              <MenuItem onClick={() => setCategoria("Metal")}>Metal</MenuItem>
-              <MenuItem onClick={() => setCategoria("Pop")}>Pop</MenuItem>
-              <MenuItem onClick={() => setCategoria("Electronica")}>Electrónica</MenuItem>
-              <MenuItem onClick={() => setCategoria("Indie")}>Indie</MenuItem>
-              <MenuItem onClick={() => setCategoria("Hip-Hop")}>Hip-Hop</MenuItem>
+            <MenuList maxH="200px" overflowY="auto">
+              {categorias.map(c => (
+                <MenuItem
+                  key={c.id}
+                  onClick={() => {
+                    setCategoriaSel(c.nombre)
+                    setCategoria(c.id)
+                  }}
+                >
+                  {c.nombre}
+                </MenuItem>
+              ))}
             </MenuList>
           </Menu>
 
@@ -109,14 +163,20 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
               w="100%"
               bg="whiteAlpha.800"
             >
-              {provincia || "Provincia"}
+              {provinciaSel || "Provincia"}
             </MenuButton>
-            <MenuList>
-              <MenuItem onClick={() => setProvincia("Buenos Aires")}>Buenos Aires</MenuItem>
-              <MenuItem onClick={() => setProvincia("Córdoba")}>Córdoba</MenuItem>
-              <MenuItem onClick={() => setProvincia("Santa Fe")}>Santa Fe</MenuItem>
-              <MenuItem onClick={() => setProvincia("Mendoza")}>Mendoza</MenuItem>
-              <MenuItem onClick={() => setProvincia("Tucumán")}>Tucumán</MenuItem>
+            <MenuList maxH="200px" overflowY="auto">
+              {provincias.map(p => (
+                <MenuItem
+                  key={p.id}
+                  onClick={() => {
+                    setProvinciaSel(p.nombre)
+                    setProvincia(p.id)
+                  }}
+                >
+                  {p.nombre}
+                </MenuItem>
+              ))}
             </MenuList>
           </Menu>
 
@@ -130,12 +190,21 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
               w="100%"
               bg="whiteAlpha.800"
             >
-              {estado || "Estado"}
+              {estadoSel || "Estado"}
             </MenuButton>
-            <MenuList>
-              <MenuItem onClick={() => setEstado("Programado")}>Programado</MenuItem>
-              <MenuItem onClick={() => setEstado("Cancelado")}>Cancelado</MenuItem>
-              <MenuItem onClick={() => setEstado("Finalizado")}>Finalizado</MenuItem>
+            <MenuList maxH="200px" overflowY="auto">
+              {estados.map(e => (
+                <MenuItem
+                  key={e.id}
+                  display={user?.rol === 'Cliente' && e.nombre === 'Borrador' ? 'none' : undefined}
+                  onClick={() => {
+                    setEstadoSel(e.nombre)
+                    setEstado(e.id)
+                  }}
+                >
+                  {e.nombre}
+                </MenuItem>
+              ))}
             </MenuList>
           </Menu>
 
@@ -149,15 +218,20 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
               w="100%"
               bg="whiteAlpha.800"
             >
-              {mood || "Mood"}
+              {moodSel || "Mood"}
             </MenuButton>
-            <MenuList>
-              <MenuItem onClick={() => setMood("Para bailar")}>Para bailar</MenuItem>
-              <MenuItem onClick={() => setMood("Fiestero")}>Fiestero</MenuItem>
-              <MenuItem onClick={() => setMood("Chill")}>Chill</MenuItem>
-              <MenuItem onClick={() => setMood("Romántico")}>Romántico</MenuItem>
-              <MenuItem onClick={() => setMood("Íntimo")}>Íntimo</MenuItem>
-              <MenuItem onClick={() => setMood("Enérgico")}>Enérgico</MenuItem>
+            <MenuList maxH="200px" overflowY="auto">
+              {moods.map(m => (
+                <MenuItem
+                  key={m.id}
+                  onClick={() => {
+                    setMoodSel(m.nombre)
+                    setMood(m.id)
+                  }}
+                >
+                  {m.nombre}
+                </MenuItem>
+              ))}
             </MenuList>
           </Menu>
 
@@ -171,7 +245,7 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
               w="100%"
               bg="whiteAlpha.800"
             >
-              {horario || "Rango Horario"}
+              {rango_horario || "Rango Horario"}
             </MenuButton>
             <MenuList>
               <MenuItem onClick={() => setHorario("Tarde")}>Tarde (12:00 - 18:00)</MenuItem>
@@ -182,7 +256,7 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
 
           {/* ARTISTA */}
           <Input 
-            placeholder={`Artista: ${ artista || 'Todos'}`}
+            placeholder={`Artista: ${ artistaNombre || 'Todos'}`}
             _placeholder={{ opacity: 1, color: 'gray.900', fontWeight: 'semibold', textAlign: 'center' }}
             variant='custom'
             isReadOnly
@@ -191,22 +265,22 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
           />
 
           <Box mb={2} align='center'>
-            <Button colorScheme="blackAlpha" rounded='full' mr={3} onClick={onClose}>
+            <Button rounded='full' mr={3} onClick={onClose} colorScheme='blackAlpha'>
               Cerrar
             </Button>
             <Button 
-              colorScheme="blackAlpha" 
               rounded='full' 
               onClick={() => {
                 limpiar();
                 onClear();
               }}
+              colorScheme='blackAlpha'
             >
               Limpiar
             </Button>
           </Box>
 
-          <Button colorScheme="whiteAlpha" color='blackAlpha.900' rounded='full' onClick={handleApply}>
+          <Button rounded='full' onClick={handleApply} colorScheme='blackAlpha'>
             Aplicar filtros
           </Button>
         </DrawerBody>

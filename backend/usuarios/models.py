@@ -59,6 +59,12 @@ class UsuarioManager(BaseUserManager):
             'is_superuser',
             True
         )
+        extra_fields.setdefault("first_name", "Admin")
+        extra_fields.setdefault("last_name", "Sistema")
+        extra_fields.setdefault("genero", "otro")
+        extra_fields.setdefault("fecha_nacimiento", "2003-12-18")
+        if "rol" not in extra_fields:
+            extra_fields["rol"] = Rol.objects.get(nombre="admin")
         return self._create_user(
             email,
             password,

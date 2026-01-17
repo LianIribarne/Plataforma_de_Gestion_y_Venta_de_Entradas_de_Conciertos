@@ -1,21 +1,19 @@
-from django.contrib.auth import get_user_model
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics, status
+from django.db.models import Q
 from django.contrib.auth.models import update_last_login
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.conf import settings
 from .permissions import EsAdministrador
 from .models import Usuario
+from .stats import organizador_stats_queryset
 from .serializers import (
-    RegistroClienteSerializer,
-    RegistroUsuarioSerializer,
-    ActualizarUsuarioSerializer,
-    ChangePasswordSerializer,
-    AdminUsuarioSerializer,
-    AdminUsuarioListSerializer,
+    RegistroClienteSerializer, RegistroUsuarioSerializer, ActualizarUsuarioSerializer, ChangePasswordSerializer,
+    AdminUsuarioSerializer, AdminUsuarioListSerializer, AdminUsuarioDetailSerializer, OrganizadorStatsSerializer,
 )
 
 access_lifetime = settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
@@ -171,6 +169,7 @@ class ActualizarUsuarioView(APIView):
         )
 
         if serializer.is_valid():
+            serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({"message": "Perfil actualizado correctamente."})
 
@@ -219,25 +218,67 @@ class AdminUsuarioUpdateView(generics.RetrieveUpdateAPIView):
         serializer.save()
         return Response({"message": "Usuario actualizado correctamente."}, status=status.HTTP_200_OK)
 
-class AdminUsuarioDeleteView(generics.DestroyAPIView):
-    queryset = Usuario.objects.all()
-    permission_classes = [EsAdministrador]
-    lookup_field = "id"
-
-    def delete(self, request, *args, **kwargs):
-        usuario = self.get_object()
-
-        if usuario.es_administrador:
-            return Response({"error": "No puedes eliminar a otro administrador."}, status=403)
-
-        usuario.delete()
-        return Response({"message": "Usuario eliminado correctamente."})
-
 class AdminUsuarioListView(generics.ListAPIView):
     permission_classes = [EsAdministrador]
-    queryset = Usuario.objects.exclude(rol__nombre='admin')
+    serializer_class = AdminUsuarioListSerializer
 
-    def list(self, request, *args, **kwargs):
-        usuarios = self.get_queryset()
-        serializer = AdminUsuarioListSerializer(usuarios, many=True)
-        return Response({"total": len(serializer.data), "usuarios": serializer.data})
+    def get_queryset(self):
+        qs = Usuario.objects.exclude(rol__nombre='admin')
+
+        email = self.request.query_params.get("email")
+        nombre = self.request.query_params.get("nombre")
+        activo = self.request.query_params.get("activo")
+        rol = self.request.query_params.get("rol")
+
+        if email:
+            qs = qs.filter(email__icontains=email)
+
+        if nombre:
+            qs = qs.filter(
+                Q(first_name__icontains=nombre) |
+                Q(last_name__icontains=nombre)
+            )
+
+        if activo in ["true", "false"]:
+            qs = qs.filter(is_active=(activo == "true"))
+
+        if rol:
+            qs = qs.filter(rol__nombre=rol)
+
+        return qs
+
+class AdminUsuarioDetailView(generics.RetrieveAPIView):
+    permission_classes = [EsAdministrador]
+    serializer_class = AdminUsuarioDetailSerializer
+    queryset = Usuario.objects.all()
+    lookup_field = "id"
+
+    def get_object(self):
+        user = super().get_object()
+
+        if user.rol.nombre == "admin":
+            raise PermissionDenied("No tenés permiso para ver información de administradores.")
+
+        return user
+    
+class OrganizadorStatsView(generics.RetrieveAPIView):
+    serializer_class = OrganizadorStatsSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return organizador_stats_queryset()
+
+    def get_object(self):
+        usuario = super().get_object()
+        request_user = self.request.user
+
+        # Admin ve a cualquiera
+        if request_user.es_administrador:
+            return usuario
+
+        # Organizador solo a sí mismo
+        if request_user.es_organizador and usuario.id == request_user.id:
+            return usuario
+
+        raise PermissionDenied("No tenés permiso para ver estas estadísticas")

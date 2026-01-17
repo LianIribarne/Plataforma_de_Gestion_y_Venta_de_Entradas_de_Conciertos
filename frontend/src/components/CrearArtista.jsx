@@ -8,14 +8,24 @@ import {
 } from "@chakra-ui/react";
 import React, { useState, useEffect } from 'react';
 import { ChevronDownIcon } from '@chakra-ui/icons'
+import api from "../services/api";
+import convertToWebp from "../utils/convertToWebp"
+
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
 
 export default function CrearArtista({ isOpen, onClose }) {
   const [formData, setFormData] = React.useState({
     nombre: "",
-    pais_origen: "",
-    categoria: "",
+    pais_origen: null,
+    categoria: null,
     imagen: null,
   })
+
+  const toast = useToast()
 
   // Datos de errores, vista previa de la imagen y su inputRef
   const [errors, setErrors] = useState({});
@@ -33,11 +43,15 @@ export default function CrearArtista({ isOpen, onClose }) {
 
     setErrors((p) => ({ ...p, imagen: "" }));
 
-    if (!file.type.startsWith("image/")) {
-      setErrors((p) => ({ ...p, imagen: "El archivo debe ser una imagen" }));
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setErrors((p) => ({
+        ...p,
+        imagen: "Formato permitido: JPG, PNG o WEBP",
+      }));
       cleanImage();
       return;
     }
+
     if (file.size > 5 * 1024 * 1024) {
       setErrors((p) => ({ ...p, imagen: "Máx. 5MB" }));
       cleanImage();
@@ -62,9 +76,21 @@ export default function CrearArtista({ isOpen, onClose }) {
           cleanImage();
           return;
         }
-  
-        setFormData(prev => ({ ...prev, imagen: file }));
-        setPreview(url);
+        
+        convertToWebp({ file, maxSize: 1024, quality: 0.8 })
+          .then((webpFile) => {
+            const previewUrl = URL.createObjectURL(webpFile);
+            
+            setFormData(prev => ({ ...prev, imagen: webpFile }));
+            setPreview(previewUrl);
+          })
+          .catch(() => {
+            setErrors(p => ({
+              ...p,
+              imagen: "Error al procesar la imagen",
+            }));
+            cleanImage();
+          });
       })
       // Error por lectura
       .catch(() => {
@@ -92,28 +118,89 @@ export default function CrearArtista({ isOpen, onClose }) {
     };
   }, [preview]);
 
-  const validate = () => {
+  const validateForm = () => {
     const e = {};
 
-    if (!formData.nombre) e.nombre = "El nombre es obligatorio";
+    if (formData.nombre === "") e.nombre = "El nombre es obligatorio";
     if (!formData.pais_origen) e.pais_origen = "El pais es obligatorio";
     if (!formData.categoria) e.categoria = "La categoria es obligatorio";
     if (!formData.imagen) e.imagen = "La imagen es obligatoria";
     
-    setErrors(e);
-    return Object.keys(e).length === 0;
+    return e;
   };
 
-  const handleSubmit = () => {
-    if (!validate()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
 
-    // datos listos
+    if (Object.keys(validationErrors).length > 0) return;
+
     const payload = new FormData();
-    Object.entries(formData).forEach(([k, v]) => payload.append(k, v));
 
-    // ejemplo
-    console.log("enviar", [...payload.entries()]);
+    payload.append("nombre", formData.nombre);
+    payload.append("categoria_id", formData.categoria);
+    payload.append("imagen", formData.imagen);
+    payload.append("pais_origen_id", formData.pais_origen);
+
+    try {
+      const res = await api.post("/conciertos/crear_artista/", payload);
+
+      const mensaje = res?.data?.message ?? "Se creo con éxito";
+
+      toast({
+        title: mensaje,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+
+      onClose();
+    } catch (error) {
+      let msg = "Error inesperado";
+
+      const data = error?.response?.data;
+        
+      if (data && typeof data === "object") {
+        const firstField = Object.keys(data)[0];
+        const firstError = data[firstField]?.[0];
+      
+        if (firstError) msg = firstError;
+      }
+
+      toast({
+        title: "Error",
+        description: msg,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+    }
   };
+
+  const [categorias, setCategorias] = useState([])
+  const [categoriaSel, setCategoriaSel] = useState("")
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    api.get("/conciertos/categorias/")
+      .then(res => setCategorias(res.data))
+      .catch(err => console.error(err));
+  }, [isOpen]);
+
+  const [paises, setPaises] = useState([])
+  const [paisSel, setPaisSel] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    api.get("/conciertos/paises/")
+      .then(res => setPaises(res.data))
+      .catch(err => console.error(err));
+  }, [isOpen]);
 
   return (
     <Modal isCentered isOpen={isOpen} onClose={onClose}>
@@ -167,34 +254,22 @@ export default function CrearArtista({ isOpen, onClose }) {
                         rounded='full'
                         w="230px"
                       >
-                        {formData.pais_origen || "Seleccione un pais"}
+                        {paisSel || "Seleccionar pais"}
                       </MenuButton>
                     </Tooltip>
 
-                    <MenuList>
-                      <MenuItem
-                        onClick={() =>
-                          handleChange("pais_origen")({ target: { value: "Argentina" } })
-                        }
-                      >
-                        Argentina
-                      </MenuItem>
-                      
-                      <MenuItem
-                        onClick={() =>
-                          handleChange("pais_origen")({ target: { value: "Option 2" } })
-                        }
-                      >
-                        Option 2
-                      </MenuItem>
-                      
-                      <MenuItem
-                        onClick={() =>
-                          handleChange("pais_origen")({ target: { value: "Option 3" } })
-                        }
-                      >
-                        Option 3
-                      </MenuItem>
+                    <MenuList maxH="200px" overflowY="auto">
+                      {paises.map((c) => (
+                        <MenuItem 
+                          key={c.id}
+                          onClick={() => {
+                            setPaisSel(c.nombre)
+                            setFormData(p => ({ ...p, pais_origen: c.id }));
+                          }}
+                        >
+                          {c.nombre}
+                        </MenuItem>
+                      ))}
                     </MenuList>
                   </Menu>
                 </FormControl>
@@ -216,34 +291,22 @@ export default function CrearArtista({ isOpen, onClose }) {
                         rounded='full'
                         w="250px"
                       >
-                        {formData.categoria || "Seleccione una categoria"}
+                        {categoriaSel || "Seleccionar categoria"}
                       </MenuButton>
                     </Tooltip>
 
-                    <MenuList>
-                      <MenuItem
-                        onClick={() =>
-                          handleChange("categoria")({ target: { value: "Argentina" } })
-                        }
-                      >
-                        Argentina
-                      </MenuItem>
-                      
-                      <MenuItem
-                        onClick={() =>
-                          handleChange("categoria")({ target: { value: "Option 2" } })
-                        }
-                      >
-                        Option 2
-                      </MenuItem>
-                      
-                      <MenuItem
-                        onClick={() =>
-                          handleChange("categoria")({ target: { value: "Option 3" } })
-                        }
-                      >
-                        Option 3
-                      </MenuItem>
+                    <MenuList maxH="200px" overflowY="auto">
+                      {categorias.map((c) => (
+                        <MenuItem 
+                          key={c.id}
+                          onClick={() => {
+                            setCategoriaSel(c.nombre)
+                            setFormData(p => ({ ...p, categoria: c.id }));
+                          }}
+                        >
+                          {c.nombre}
+                        </MenuItem>
+                      ))}
                     </MenuList>
                   </Menu>
                 </FormControl>
@@ -262,7 +325,7 @@ export default function CrearArtista({ isOpen, onClose }) {
                   <Input
                     ref={inputFileRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     onChange={handleFile}
                     variant='unstyled'
                     rounded='full'

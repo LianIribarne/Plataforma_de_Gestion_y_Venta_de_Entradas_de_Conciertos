@@ -1,76 +1,58 @@
 import {
-  Image,
-  Heading,
-  Wrap,
-  WrapItem,
-  Box,
-  useDisclosure,
-  Button,
+  Image, Heading, Wrap, WrapItem,
+  Box, useDisclosure, Button, HStack,
+  Skeleton, Text,
 } from "@chakra-ui/react";
 import { useState, useEffect } from 'react';
 import Evento from "../components/Concierto";
 import Carrusel from "../components/Artistas";
 import FiltrosEventos from '../components/FiltrosConciertos';
-
-const eventos = [
-  {
-    id: '1',
-    imagen: 'https://www.musikblog.de/wp-content/uploads/2022/08/Pale_Waves_Credit_Dirty_Hit-8.jpg',
-    artista: 'Pale Waves',
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    fecha: '04.11.2025',
-    genero: 'Indie Pop',
-    estado: 'Programado'
-  },
-  {
-    id: '2',
-    imagen: 'https://i.scdn.co/image/ab67616d0000b2730315d0b066cebbdd7128a764',
-    artista: 'Chaos Chaos',
-    titulo: 'Chaos Chaos – “Bright Futures Live Set”',
-    fecha: '04.11.2025',
-    genero: 'Indie Electronic',
-    estado: 'Agotado'
-  },
-  {
-    id: '3',
-    imagen: 'https://i.scdn.co/image/ab67616d0000b273df51a3d66223e5b01813e0c4',
-    artista: 'Bring Me The Horizon',
-    titulo: 'Bring Me The Horizon (BMTH) – “Post Human World Tour”',
-    fecha: '04.11.2025',
-    genero: 'Metalcore',
-    estado: 'Cancelado'
-  },
-  {
-    id: '4',
-    imagen: 'https://i.scdn.co/image/ab67616d0000b273d6dfb454b77efaccc1371d14',
-    artista: 'iDKHOW',
-    titulo: 'iDKHOW – “RetroFuture Live Experience”',
-    fecha: '04.11.2025',
-    genero: 'Alternative Pop',
-    estado: 'Programado'
-  },
-]
+import api from "../services/api";
 
 export default function Eventos() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [selectedArtist, setSelectedArtist] = useState('');
 
-  // const [eventos, setEventos] = useState([]);
-
-  const handleApplyFilters = async (filtros) => {
-    const params = new URLSearchParams(filtros);
-    const res = await axios.get(`/api/eventos/?${params.toString()}`);
-    setEventos(res.data);
-  };
-
-  const handleArtistFromCarrusel = (artistName) => {
-    setSelectedArtist(artistName);
+  const handleArtistFromCarrusel = (artista) => {
+    setSelectedArtist(artista);
   };
 
   const handleClearFilters = () => {
     setSelectedArtist('');
   };
+
+  const [conciertos, setConciertos] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchConciertos = async (filtros) => {
+    setLoading(true);
+
+    const params = {}
+
+    if (filtros?.categoria) params.categoria = filtros.categoria;
+    if (filtros?.artista) params.artista = filtros.artista;
+    if (filtros?.rango_horario) params.rango_horario = filtros.rango_horario;
+    if (filtros?.provincia) params.provincia = filtros.provincia;
+    if (filtros?.mood) params.mood = filtros.mood;
+    if (filtros?.estado) params.estado = filtros.estado;
+    if (filtros?.entradas) params.entradas = filtros.entradas;
+
+    try {
+      const response = await api.get(
+        "/conciertos/conciertos/", 
+        { params }
+      );
+
+      setConciertos(response.data.results);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConciertos();
+  }, []);
 
   return (
     <Box pb={5}>
@@ -81,7 +63,6 @@ export default function Eventos() {
         blur='2px'
         maxW="100hv"
         mt={-48}
-        mb={10}
         objectFit="cover"
         sx={{
           WebkitMaskImage:
@@ -115,7 +96,6 @@ export default function Eventos() {
           bg='whiteAlpha.800'
           color='blackAlpha.800'
           rounded='full' 
-          fontSize='2xl' 
           size='lg' 
           onClick={onOpen}
         >
@@ -125,7 +105,7 @@ export default function Eventos() {
         <FiltrosEventos
           isOpen={isOpen} 
           onClose={onClose} 
-          onApply={handleApplyFilters}
+          onApply={fetchConciertos}
           artistaSeleccionado={selectedArtist}
           onClear={handleClearFilters}
         />
@@ -134,24 +114,53 @@ export default function Eventos() {
       {/* Artistas */}
       <Carrusel onSelectArtista={handleArtistFromCarrusel} artistaSeleccionado={selectedArtist} />
 
-      {/* Nuevos Eventos */}
-      <Heading ml={5} color='gray.200'>Lo más nuevo</Heading>
-      <Wrap spacing={10} justify='center' align='center'>
-        {eventos.map((e) => (
-          <WrapItem key={e.id}>
-            <Evento {...e}/>
-          </WrapItem>
-        ))}
-      </Wrap>
-
       {/* Eventos */}
-      <Heading ml={5} mt={5} color='gray.200'>Todos los conciertos</Heading>
+      <Heading ml={5} mt={5} mb={4} color='white' align='center'>Todos los conciertos</Heading>
       <Wrap spacing={10} justify='center' align='center'>
-        {eventos.map((e) => (
-          <WrapItem key={e.id}>
-            <Evento {...e}/>
-          </WrapItem>
-        ))}
+        {loading ? (
+          <HStack spacing={4} justify='center'>
+            {[...Array(3)].map((_, i) => (
+              <Skeleton
+                key={i}
+                h={280}
+                w={240}
+                borderRadius={30}
+                bg="whiteAlpha.300"
+                p={4}
+              />
+            ))}
+          </HStack>
+        ) : (
+          conciertos.length > 0 ? (
+            conciertos.map((c) => (
+              <WrapItem key={c.id}>
+                <Evento
+                  id={c.id}
+                  imagen={c.imagen}
+                  artista={c.artista.nombre}
+                  titulo={c.titulo}
+                  genero={c.artista.categoria.nombre}
+                  estado={c.estado}
+                  fecha={c.fecha}
+                  hora={c.show_hora}
+                  tipos_entrada={c.tipos_entrada}
+                />
+              </WrapItem>
+            ))
+          ) : (
+            <Text
+              bg='whiteAlpha.400'
+              color='white'
+              py={2}
+              px={3}
+              borderRadius={20}
+              fontSize='2xl'
+              fontWeight='medium'
+            >
+              No se encontraron conciertos con los filtros aplicados.
+            </Text>
+          )
+        )}
       </Wrap>
     </Box>
   );

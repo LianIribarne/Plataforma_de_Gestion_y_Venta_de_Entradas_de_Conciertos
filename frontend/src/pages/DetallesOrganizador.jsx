@@ -1,11 +1,19 @@
 import {
   Box, Text, Heading, Grid,
-  GridItem, Wrap, WrapItem, Stat,
-  StatLabel, StatNumber, StatHelpText, StatGroup,
+  GridItem, Wrap, WrapItem, Button,
+  useDisclosure, IconButton, Tooltip, Badge,
+  Skeleton, HStack,
 } from '@chakra-ui/react';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import formatoPrecio from '../utils/FormatoPrecio'
 import Evento from "../components/Concierto";
 import Pago from "../components/Pago";
+import Carrusel from "../components/Artistas";
+import FiltrosEventos from '../components/FiltrosConciertos';
+import FiltrosPagos from '../components/FiltrosPagos';
+import api from '../services/api'
 
 const eventos = [
   {
@@ -14,6 +22,7 @@ const eventos = [
     artista: 'Pale Waves',
     titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
     fecha: '04/11/2025',
+    hora: '12:00',
     genero: 'Indie Pop',
     estado: 'Programado'
   },
@@ -23,6 +32,7 @@ const eventos = [
     artista: 'Chaos Chaos',
     titulo: 'Chaos Chaos – “Bright Futures Live Set”',
     fecha: '04/11/2025',
+    hora: '12:00',
     genero: 'Indie Electronic',
     estado: 'Agotado'
   },
@@ -32,6 +42,7 @@ const eventos = [
     artista: 'iDKHOW',
     titulo: 'iDKHOW – “RetroFuture Live Experience”',
     fecha: '04/11/2025',
+    hora: '12:00',
     genero: 'Alternative Pop',
     estado: 'Cancelado'
   },
@@ -86,7 +97,7 @@ const pagos = [
     codigo: 'A9F1C1B27E',
     fecha: '02/11/2025',
     hora: '20:01',
-    monto: 245000,
+    monto: 265000,
     entradas: [
       {
         nombre: 'General',
@@ -96,30 +107,94 @@ const pagos = [
       {
         nombre: 'VIP Access Early',
         cantidad: 4,
-        precio: 220000,
+        precio: 60000,
       },
     ]
   },
 ]
 
 export default function DetallesUsuarios() {
-  const organizador = [
-    { label: 'Email', value: 'lian@gmail.com' },
-    { label: 'Fecha nacimiento', value: '18/12/2003' },
-    { label: 'Cuando se creó la cuenta', value: '11/11/2025 23:01' },
-    { label: 'Último inicio de sesión', value: '19/11/2025 17:23' },
-    { label: 'Suspendido?', value: 'No' },
-    { label: 'Activo?', value: 'Si' },
+  const [datos, setDatos] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const id = location.state;
+  const navigate = useNavigate();
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [verPagos, setVerPagos] = useState(true);
+  const [verEventos, setVerEventos] = useState(true);
+
+  const [selectedArtist, setSelectedArtist] = useState('');
+
+  const handleApplyFilters = async (filtros) => {
+    const params = new URLSearchParams(filtros);
+    const res = await axios.get(`/api/eventos/?${params.toString()}`);
+    setEventos(res.data);
+  };
+
+  const handleArtistFromCarrusel = (artistName) => {
+    setSelectedArtist(artistName);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedArtist('');
+  };
+
+  if (!id) navigate("/usuarios");;
+
+  useEffect(() => {
+    const fetchOrganizador = async () => {
+      try {
+        const response = await api.get(`/usuarios/admin/detalles_usuario/${id}`);
+        const responseStats = await api.get(`/usuarios/estadisticas_organizador/${id}`)
+
+        const payload = response.data;
+        const payloadStats = responseStats.data
+
+        setDatos(payload);
+        setStats(payloadStats)
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganizador();
+  }, [id]);
+
+  const organizadorBase = [
+    { label: 'Email', key: 'email' },
+    { label: 'Fecha nacimiento', key: 'fecha_nacimiento' },
+    { label: 'Cuando se creó la cuenta', key: 'date_joined' },
+    { label: 'Último inicio de sesión', key: 'last_login' },
+  ];
+
+  const organizadorConDatos = datos
+    ? organizadorBase.map(item => ({
+        ...item,
+        value: datos[item.key] ?? ''
+      }))
+    : [];
+
+  const conciertosBase = [
+    { label: 'Creados', key: 'conciertos_creados' },
+    { label: 'Programados', key: 'conciertos_programados' },
+    { label: 'Cancelados', key: 'conciertos_cancelados' },
+    { label: 'Agotados', key: 'conciertos_agotados' },
+    { label: 'Finalizados', key: 'conciertos_finalizados' },
+    { label: 'Tipos entradas creadas', key: 'tipos_entrada_creados' },
+    { label: 'Entradas totales', key: 'entradas_totales' },
+    { label: 'Entradas vendidas', key: 'entradas_vendidas' },
+    { label: 'Ocupación promedio', key: 'ocupacion_promedio' },
   ]
 
-  const conciertos = [
-    { label: 'Creados', value: 7 },
-    { label: 'Programados', value: 1 },
-    { label: 'Cancelados', value: 2 },
-    { label: 'Agotados', value: 3 },
-    { label: 'Entradas creadas', value: 44500 },
-    { label: 'Ocupación promedio', value: '79.01%' },
-  ]
+  const conciertosStats = stats
+    ? conciertosBase.map(item => ({
+        ...item,
+        value: stats[item.key] ?? ''
+      }))
+    : [];
 
   return (
     <Box p={5}>
@@ -127,128 +202,330 @@ export default function DetallesUsuarios() {
         templateColumns='repeat(3, 1fr)'
         gap={4}
       >
-        <GridItem color='white' colSpan={1}>
-          <Heading mb={4} align='center'>Organizador Lian Iribarne</Heading>
-          <Wrap justify='center'>
-            {organizador.map((o, i) => (
-              <WrapItem 
-                bg='whiteAlpha.400' 
-                fontWeight='medium' 
-                px={2}
-                py={1}
-                borderRadius={20}
-                display='inline-block'
-                key={i}
-              >
-                <Text as='span'>{o.label}</Text>{' '}
-                <Text 
-                  as='span' 
-                  bg='blackAlpha.300' 
-                  px={2} 
-                  pb={0.5}
-                  borderRadius={20}
-                >
-                  {o.value}
-                </Text>
-              </WrapItem>
-            ))}
-          </Wrap>
+        <GridItem color='white' colSpan={1} align='center'>
+            {loading ? (
+              <Box>
+                <Skeleton h={800} borderRadius={20} />
+              </Box>
+            ) : (
+              <Box>
+                <Heading mb={4} align='center'>
+                  Organizador{' '}
+                  {datos?.first_name}{' '}
+                  {datos?.last_name}{' '}
+                  <Badge
+                    colorScheme={datos?.is_active === 'Activo' ? 'green' : 'red'}
+                    fontSize='xl'
+                    variant='subtle'
+                  >
+                    {datos?.is_active}
+                  </Badge>
+                </Heading>
+                <Wrap justify='center'>
+                  {organizadorConDatos.map((o, i) => (
+                    <WrapItem 
+                      bg='whiteAlpha.400' 
+                      fontWeight='medium' 
+                      px={2}
+                      py={1}
+                      borderRadius={10}
+                      align='center'
+                      display='inline-block'
+                      key={i}
+                    >
+                      <Heading fontSize='xl'>
+                        {o.label}
+                      </Heading>
+                      <Text>
+                        {o.value}
+                      </Text>
+                    </WrapItem>
+                  ))}
+                </Wrap>
 
-          <Heading my={4} fontSize='2xl' align='center'>Conciertos</Heading>
-          <Wrap justify='center'>
-            {conciertos.map((c, i) => (
-              <WrapItem 
-                bg='whiteAlpha.400' 
-                fontWeight='medium' 
-                px={2}
-                py={1}
-                borderRadius={20}
-                display='inline-block'
-                key={i}
-              >
-                <Text as='span'>{c.label}</Text>{' '}
-                <Text 
-                  as='span' 
-                  bg='blackAlpha.300' 
-                  px={2} 
-                  pb={0.5}
-                  borderRadius={20}
-                >
-                  {c.value}
-                </Text>
-              </WrapItem>
-            ))}
-          </Wrap>
+                <Heading my={4} fontSize='2xl' align='center'>Conciertos</Heading>
+                <Wrap justify='center'>
+                  {conciertosStats.map((c, i) => (
+                    <WrapItem 
+                      bg='whiteAlpha.400' 
+                      fontWeight='medium' 
+                      px={2}
+                      py={1}
+                      borderRadius={10}
+                      align='center'
+                      display='inline-block'
+                      key={i}
+                    >
+                      <Heading fontSize='xl'>
+                        {c.label}
+                      </Heading>
+                      <Text>
+                        {c.value}
+                      </Text>
+                    </WrapItem>
+                  ))}
+                </Wrap>
 
-          <Heading my={4} fontSize='2xl' align='center'>Últimos cambios</Heading>
-          <Wrap justify='center'>
-            
-          </Wrap>
+                <Heading my={4} fontSize='2xl' align='center'>Últimos cambios</Heading>
+                <Wrap justify='center'>
+                  
+                </Wrap>
+
+                <Heading my={4} fontSize='2xl' align='center'>Analítica</Heading>
+                <Wrap justify='center'>
+                  <WrapItem
+                    bg='whiteAlpha.400' 
+                    fontWeight='medium' 
+                    px={2}
+                    py={1}
+                    borderRadius={10}
+                    align='center'
+                    display='inline-block'
+                  >
+                    <Heading fontSize='xl'>
+                      ${formatoPrecio(678245000)}
+                    </Heading>
+                    <Text>
+                      Ingreso total generado
+                    </Text>
+                  </WrapItem>
+                  <WrapItem
+                    bg='whiteAlpha.400' 
+                    fontWeight='medium' 
+                    px={2}
+                    py={1}
+                    borderRadius={10}
+                    align='center'
+                    display='inline-block'
+                  >
+                    <Heading fontSize='xl'>
+                      ${formatoPrecio(8245000)}
+                    </Heading>
+                    <Text>
+                      Ingreso promedio por concierto
+                    </Text>
+                  </WrapItem>
+                  <WrapItem
+                    bg='whiteAlpha.400' 
+                    fontWeight='medium' 
+                    px={2}
+                    py={1}
+                    borderRadius={10}
+                    align='center'
+                    display='inline-block'
+                  >
+                    <Heading fontSize='xl'>
+                      561
+                    </Heading>
+                    <Text>
+                      Reservas totales
+                    </Text>
+                  </WrapItem>
+                  <WrapItem
+                    bg='whiteAlpha.400' 
+                    fontWeight='medium' 
+                    px={2}
+                    py={1}
+                    borderRadius={10}
+                    align='center'
+                    display='inline-block'
+                  >
+                    <Heading fontSize='xl'>
+                      201
+                    </Heading>
+                    <Text>
+                      Reservas expiradas
+                    </Text>
+                  </WrapItem>
+                  <WrapItem
+                    bg='whiteAlpha.400' 
+                    fontWeight='medium' 
+                    px={2}
+                    py={1}
+                    borderRadius={10}
+                    align='center'
+                    display='inline-block'
+                  >
+                    <Heading fontSize='xl'>
+                      360
+                    </Heading>
+                    <Text>
+                      Reservas finalizadas
+                    </Text>
+                  </WrapItem>
+                  <WrapItem
+                    bg='whiteAlpha.400' 
+                    fontWeight='medium' 
+                    px={2}
+                    py={1}
+                    borderRadius={10}
+                    align='center'
+                    display='inline-block'
+                  >
+                    <Heading fontSize='xl'>
+                      14 días
+                    </Heading>
+                    <Text>
+                      Promedio para vender el 50%
+                    </Text>
+                  </WrapItem>
+                  <WrapItem
+                    bg='whiteAlpha.400' 
+                    fontWeight='medium' 
+                    px={2}
+                    py={1}
+                    borderRadius={10}
+                    align='center'
+                    display='inline-block'
+                  >
+                    <Heading fontSize='xl'>
+                      {((360 / 561) * 100).toFixed(2)}%
+                    </Heading>
+                    <Text>
+                      Ratio de reserva a compra
+                    </Text>
+                  </WrapItem>
+                </Wrap>
+              </Box>
+            )}
         </GridItem>
 
         <GridItem colSpan={2}>
           <Heading mb={4} color='white' align='center'>Últimos conciertos creados</Heading>
-          <Grid templateColumns='repeat(3, 1fr)' ml={20}>
-            {eventos.map((e) => (
-              <GridItem key={e.id}>
-                <Evento {...e}/>
-              </GridItem>
-            ))}
-          </Grid>
+          {loading ? (
+            <HStack spacing={20} justify='center'>
+              <Skeleton h={400} w={64} borderRadius={20} />
+              <Skeleton h={400} w={64} borderRadius={20} />
+              <Skeleton h={400} w={64} borderRadius={20} />
+            </HStack>
+          ) : (
+            <Grid templateColumns='repeat(3, 1fr)' ml={20}>
+              {eventos.map((e) => (
+                <GridItem key={e.id}>
+                  <Evento {...e}/>
+                </GridItem>
+              ))}
+            </Grid>
+          )}
 
           <Heading my={4} color='white' align='center'>Últimas ventas registradas</Heading>
-          <Wrap spacing={10} align='center' justify='center'>
-            {pagos.map((p) => (
-              <WrapItem align='center' key={p.codigo}>
-                <Pago {...p}/>
-              </WrapItem>
-            ))}
-          </Wrap>
-        </GridItem>
-
-        <GridItem colSpan={3} color='white'>
-          <Heading my={4} align='center'>Analítica</Heading>
-          <StatGroup justify='center' align='center'>
-            <Stat px={2}>
-              <StatLabel>Ingreso total generado</StatLabel>
-              <StatNumber>${formatoPrecio(678245000)}</StatNumber>
-            </Stat>
-            <Stat px={2}>
-              <StatLabel>Ingreso promedio por concierto</StatLabel>
-              <StatNumber>${formatoPrecio(8245000)}</StatNumber>
-            </Stat>
-            <Stat px={2}>
-              <StatLabel>Promedio para vender el 50% por concierto</StatLabel>
-              <StatNumber>14 días</StatNumber>
-            </Stat>
-            <Stat px={2}>
-              <StatLabel>Reservas totales</StatLabel>
-              <StatNumber>561</StatNumber>
-            </Stat>
-            <Stat px={2}>
-              <StatLabel>Reservas expiradas</StatLabel>
-              <StatNumber>201</StatNumber>
-            </Stat>
-            <Stat px={2}>
-              <StatLabel>Reservas finalizadas</StatLabel>
-              <StatNumber>360</StatNumber>
-            </Stat>
-            <Stat px={2}>
-              <StatLabel>Ratio (reserva - compra)</StatLabel>
-              <StatNumber>{(360 / 561) * 100}%</StatNumber>
-            </Stat>
-          </StatGroup>
+          {loading ? (
+            <HStack spacing={20} justify='center'>
+              <Skeleton h={400} w={72} />
+              <Skeleton h={400} w={72} />
+              <Skeleton h={400} w={72} />
+            </HStack>
+          ) : (
+            <Wrap spacing={10} align='center' justify='center'>
+              {pagos.map((p) => (
+                <WrapItem align='center' key={p.codigo}>
+                  <Pago {...p}/>
+                </WrapItem>
+              ))}
+            </Wrap>
+          )}
         </GridItem>
 
         <GridItem colSpan={3}>
-          <Heading my={4} color='white' align='center'>Conciertos creados</Heading>
-          <Wrap spacing={10} align='center' justify='center'>
-            {eventos.map((e) => (
-              <WrapItem key={e.id}>
-                <Evento {...e}/>
-              </WrapItem>
-            ))}
-          </Wrap>
+          <Box align='center' mt={4}>
+            <Heading color='white' as='span'>Conciertos creados</Heading>
+            <Button 
+              bg='whiteAlpha.800'
+              color='blackAlpha.800'
+              rounded='full' 
+              ml={2}
+              mt={-3}
+              onClick={onOpen}
+            >
+              Filtros
+            </Button>
+            <Tooltip label={verEventos ? 'Ocultar' : 'Mostrar'} placement='top'>
+              <IconButton  
+                bg='whiteAlpha.800'
+                color='blackAlpha.800'
+                rounded='full' 
+                ml={2}
+                mt={-3}
+                onClick={() => setVerEventos(prev => !prev)}
+                icon={verEventos ? <ViewOffIcon /> : <ViewIcon />}
+              />
+            </Tooltip>
+          </Box>
+
+          <FiltrosEventos
+            isOpen={isOpen} 
+            onClose={onClose} 
+            onApply={handleApplyFilters}
+            artistaSeleccionado={selectedArtist}
+            onClear={handleClearFilters}
+          />
+
+          <Carrusel onSelectArtista={handleArtistFromCarrusel} artistaSeleccionado={selectedArtist} />
+
+          {loading ? (
+            <HStack spacing={20} justify='center'>
+              <Skeleton h={400} w={64} borderRadius={20} />
+              <Skeleton h={400} w={64} borderRadius={20} />
+              <Skeleton h={400} w={64} borderRadius={20} />
+            </HStack>
+          ) : (
+            <Wrap spacing={10} align='center' justify='center' mt={6} display={verEventos ? undefined : 'none'}>
+              {eventos.map((e) => (
+                <WrapItem key={e.id}>
+                  <Evento {...e}/>
+                </WrapItem>
+              ))}
+            </Wrap>
+          )}
+        </GridItem>
+
+        <GridItem colSpan={3}>
+          <Box align='center' mt={4}>
+            <Heading color='white' as='span'>Ventas registradas</Heading>
+            <Button 
+              bg='whiteAlpha.800'
+              color='blackAlpha.800'
+              rounded='full' 
+              ml={2}
+              mt={-3}
+              onClick={onOpen}
+            >
+              Filtros
+            </Button>
+            <Tooltip label={verPagos ? 'Ocultar' : 'Mostrar'} placement='top'>
+              <IconButton  
+                bg='whiteAlpha.800'
+                color='blackAlpha.800'
+                rounded='full' 
+                ml={2}
+                mt={-3}
+                onClick={() => setVerPagos(prev => !prev)}
+                icon={verPagos ? <ViewOffIcon /> : <ViewIcon />}
+              />
+            </Tooltip>
+          </Box>
+
+          <FiltrosPagos 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            onApply={handleApplyFilters}
+          />
+
+          {loading ? (
+            <HStack spacing={20} justify='center'>
+              <Skeleton h={400} w={72} />
+              <Skeleton h={400} w={72} />
+              <Skeleton h={400} w={72} />
+            </HStack>
+          ) : (
+            <Wrap spacing={10} align='center' justify='center' mt={6} display={verPagos ? undefined : 'none'}>
+              {pagos.map((p) => (
+                <WrapItem align='center' key={p.codigo}>
+                  <Pago {...p}/>
+                </WrapItem>
+              ))}
+            </Wrap>
+          )}
         </GridItem>
       </Grid>
     </Box>

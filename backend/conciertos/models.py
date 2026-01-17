@@ -1,7 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
-from backend.utils.validarImagen import validar_tamano_imagen, validar_cuadrada
+from backend.utils.validarImagen import validar_tamano_imagen, validar_cuadrada, validar_formato_imagen
 
 class Categoria(models.Model):
     nombre = models.CharField(
@@ -12,22 +13,37 @@ class Categoria(models.Model):
     def __str__(self):
         return self.nombre
 
+class Pais(models.Model):
+    nombre = models.CharField(
+        max_length=50,
+        unique=True
+    )
+
+    def __str__(self):
+        return self.nombre
+
 class Artista(models.Model):
     nombre = models.CharField(max_length=255)
-    pais_origen = models.CharField(max_length=120)
     imagen = models.ImageField(
         upload_to='artistas/',
         validators=[
             validar_tamano_imagen,
+            validar_formato_imagen,
             validar_cuadrada
         ]
     )
+    activo = models.BooleanField(default=True)
 
     # Foreing Key
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,
         related_name='categorias'
+    )
+    pais_origen = models.ForeignKey(
+        Pais,
+        on_delete=models.PROTECT,
+        related_name='paises'
     )
 
     def __str__(self):
@@ -58,6 +74,7 @@ class Ciudad(models.Model):
 class Lugar(models.Model):
     nombre = models.CharField(max_length=255)
     direccion = models.CharField(max_length=255)
+    activo = models.BooleanField(default=True)
 
     # Foreing Key
     ciudad = models.ForeignKey(
@@ -72,40 +89,65 @@ class Lugar(models.Model):
     def __str__(self):
         return self.nombre
 
+class ConciertoMeta(models.Model):
+    TIPO_ESTADO = "estado"
+    TIPO_MOOD = "mood"
+
+    TIPO_CHOICES = (
+        (TIPO_ESTADO, "Estado"),
+        (TIPO_MOOD, "Mood"),
+    )
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPO_CHOICES
+    )
+    codigo = models.CharField(
+        max_length=30,
+        help_text="Valor interno, ej: borrador, chill"
+    )
+    nombre = models.CharField(
+        max_length=50,
+        help_text="Texto visible, ej: Borrador, Chill"
+    )
+    orden = models.PositiveIntegerField(default=0)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("tipo", "codigo")
+        ordering = ["orden", "nombre"]
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} - {self.nombre}"
+
 class Concierto(models.Model):
-    ESTADOS = [
-        ('programado', 'Programado'),
-        ('agotado', 'Agotado'),
-        ('finalizado', 'Finalizado'),
-        ('cancelado', 'Cancelado'),
-    ]
-    MOOD = [
-        ("bailable", "Para bailar"),
-        ("fiestero", "Fiestero"),
-        ("chill", "Chill"),
-        ("romantico", "Romántico"),
-        ("intimo", "Íntimo"),
-        ("energetico", "Enérgico"),
-    ]
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
-    estado = models.CharField(
-        max_length=20,
-        choices=ESTADOS,
-        default='Programado'
+    estado = models.ForeignKey(
+        ConciertoMeta,
+        on_delete=models.PROTECT,
+        related_name="conciertos_por_estado",
+        limit_choices_to={"tipo": "estado"}
     )
-    mood = models.CharField(
-        max_length=50,
-        choices=MOOD
+    mood = models.ForeignKey(
+        ConciertoMeta,
+        on_delete=models.PROTECT,
+        related_name="conciertos_por_mood",
+        limit_choices_to={"tipo": "mood"}
     )
     fecha = models.DateField()
     show_hora = models.TimeField()
     puertas_hora = models.TimeField()
-    limite_reserva_total = models.PositiveIntegerField()
+    limite_reserva_total = models.PositiveIntegerField(
+        validators=[
+            MinValueValidator(2),
+            MaxValueValidator(8)
+        ]
+    )
     imagen = models.ImageField(
         upload_to='conciertos/',
         validators=[
             validar_tamano_imagen,
+            validar_formato_imagen,
             validar_cuadrada
         ]
     )
@@ -128,13 +170,18 @@ class Concierto(models.Model):
     )
     
     def clean(self):
-        if self.fecha and self.fecha <= timezone.now():
+        if self.fecha and self.fecha <= timezone.localdate():
             raise ValidationError('La fecha debe ser futuro.')
 
     def __str__(self):
         return self.titulo
     
     def save(self, *args, **kwargs):
+        if not self.estado_id:
+            self.estado = ConciertoMeta.objects.get(
+                tipo="estado",
+                codigo="borrador"
+            )
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -142,20 +189,25 @@ class TipoEntrada(models.Model):
     nombre = models.CharField(max_length=100)
     precio = models.DecimalField(
         max_digits=10,
-        decimal_places=2
+        decimal_places=2,
+        validators=[
+            MinValueValidator(100.00),
+            MaxValueValidator(1000000.00)
+        ]
     )
-    cantidad_total = models.PositiveIntegerField()
-    limite_reserva = models.PositiveIntegerField()
+    cantidad_total = models.PositiveIntegerField(
+        validators=[MaxValueValidator(10000)]
+    )
+    limite_reserva = models.PositiveIntegerField(
+        validators=[MaxValueValidator(6)]
+    )
+    activo = models.BooleanField(default=True)
 
-    # Foreing Key
     evento = models.ForeignKey(
         Concierto,
         on_delete=models.CASCADE,
-        related_name='eventos'
+        related_name="tipos_entrada",
     )
 
     class Meta:
-        unique_together = ('nombre', 'evento')
-
-    def __str__(self):
-        return f"{self.nombre} - {self.evento}"
+        unique_together = ("nombre", "evento")

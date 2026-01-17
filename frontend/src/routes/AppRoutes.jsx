@@ -4,12 +4,17 @@ import Conciertos from '../pages/Conciertos';
 import InfoConcierto from '../pages/InfoConcierto';
 import AnaliticaConcierto from '../pages/AnaliticaConcierto';
 import Usuarios from '../pages/Usuarios';
+import Lugares from '../pages/Lugares';
+import Artistas from '../pages/Artistas';
 import DetallesOrganizador from '../pages/DetallesOrganizador';
-import Pagos from '../pages/pagos';
+import DetallesCliente from '../pages/DetallesCliente';
+import Pagos from '../pages/Pagos';
+import PagosConcierto from '../pages/PagosConcierto';
 import Entradas from '../pages/entradas';
 import Register from '../pages/register';
 import Login from '../pages/Login';
 import ProcesoPago from '../pages/procesoPago';
+import Perfil from '../pages/Perfil';
 import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
@@ -30,31 +35,44 @@ export default function AppRoutes() {
 
         {/* CONCIERTOS */}
         <Route path="conciertos" element={<Conciertos />} />
-        <Route path="conciertos/:slug" element={<InfoConcierto />} />
 
-        <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
-          <Route path="analitica" element={<AnaliticaConcierto />} />
-        </Route>
+        {/* PERFIL */}
+        <Route path="perfil" element={<Perfil />} />
 
-        {/* USUARIOS */}
-        <Route element={<ProtectedRoute allowedRoles={['Cliente', 'Organizador']} />}>
-          <Route path="usuarios" element={<Usuarios />} />
-        </Route>
-
-        <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
-          <Route path="detalle_organizador" element={<DetallesOrganizador />} />
-        </Route>
-
-        {/* PAGOS */}
+        {/* -----CLIENTE----- */}
         <Route element={<ProtectedRoute allowedRoles={['Administrador', 'Organizador']} />}>
+          {/* CONCIERTO */}
+          <Route path="conciertos/:slug" element={<InfoConcierto />} />
+
+          {/* PAGOS */}
           <Route path="pagos" element={<Pagos />} />
           <Route path="pagos/proceso_pago" element={<ProcesoPago />} />
-        </Route>
 
-        {/* ENTRADAS */}
-        <Route element={<ProtectedRoute allowedRoles={['Administrador', 'Organizador']} />}>
+          {/* ENTRADAS */}
           <Route path="entradas" element={<Entradas />} />
         </Route>
+        {/* -----CLIENTE----- */}
+
+        {/* -----ADMIN/ORGANIZADOR----- */}
+        <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
+          {/* ANALÍTICA */}
+          <Route path="analitica" element={<AnaliticaConcierto />} />
+          <Route path="pagos_concierto" element={<PagosConcierto />} />
+        </Route>
+        {/* -----ADMIN/ORGANIZADOR----- */}
+
+        {/* -----ADMIN----- */}
+        <Route element={<ProtectedRoute allowedRoles={['Cliente', 'Organizador']} />}>
+          {/* USUARIOS */}
+          <Route path="usuarios" element={<Usuarios />} />
+          <Route path="usuarios/detalle_organizador" element={<DetallesOrganizador />} />
+          <Route path="usuarios/detalle_cliente" element={<DetallesCliente />} />
+          {/* LUGARES */}
+          <Route path="lugares" element={<Lugares />} />
+          {/* ARTISTAS */}
+          <Route path="artistas" element={<Artistas />} />
+        </Route>
+        {/* -----ADMIN----- */}
       </Route>
     </Routes>
   );

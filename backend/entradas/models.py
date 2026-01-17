@@ -1,11 +1,13 @@
 from django.db import models
-from backend.utils.generarCodigo import generar_codigo
+from django.core.validators import MaxValueValidator, MinValueValidator
+from backend.utils.generarCodigo import generar_codigo_unico_entrada
 
 class Reserva(models.Model):
     reservar_hasta = models.DateTimeField()
+    activo = models.BooleanField(default=True)
 
     # Foreing Key
-    cliente = models.OneToOneField(
+    cliente = models.ForeignKey(
         "usuarios.Usuario",
         on_delete=models.CASCADE,
         related_name='reservas'
@@ -16,21 +18,29 @@ class Reserva(models.Model):
 
 class Entrada(models.Model):
     ESTADOS = [
-        ('Disponible', 'Disponible'),
-        ('Reservada', 'Reservada'),
-        ('Vendida', 'Vendida'),
-        ('Cancelada', 'Cancelada'),
+        ('disponible', 'Disponible'),
+        ('reservada', 'Reservada'),
+        ('vendida', 'Vendida'),
+        ('cancelada', 'Cancelada'),
     ]
     estado = models.CharField(
         max_length=20,
         choices=ESTADOS,
-        default='Disponible'
+        default='disponible'
     )
     codigo = models.CharField(
-        max_length=12,
+        max_length=10,
         unique=True,
-        default=generar_codigo,
+        default=generar_codigo_unico_entrada,
         editable=False
+    )
+    precio = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(100.00),
+            MaxValueValidator(1000000.00)
+        ]
     )
 
     # Foreing Key
@@ -44,7 +54,7 @@ class Entrada(models.Model):
     tipo = models.ForeignKey(
         "conciertos.TipoEntrada",
         on_delete=models.CASCADE,
-        related_name='tipos'
+        related_name='entradas'
     )
     reserva = models.ForeignKey(
         Reserva,
@@ -55,4 +65,4 @@ class Entrada(models.Model):
     )
 
     def __str__(self):
-        return f'Usuario: {self.usuario} - Pago: {self.pago}'
+        return f'{self.codigo} - {self.get_estado_display()}'

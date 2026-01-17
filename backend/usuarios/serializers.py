@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from .models import Usuario, Rol
+from .models import Usuario
 from django.utils import timezone
 
 class RegistroClienteSerializer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ class RegistroClienteSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password")
         usuario = Usuario(
             **validated_data,
-            rol_id=3
+            rol_id=3,
         )
         usuario.set_password(password)
         usuario.save()
@@ -98,12 +98,14 @@ class ActualizarUsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = [
-            "first_name",
-            "last_name",
-            "email",
-            "fecha_nacimiento",
-            "genero",
+            "first_name", "last_name", "email",
+            "fecha_nacimiento", "genero",
         ]
+        extra_kwargs = {
+            "email": {
+                "validators": []
+            }
+        }
 
     def validate_email(self, value):
         user = self.context["request"].user
@@ -150,15 +152,14 @@ class AdminUsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = [
-            "email",
-            "password",
-            "first_name",
-            "last_name",
-            "fecha_nacimiento",
-            "genero",
-            "rol",
-            "is_active",
+            "email", "password", "first_name", "last_name",
+            "fecha_nacimiento", "genero", "rol", "is_active",
         ]
+        extra_kwargs = {
+            "email": {
+                "validators": []
+            }
+        }
 
     def validate(self, attrs):
         user = self.context["request"].user
@@ -195,23 +196,95 @@ class AdminUsuarioSerializer(serializers.ModelSerializer):
         return value
 
 class AdminUsuarioListSerializer(serializers.ModelSerializer):
-    fecha_nacimiento = serializers.DateField(format="%d/%m/%Y")
-    last_login = serializers.DateTimeField(format="%d/%m/%Y %H:%M", required=False)
-    date_joined = serializers.DateTimeField(format="%d/%m/%Y %H:%M")
     rol = serializers.CharField(source="rol.get_nombre_display")
-    genero = serializers.CharField(source="get_genero_display")
 
     class Meta:
         model = Usuario
         fields = [
-            "id",
-            "email",
-            "rol",
-            "first_name",
-            "last_name",
-            "fecha_nacimiento",
-            "genero",
-            "is_active",
-            "last_login",
-            "date_joined",
+            "id", "email", "rol", "first_name",
+            "last_name", "is_active"
         ]
+
+class AdminUsuarioDetailSerializer(serializers.ModelSerializer):
+    fecha_nacimiento = serializers.DateField(format="%d/%m/%Y")
+    date_joined = serializers.DateTimeField(format="%d/%m/%Y %H:%M")
+    last_login = serializers.SerializerMethodField()
+    rol = serializers.SerializerMethodField()
+    is_active = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Usuario
+        fields = [
+            "id", "email", "rol", "first_name",
+            "last_name", "fecha_nacimiento", "is_active",
+            "last_login", "date_joined"
+        ]
+    
+    def get_rol(self, obj):
+        return {
+            "id": obj.rol.id,
+            "nombre": obj.rol.get_nombre_display()
+        }
+
+    def get_is_active(self, obj):
+        return "Activo" if obj.is_active else "Suspendido"
+    
+    def get_last_login(self, obj):
+        if obj.last_login is None:
+            return "Sin información"
+        return obj.last_login.strftime("%d/%m/%Y %H:%M")
+
+class OrganizadorStatsSerializer(serializers.ModelSerializer):
+    conciertos_creados = serializers.SerializerMethodField()
+    conciertos_programados = serializers.SerializerMethodField()
+    conciertos_agotados = serializers.SerializerMethodField()
+    conciertos_finalizados = serializers.SerializerMethodField()
+    conciertos_cancelados = serializers.SerializerMethodField()
+    tipos_entrada_creados = serializers.SerializerMethodField()
+    entradas_totales = serializers.SerializerMethodField()
+    entradas_vendidas = serializers.SerializerMethodField()
+    ocupacion_promedio = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Usuario
+        fields = [
+            "conciertos_creados", "conciertos_programados", "conciertos_agotados", "conciertos_finalizados",
+            "conciertos_cancelados", "tipos_entrada_creados", "entradas_totales", "entradas_vendidas",
+            "ocupacion_promedio",
+        ]
+    
+    def _valor_o_sin_info(self, value):
+        return "Sin información" if value in [0, None] else value
+
+    def get_conciertos_creados(self, obj):
+        return self._valor_o_sin_info(obj.conciertos_creados)
+
+    def get_conciertos_programados(self, obj):
+        return self._valor_o_sin_info(obj.conciertos_programados)
+
+    def get_conciertos_agotados(self, obj):
+        return self._valor_o_sin_info(obj.conciertos_agotados)
+
+    def get_conciertos_finalizados(self, obj):
+        return self._valor_o_sin_info(obj.conciertos_finalizados)
+
+    def get_conciertos_cancelados(self, obj):
+        return self._valor_o_sin_info(obj.conciertos_cancelados)
+
+    def get_tipos_entrada_creados(self, obj):
+        return self._valor_o_sin_info(obj.tipos_entrada_creados)
+
+    def get_entradas_totales(self, obj):
+        return self._valor_o_sin_info(obj.entradas_totales)
+
+    def get_entradas_vendidas(self, obj):
+        return self._valor_o_sin_info(obj.entradas_vendidas)
+
+    def get_ocupacion_promedio(self, obj):
+        if obj.entradas_totales in [0, None]:
+            return "Sin información"
+        
+        porcentaje = obj.ocupacion_promedio * 100
+        porcentaje = round(porcentaje, 2)
+
+        return f"{porcentaje:.2f}".replace(".", ",") + "%"

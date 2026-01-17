@@ -1,55 +1,122 @@
 import { 
   Button, FormControl, FormLabel, Input, 
-  Box, HStack, Image,
   Menu, MenuButton, MenuList, MenuItem,
   Modal, ModalOverlay, ModalContent, ModalHeader,
   ModalFooter, ModalBody, ModalCloseButton,
-  Text, Tooltip, useToast,
+  Tooltip, useToast,
 } from "@chakra-ui/react";
 import React, { useState, useEffect } from 'react';
 import { ChevronDownIcon } from '@chakra-ui/icons'
-import provinciasCiudades from "../data/provincias_ciudades.json";
+import api from '../services/api'
 
 export default function CrearLugar({ isOpen, onClose }) {
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     provincia: "",
     ciudad: "",
     lugar: "",
+    direccion: "",
   })
+
+  const toast = useToast()
 
   const [errors, setErrors] = useState({});
 
-  const [provincia, setProvincia] = useState("");
-  const [ciudad, setCiudad] = useState("");
+  const [provincias, setProvincias] = useState([]);
+  const [ciudades, setCiudades] = useState([]);
 
-  const provincias = Object.keys(provinciasCiudades);
-  const ciudades = provincia ? provinciasCiudades[provincia] : [];
+  const [provinciaSel, setProvinciaSel] = useState(null);
+  const [ciudadSel, setCiudadSel] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    api.get("/conciertos/provincias/")
+      .then(res => setProvincias(res.data))
+      .catch(err => console.error(err));
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!provinciaSel) return;
+
+    api.get(`/conciertos/ciudades/?provincia_id=${provinciaSel.id}`)
+      .then(res => setCiudades(res.data))
+      .catch(err => console.error(err));
+  }, [provinciaSel]);
 
   const handleChange = (key) => (e) => {
     setFormData((p) => ({ ...p, [key]: e.target.value }));
     setErrors((p) => ({ ...p, [key]: "" }));
   };
 
-  const validate = () => {
-    const e = {};
+  const validateForm = () => {
+    const newErrors = {};
 
-    if (formData.provincia === '') e.provincia = "La provincia es obligatoria";
-    if (formData.ciudad === '') e.ciudad = "La ciudad es obligatoria";
-    if (!formData.lugar) e.lugar = "El lugar es obligatorio";
+    if (formData.provincia === '') newErrors.provincia = "La provincia es obligatoria";
+    if (formData.ciudad === '') newErrors.ciudad = "La ciudad es obligatoria";
+    if (!formData.lugar) newErrors.lugar = "El nombre del lugar es obligatorio";
+    if (!formData.direccion) newErrors.direccion = "La direccion es obligatoria";
     
-    setErrors(e);
-    return Object.keys(e).length === 0;
+    return newErrors;
   };
 
-  const handleSubmit = () => {
-    if (!validate()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+  
+    if (Object.keys(validationErrors).length > 0) return;
 
-    // datos listos
-    const payload = new FormData();
-    Object.entries(formData).forEach(([k, v]) => payload.append(k, v));
+    try {
+      const payload = {
+        nombre: formData.lugar,
+        direccion: formData.direccion,
+        ciudad_id: formData.ciudad,
+      };
 
-    // ejemplo
-    console.log("enviar", [...payload.entries()]);
+      const res = await api.post("/conciertos/registrar_lugar/", payload);
+
+      const mensaje = res?.data?.message ?? "Se creo con éxito";
+
+      toast({
+        title: mensaje,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+
+      setFormData({
+        provincia: "",
+        ciudad: "",
+        lugar: "",
+        direccion: "",
+      })
+
+      setProvinciaSel(null)
+      setCiudadSel(null)
+
+      onClose();
+    } catch (error) {
+      let msg = "Error inesperado";
+
+      const data = error?.response?.data;
+        
+      if (data && typeof data === "object") {
+        const firstField = Object.keys(data)[0];
+        const firstError = data[firstField]?.[0];
+      
+        if (firstError) msg = firstError;
+      }
+
+      toast({
+        title: "Error",
+        description: msg,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+    }
   };
 
   return (
@@ -60,104 +127,126 @@ export default function CrearLugar({ isOpen, onClose }) {
         <ModalCloseButton color="white" />
 
         <ModalBody>
-            <FormControl isInvalid={errors.provincia}>
-              <FormLabel color='white'>Provincia</FormLabel>
-              <Menu>
-                <Tooltip
-                  label={errors.provincia}
-                  isOpen={!!errors.provincia}
-                  placement="top"
-                  bg="red.500"
-                  color="white"
-                  hasArrow
-                >
-                  <MenuButton
-                    as={Button}
-                    rightIcon={<ChevronDownIcon />}
-                    rounded='full'
-                    w="400px"
-                  >
-                    {provincia || "Seleccione una provincia"}
-                  </MenuButton>
-                </Tooltip>
-                <MenuList maxH="200px" overflowY="auto">
-                  {provincias.map((prov) => (
-                    <MenuItem 
-                      key={prov}
-                      onClick={() => {
-                        setProvincia(prov);
-                        setCiudad("");
-                        handleChange({ target: { name: "provincia", value: prov } });
-                      }}
-                    >
-                      {prov}
-                    </MenuItem>
-                  ))}
-                </MenuList>
-              </Menu>
-            </FormControl>
-
-            <FormControl isInvalid={errors.ciudad}>
-              <FormLabel color='white'>Ciudad</FormLabel>
-              <Menu>
-                <Tooltip
-                  label={errors.ciudad}
-                  isOpen={!!errors.ciudad}
-                  placement="top"
-                  bg="red.500"
-                  color="white"
-                  hasArrow
-                >
-                  <MenuButton
-                    as={Button}
-                    rightIcon={<ChevronDownIcon />}
-                    rounded='full'
-                    w="400px"
-                    onChange={(e) => {
-                      setCiudad(e.target.value);
-                      handleChange(e);
-                    }}
-                    isDisabled={!provincia}
-                  >
-                    {ciudad || "Seleccione una ciudad"}
-                  </MenuButton>
-                </Tooltip>
-                <MenuList maxH="200px" overflowY="auto">
-                  {ciudades.map((c) => (
-                    <MenuItem 
-                      key={c}
-                      onClick={() =>{
-                        setCiudad(c);
-                        handleChange({ target: { name: "ciudad", value: c } });
-                      }}
-                    >
-                      {c}
-                    </MenuItem>
-                  ))}
-                </MenuList>
-              </Menu>
-            </FormControl>
-
-            <FormControl mb={2} isInvalid={errors.lugar}>
-              <FormLabel color='white'>Lugar</FormLabel>
+          <FormControl mb={2} isInvalid={errors.provincia}>
+            <FormLabel color='white'>Provincia</FormLabel>
+            <Menu>
               <Tooltip
-                label={errors.lugar}
-                isOpen={!!errors.lugar}
+                label={errors.provincia}
+                isOpen={!!errors.provincia}
                 placement="top"
                 bg="red.500"
                 color="white"
                 hasArrow
               >
-                <Input
-                  placeholder="Ingrese un lugar"
-                  variant='custom'
+                <MenuButton
+                  as={Button}
+                  rightIcon={<ChevronDownIcon />}
                   rounded='full'
-                  value={formData.lugar} 
-                  onChange={handleChange("lugar")}
                   w="400px"
-                />
+                >
+                  {provinciaSel?.nombre || "Seleccionar provincia"}
+                </MenuButton>
               </Tooltip>
-            </FormControl>
+              <MenuList maxH="200px" overflowY="auto">
+                {provincias.map((prov) => (
+                  <MenuItem 
+                    key={prov.id}
+                    onClick={() => {
+                      setProvinciaSel(prov);
+                      setCiudadSel(null);
+                      setCiudades([]);
+                      setFormData(p => ({ ...p, provincia: prov.id }));
+                    }}
+                  >
+                    {prov.nombre}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+          </FormControl>
+
+          <FormControl mb={2} isInvalid={errors.ciudad}>
+            <FormLabel color='white'>Ciudad</FormLabel>
+            <Menu>
+              <Tooltip
+                label={errors.ciudad}
+                isOpen={!!errors.ciudad}
+                placement="top"
+                bg="red.500"
+                color="white"
+                hasArrow
+              >
+                <MenuButton
+                  as={Button}
+                  rightIcon={<ChevronDownIcon />}
+                  rounded='full'
+                  w="400px"
+                  onChange={(e) => {
+                    setCiudad(e.target.value);
+                    handleChange(e);
+                  }}
+                  isDisabled={!provinciaSel}
+                >
+                  {ciudadSel?.nombre || "Seleccionar ciudad"}
+                </MenuButton>
+              </Tooltip>
+              <MenuList maxH="200px" overflowY="auto">
+                {ciudades.map((c) => (
+                  <MenuItem 
+                    key={c.id}
+                    onClick={() =>{
+                      setCiudadSel(c);
+                      setFormData(p => ({ ...p, ciudad: c.id }));
+                    }}
+                  >
+                    {c.nombre}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+          </FormControl>
+
+          <FormControl mb={2} isInvalid={errors.lugar}>
+            <FormLabel color='white'>Nombre del lugar</FormLabel>
+            <Tooltip
+              label={errors.lugar}
+              isOpen={!!errors.lugar}
+              placement="top"
+              bg="red.500"
+              color="white"
+              hasArrow
+            >
+              <Input
+                placeholder="Ingrese un nombre"
+                variant='custom'
+                rounded='full'
+                value={formData.lugar} 
+                onChange={handleChange("lugar")}
+                w="400px"
+              />
+            </Tooltip>
+          </FormControl>
+
+          <FormControl mb={2} isInvalid={errors.direccion}>
+            <FormLabel color='white'>Dirección</FormLabel>
+            <Tooltip
+              label={errors.direccion}
+              isOpen={!!errors.direccion}
+              placement="top"
+              bg="red.500"
+              color="white"
+              hasArrow
+            >
+              <Input
+                placeholder="Ingrese una dirección"
+                variant='custom'
+                rounded='full'
+                value={formData.direccion} 
+                onChange={handleChange("direccion")}
+                w="400px"
+              />
+            </Tooltip>
+          </FormControl>
         </ModalBody>
 
         <ModalFooter>

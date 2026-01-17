@@ -1,20 +1,13 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { 
-  Tabs, 
-  TabList, 
-  Tab, 
-  Box, 
-  Avatar, 
-  useDisclosure,
-  Flex, 
-  Button,
+  Tabs, TabList, Tab, Box, 
+  Avatar, useDisclosure, Flex, Button,
   Tooltip,
 } from "@chakra-ui/react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { AddIcon, TimeIcon } from '@chakra-ui/icons'
 import { Link } from 'react-router-dom';
-import Perfil from '../components/PerfilUsuario';
 import CrearConcierto from '../components/CrearConcierto';
 import CrearArtista from '../components/CrearArtista';
 import CrearUsuario from '../components/CrearUsuario';
@@ -27,6 +20,7 @@ function Seccion({ url, label }) {
       as={NavLink} 
       to={url} 
       mr='4' 
+      pointerEvents="auto"
       bg='blackAlpha.900' 
       color='white'
       _selected={{ bg: "whiteAlpha.900", color: "black" }}
@@ -45,8 +39,6 @@ function Seccion({ url, label }) {
 export default function DashboardLayout() {
   const { user } = useAuth();
   const location = useLocation();
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const {
     isOpen: isConciertoOpen,
@@ -72,15 +64,6 @@ export default function DashboardLayout() {
     onClose: onLugarClose
   } = useDisclosure();
 
-  const btnRef = React.useRef()
-  
-  // const tabIndex = (() => {
-  //   if (location.pathname.startsWith("/usuarios")) return 1;
-  //   if (location.pathname.startsWith("/pagos")) return 2;
-  //   if (location.pathname.startsWith("/entradas")) return 3;
-  //   return 0; // Eventos por defecto
-  // })();
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
@@ -88,6 +71,8 @@ export default function DashboardLayout() {
   const secciones = [
     { url: '/conciertos', label: 'Conciertos', rol: ['Administrador', 'Organizador', 'Cliente'] },
     { url: '/usuarios', label: 'Usuarios', rol: ['Administrador'] },
+    { url: '/lugares', label: 'Lugares', rol: ['Administrador'] },
+    { url: '/artistas', label: 'Artistas', rol: ['Administrador'] },
     { url: '/pagos', label: 'Pagos', rol: ['Cliente'] },
     { url: '/entradas', label: 'Entradas', rol: ['Cliente'] },
   ]
@@ -120,7 +105,7 @@ export default function DashboardLayout() {
           as={Flex} 
           justifyContent="space-between" 
           alignItems="center" 
-          pointerEvents="auto"
+          pointerEvents="none"
         >
           <Flex>
             {secciones.map((s) => s.rol.includes(user.rol) && (
@@ -254,23 +239,17 @@ export default function DashboardLayout() {
             )}
 
             <Avatar 
-              as={Button}
-              onClick={onOpen}
-              ref={btnRef}
-              bg='whiteAlpha.500'
+              as={Link}
+              to='/perfil'
+              bg='blackAlpha.700'
               p={0}
               transition="all 0.3s ease"
-              _hover={{ transform: 'scale(1.1)' }}
+              pointerEvents="auto"
+              _hover={{ transform: 'scale(1.1)', bg: 'blackAlpha.900' }}
             />
           </Box>
         </TabList>
       </Tabs>
-
-      {/* MODAL: PERFIL */}
-      <Perfil 
-        isOpen={isOpen}
-        onClose={onClose}
-      />
       
       {/* MODAL: CREAR CONCIERTO */}
       <CrearConcierto 

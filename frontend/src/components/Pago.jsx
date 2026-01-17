@@ -33,8 +33,11 @@ export default function Pago({ titulo, codigo, fecha, hora, monto, entradas }) {
 
       <Box my={3}>
         {entradas.map((e) => (
-          <Box display="flex" justifyContent="space-between" key={e.nombre}>
-            <Text>{e.nombre}{e.cantidad > 1 ? `(${e.cantidad})`: undefined}</Text>
+          <Box display="flex" justifyContent="space-between" key={e.nombre} mt={1}>
+            <Box align='start'>
+              <Text>{e.nombre}{e.cantidad > 1 ? `(${e.cantidad})`: undefined}</Text>
+              <Text fontSize='x-small'>${formatoPrecio(e.precio)}</Text>
+            </Box>
             <Text>${formatoPrecio((e.precio * e.cantidad))}</Text>
           </Box>
         ))}

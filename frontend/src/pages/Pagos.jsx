@@ -1,13 +1,9 @@
 import {
-  Heading, 
-  Grid, 
-  GridItem,
-  Box, 
-  AbsoluteCenter,
-  Wrap,
-  WrapItem,
+  Heading, Box, AbsoluteCenter, Wrap,
+  WrapItem, Button, useDisclosure,
 } from "@chakra-ui/react";
 import Pago from '../components/Pago';
+import FiltrosPagos from "../components/FiltrosPagos";
 
 const pagos = [
   {
@@ -56,9 +52,26 @@ const pagos = [
 ]
 
 export default function Pagos() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  const handleApplyFilters = async (filtros) => {
+    const params = new URLSearchParams(filtros);
+    const res = await axios.get(`/api/eventos/?${params.toString()}`);
+    setEventos(res.data);
+  };
+
   return pagos.length > 0 ? (
-    <Box p={5}>
-      <Heading mb={10} align='center' color='gray.50' size='2xl'>Tus pagos</Heading>
+    <Box p={5} align='center'>
+      <Heading mb={6} align='center' color='gray.50' size='2xl'>Tus pagos</Heading>
+      <Button 
+        bg='whiteAlpha.800'
+        color='blackAlpha.800'
+        rounded='full' 
+        onClick={onOpen}
+        mb={6}
+      >
+        Filtros
+      </Button>
       <Wrap spacing={10} align='center' justify='center'>
         {pagos.map((p) => (
           <WrapItem align='center' key={p.codigo}>
@@ -66,6 +79,12 @@ export default function Pagos() {
           </WrapItem>
         ))}
       </Wrap>
+
+      <FiltrosPagos 
+        isOpen={isOpen} 
+        onClose={onClose} 
+        onApply={handleApplyFilters}
+      />
     </Box>
   ) : (
     <AbsoluteCenter>

@@ -15,7 +15,6 @@ import {
 import { IoTicketSharp } from "react-icons/io5";
 import { MdLocalGroceryStore } from "react-icons/md";
 import { ArrowRightIcon } from '@chakra-ui/icons';
-import formatoPrecio from '../utils/FormatoPrecio';
 
 function Reservar({ value, onChange, max, placeholder }) {
   const {
@@ -50,12 +49,12 @@ function Reservar({ value, onChange, max, placeholder }) {
   );
 }
 
-export default function EntradaInfo({ tipo, disponibles, reservadas, precio, cantMax, onCantChange }) {
+export default function EntradaInfo({ tipo, disponibles, reservadas, precio, precioNumber, cantMax, onCantChange }) {
   const [cant, setCant] = useState(0);
 
   const handleChange = (valor) => {
     setCant(valor);
-    onCantChange?.(tipo, valor); // avisa a EventoDetalle
+    onCantChange?.(tipo, valor, precioNumber); // avisa a EventoDetalle
   }
 
   return (
@@ -83,7 +82,7 @@ export default function EntradaInfo({ tipo, disponibles, reservadas, precio, can
               px={2} 
               rounded='full'
             >
-              <b>{tipo} <ArrowRightIcon mb={1} boxSize={4} /> ${formatoPrecio(precio)}</b>
+              <b>{tipo} <ArrowRightIcon mb={1} boxSize={4} /> {precio}</b>
             </Text>
           </Box>
           <AccordionIcon />

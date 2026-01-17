@@ -21,7 +21,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
     fechaNacimiento: "",
     password: "",
     genero: "hombre",
-    rol: '1',
+    rol: '3',
   });
 
   const [errors, setErrors] = React.useState({});
@@ -90,7 +90,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
         rol: Number(formData.rol),
       };
 
-      const res = await api.post("/usuarios/registro/", payload);
+      const res = await api.post("/admin/crear_usuario/", payload);
 
       const mensaje = res?.data?.message ?? "Se creo con éxito";
 
@@ -101,6 +101,8 @@ export default function CrearUsuario({ isOpen, onClose }) {
         isClosable: true,
         position: 'top',
       });
+
+      onClose();
     } catch (error) {
       let msg = "Error inesperado";
 
@@ -149,7 +151,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
                       hasArrow
                     >
                       <Input
-                        placeholder="Ingrese su nombre"
+                        placeholder="Ingrese el nombre"
                         value={formData.nombre}
                         onChange={(e) => {
                           handleChange("nombre")(e)
@@ -175,7 +177,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
                       hasArrow
                     >
                       <Input
-                        placeholder="Ingrese su apellido"
+                        placeholder="Ingrese el apellido"
                         value={formData.apellido}
                         onChange={(e) => {
                           handleChange("apellido")(e)
@@ -261,7 +263,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
                 <InputGroup variant='custom'>
                   <Input
                     type={show ? "text" : "password"}
-                    placeholder="Ingrese su contraseña"
+                    placeholder="Ingrese una contraseña"
                     value={formData.password}
                     onChange={(e) => {
                       handleChange("password")(e)
@@ -311,9 +313,9 @@ export default function CrearUsuario({ isOpen, onClose }) {
                 value={formData.rol}
               >
                 <Stack direction="row" color='white'>
-                  <Radio size='lg' value='1'>Cliente</Radio>
+                  <Radio size='lg' value='1'>Administrador</Radio>
                   <Radio size='lg' value='2'>Organizador</Radio>
-                  <Radio size='lg' value='3'>Administrador</Radio>
+                  <Radio size='lg' value='3'>Cliente</Radio>
                 </Stack>
               </RadioGroup>
             </FormControl>

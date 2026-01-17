@@ -8,7 +8,6 @@ import {
 import { useState, useEffect } from 'react';
 import { MdLocalGroceryStore } from "react-icons/md";
 import { LockIcon, UnlockIcon } from "@chakra-ui/icons"
-import provinciasCiudades from "../data/provincias_ciudades.json";
 import formatoPrecio from '../utils/FormatoPrecio'
 
 const reservas = [
@@ -41,19 +40,19 @@ export default function ProcesoPago() {
     cvv: "",
     nombre: "",
     apellido: "",
-    provincia: "",
-    ciudad: "",
+    // provincia: "",
+    // ciudad: "",
     direccion: "",
   });
 
   const [errors, setErrors] = useState({});
   const [tipoTarjeta, setTipoTarjeta] = useState(null);
 
-  const [provincia, setProvincia] = useState("");
-  const [ciudad, setCiudad] = useState("");
+  // const [provincia, setProvincia] = useState("");
+  // const [ciudad, setCiudad] = useState("");
 
-  const provincias = Object.keys(provinciasCiudades);
-  const ciudades = provincia ? provinciasCiudades[provincia] : [];
+  // const provincias = Object.keys(provinciasCiudades);
+  // const ciudades = provincia ? provinciasCiudades[provincia] : [];
 
   const detectarTipoTarjeta = (numero) => {
     if (/^4/.test(numero)) return "visa";
@@ -145,8 +144,8 @@ export default function ProcesoPago() {
     if (formData.cvv.length !== 3) newErrors.cvv = "CVV inválido";
     if (!formData.nombre.trim()) newErrors.nombre = "Es necesario";
     if (!formData.apellido.trim()) newErrors.apellido = "Es necesario";
-    if (formData.provincia === "") newErrors.provincia = "Es necesario";
-    if (formData.ciudad === "") newErrors.ciudad = "Es necesario";
+    // if (formData.provincia === "") newErrors.provincia = "Es necesario";
+    // if (formData.ciudad === "") newErrors.ciudad = "Es necesario";
     if (formData.direccion === "") newErrors.direccion = "Es necesario";
 
     setErrors(newErrors);
@@ -165,8 +164,8 @@ export default function ProcesoPago() {
       formData.cvv.length === 3 && 
       formData.nombre && 
       formData.apellido && 
-      formData.provincia != "" && 
-      formData.ciudad != "" && 
+      // formData.provincia != "" && 
+      // formData.ciudad != "" && 
       formData.direccion;
 
     setCompleto(ok);
@@ -339,7 +338,7 @@ export default function ProcesoPago() {
             </FormControl>
 
             {/* Select Provincia */}
-            <FormControl mb={4}>
+            {/* <FormControl mb={4}>
               <FormLabel color="white">Provincia</FormLabel>
               <Tooltip
                 label={errors.provincia}
@@ -368,10 +367,10 @@ export default function ProcesoPago() {
                   ))}
                 </Select>
               </Tooltip>
-            </FormControl>
+            </FormControl> */}
 
             {/* Select Ciudad */}
-            <FormControl>
+            {/* <FormControl>
               <FormLabel color="white">Ciudad</FormLabel>
               <Tooltip
                 label={errors.ciudad}
@@ -400,7 +399,7 @@ export default function ProcesoPago() {
                   ))}
                 </Select>
               </Tooltip>
-            </FormControl>
+            </FormControl> */}
           </SimpleGrid>
 
           <FormControl>

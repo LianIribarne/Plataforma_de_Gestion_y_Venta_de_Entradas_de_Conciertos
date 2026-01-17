@@ -1,11 +1,11 @@
 from django.db import models
-from backend.utils.generarCodigo import generar_codigo
+from backend.utils.generarCodigo import generar_codigo_unico_pago
 
 class Pago(models.Model):
     codigo = models.CharField(
-        max_length=12,
+        max_length=10,
         unique=True,
-        default=generar_codigo,
+        default=generar_codigo_unico_pago,
         editable=False
     )
     cant_entradas = models.PositiveIntegerField()

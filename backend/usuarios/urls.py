@@ -1,19 +1,12 @@
 from django.urls import path
 from .views import (
-    RegistroClienteView,
-    RegistroUsuarioView,
-    LoginCookieView,
-    RefreshCookieView,
-    LogoutView,
-    UserMeView,
-    ActualizarUsuarioView,
-    ChangePasswordView,
-    AdminUsuarioUpdateView,
-    AdminUsuarioDeleteView,
-    AdminUsuarioListView,
+    RegistroClienteView, RegistroUsuarioView, LoginCookieView, RefreshCookieView,
+    LogoutView, UserMeView, ActualizarUsuarioView, ChangePasswordView,
+    AdminUsuarioUpdateView, AdminUsuarioListView, AdminUsuarioDetailView, OrganizadorStatsView
 )
 
 urlpatterns = [
+    # todos
     path("registro/", RegistroClienteView.as_view(), name="registro"),
     path("login/", LoginCookieView.as_view(), name="login"),
     path("refresh/", RefreshCookieView.as_view(), name="refresh"),
@@ -25,6 +18,9 @@ urlpatterns = [
     # admin
     path("admin/crear_usuario/", RegistroUsuarioView.as_view(), name="crear_usuario"),
     path("admin/modificar_usuario/<int:id>", AdminUsuarioUpdateView.as_view(), name="modificar_usuario"),
-    path("admin/eliminar/<int:id>", AdminUsuarioDeleteView.as_view(), name="eliminar_usuario"),
-    path("admin/listar_usuarios", AdminUsuarioListView.as_view(), name="listar_usuarios")
+    path("admin/listar_usuarios", AdminUsuarioListView.as_view(), name="listar_usuarios"),
+    path("admin/detalles_usuario/<int:id>/", AdminUsuarioDetailView.as_view(), name="usuario_detalle"),
+
+    # admin y organizador
+    path("estadisticas_organizador/<int:id>", OrganizadorStatsView.as_view(), name="stats_organizador")
 ]

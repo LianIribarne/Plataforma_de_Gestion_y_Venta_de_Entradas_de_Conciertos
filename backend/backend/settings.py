@@ -24,6 +24,23 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Broker (Redis)
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+# Opcional: guardar resultados
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+# Zona horaria (IMPORTANTE)
+CELERY_TIMEZONE = "America/Argentina/Buenos_Aires"
+
+CELERY_ENABLE_UTC = False
+
+# Auto retry si algo falla
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+
+CELERY_TASK_IGNORE_RESULT = True
+
 # para producción HTTPS
 
 # CSRF_COOKIE_SECURE = True
@@ -118,7 +135,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "es-ar"
 
 TIME_ZONE = "America/Argentina/Buenos_Aires"
 
