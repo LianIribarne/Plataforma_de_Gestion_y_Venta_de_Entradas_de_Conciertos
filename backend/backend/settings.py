@@ -1,7 +1,7 @@
-from pathlib import Path
 from decouple import config # lee los datos sensibles en el archivo .env
-import os
 from datetime import timedelta
+from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -18,22 +18,20 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
+CORS_ALLOWED_ORIGINS = [config("CORS_ALLOWED_ORIGINS")]
 
 CORS_ALLOW_CREDENTIALS = True
 
 # Broker (Redis)
-CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 
 # Opcional: guardar resultados
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
 
-# Zona horaria (IMPORTANTE)
+# Zona horaria
 CELERY_TIMEZONE = "America/Argentina/Buenos_Aires"
 
-CELERY_ENABLE_UTC = False
+CELERY_ENABLE_UTC = True
 
 # Auto retry si algo falla
 CELERY_TASK_ACKS_LATE = True
