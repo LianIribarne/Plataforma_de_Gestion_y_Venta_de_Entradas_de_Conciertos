@@ -96,7 +96,10 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
             )
 
             entradas = [
-                Entrada(tipo=tipo_entrada, precio=tipo["precio"])
+                Entrada(
+                    tipo=tipo_entrada,
+                    precio=tipo["precio"]
+                )
                 for _ in range(tipo["cantidad_total"])
             ]
             Entrada.objects.bulk_create(entradas)

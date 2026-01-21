@@ -2,6 +2,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from usuarios.permissions import EsOrganizador
 from conciertos.models import TipoEntrada
 from conciertos.services import (
     cancelar_tipo, cancelar_cantidad,
@@ -9,9 +10,15 @@ from conciertos.services import (
     agregar_entradas
 )
 from conciertos.serializers import (
-    TipoEntradaCancelarSerializer, TipoEntradaCancelarCantidadSerializer,
-    TipoEntradaModificarSerializer, TipoEntradaAgregarSerializer
+    CreateTipoEntradaSerializer, TipoEntradaCancelarSerializer,
+    TipoEntradaCancelarCantidadSerializer, TipoEntradaModificarSerializer,
+    TipoEntradaAgregarSerializer
 )
+
+class TipoEntradaCreateView(generics.CreateAPIView):
+    queryset = TipoEntrada.objects.all()
+    serializer_class = CreateTipoEntradaSerializer
+    permission_classes = [EsOrganizador]
 
 class TipoEntradaCancelarView(generics.GenericAPIView):
     serializer_class = TipoEntradaCancelarSerializer

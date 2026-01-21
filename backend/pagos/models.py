@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from backend.utils.generarCodigo import generar_codigo_unico_pago
 
 class Pago(models.Model):
@@ -8,7 +9,9 @@ class Pago(models.Model):
         default=generar_codigo_unico_pago,
         editable=False
     )
-    cant_entradas = models.PositiveIntegerField()
+    cant_entradas = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)]
+    )
     monto = models.DecimalField(
         max_digits=10,
         decimal_places=2

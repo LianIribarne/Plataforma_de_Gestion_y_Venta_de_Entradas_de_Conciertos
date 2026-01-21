@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from django.db import transaction
 from conciertos.models import TipoEntrada
+from entradas.models import Entrada
 
 class TipoEntradaCreateSerializer(serializers.Serializer):
     nombre = serializers.CharField(max_length=100)
@@ -19,19 +21,19 @@ class TipoEntradaStatsSerializer(serializers.ModelSerializer):
             "id", "nombre", "precio", "cantidad_total",
             "disponibles", "vendidas", "canceladas", "limite_reserva",
         ]
-    
+
     def _valor_o_sin_info(self, value):
         return "Sin información" if value in [0, None] else value
-    
+
     def get_disponibles(self, obj):
         return self._valor_o_sin_info(obj.disponibles)
-    
+
     def get_vendidas(self, obj):
         return self._valor_o_sin_info(obj.vendidas)
-    
+
     def get_canceladas(self, obj):
         return self._valor_o_sin_info(obj.canceladas)
-    
+
     def get_precio(self, obj):
         return f"${obj.precio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -67,63 +69,63 @@ class TipoEntradaReservasStatsSerializer(serializers.ModelSerializer):
             # dinero
             "ingreso_real", "ingreso_estimado",
         ]
-    
+
     def _valor_o_sin_info(self, value):
         return "Sin información" if value in [0, None] else value
-    
+
     def get_reservas_totales(self, obj):
         return self._valor_o_sin_info(obj.reservas_totales)
-    
+
     def get_reservas_activas(self, obj):
         return self._valor_o_sin_info(obj.reservas_activas)
-    
+
     def get_reservas_expiradas(self, obj):
         return self._valor_o_sin_info(obj.reservas_expiradas)
-    
+
     def get_reservas_finalizadas(self, obj):
         return self._valor_o_sin_info(obj.reservas_finalizadas)
-    
+
     def get_reservas_activas_pct(self, obj):
         if obj.reservas_activas_pct in [0, None]:
             return "Sin información"
-        
+
         porcentaje = obj.reservas_activas_pct * 100
         porcentaje = round(porcentaje, 2)
 
         return f"{porcentaje:.2f}".replace(".", ",") + "%"
-    
+
     def get_reservas_expiradas_pct(self, obj):
         if obj.reservas_expiradas_pct in [0, None]:
             return "Sin información"
-        
+
         porcentaje = obj.reservas_expiradas_pct * 100
         porcentaje = round(porcentaje, 2)
 
         return f"{porcentaje:.2f}".replace(".", ",") + "%"
-    
+
     def get_reservas_finalizadas_pct(self, obj):
         if obj.reservas_finalizadas_pct in [0, None]:
             return "Sin información"
-        
+
         porcentaje = obj.reservas_finalizadas_pct * 100
         porcentaje = round(porcentaje, 2)
 
         return f"{porcentaje:.2f}".replace(".", ",") + "%"
-    
+
     def get_ratio_reserva_compra(self, obj):
         if obj.ratio_reserva_compra in [0, None]:
             return "Sin información"
-        
+
         porcentaje = obj.ratio_reserva_compra * 100
         porcentaje = round(porcentaje, 2)
 
         return f"{porcentaje:.2f}".replace(".", ",") + "%"
-    
+
     def get_ingreso_real(self, obj):
         if obj.ingreso_real in [0, None]:
             return "Sin información"
         return f"${obj.ingreso_real:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    
+
     def get_ingreso_estimado(self, obj):
         if obj.ingreso_estimado in [0, None]:
             return "Sin información"
@@ -151,9 +153,62 @@ class TipoEntradaConciertoSerializer(serializers.ModelSerializer):
 
     def get_reservadas(self, obj):
         return obj.entradas.filter(estado="reservada").count()
-    
+
     def get_precio_legible(self, obj):
         return f"${obj.precio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+class CreateTipoEntradaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoEntrada
+        fields = ['nombre', 'precio', 'cantidad_total', 'limite_reserva', 'evento']
+
+    def validate(self, attrs):
+        request = self.context["request"]
+        usuario = request.user
+        concierto = attrs["evento"]
+        limite_reserva = attrs["limite_reserva"]
+
+        if concierto.organizador != usuario:
+            raise serializers.ValidationError(
+                {"evento": "No sos el organizador de este concierto."}
+            )
+
+        if limite_reserva > concierto.limite_reserva_total:
+            raise serializers.ValidationError(
+                {
+                    "limite_reserva": (
+                        "No puede superar el límite de reserva total del concierto."
+                    )
+                }
+            )
+
+        tipos_activos = TipoEntrada.objects.filter(
+            evento=concierto,
+            activo=True
+        ).count()
+
+        if tipos_activos >= 4:
+            raise serializers.ValidationError(
+                "Este concierto ya tiene el máximo de 4 tipos de entrada activos."
+            )
+
+        return attrs
+
+    @transaction.atomic
+    def create(self, validated_data):
+        tipo = TipoEntrada.objects.create(**validated_data)
+
+        entradas = [
+            Entrada(
+                tipo=tipo,
+                precio=tipo.precio
+            )
+            for _ in range(tipo.cantidad_total)
+        ]
+
+        Entrada.objects.bulk_create(entradas)
+
+        return tipo
 
 class TipoEntadaUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -165,23 +220,23 @@ class TipoEntradaMiniSerializer(serializers.ModelSerializer):
     vendidas = serializers.SerializerMethodField()
     reservadas = serializers.SerializerMethodField()
     canceladas = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = TipoEntrada
         fields = [
             'id', 'nombre', 'precio', 'limite_reserva', 'activo',
             'disponibles', 'vendidas', 'reservadas', 'canceladas'
         ]
-    
+
     def get_disponibles(self, obj):
         return obj.entradas.filter(estado="disponible").count()
-    
+
     def get_vendidas(self, obj):
         return obj.entradas.filter(estado="vendida").count()
 
     def get_reservadas(self, obj):
         return obj.entradas.filter(estado="reservada").count()
-    
+
     def get_canceladas(self, obj):
         return obj.entradas.filter(estado="cancelada").count()
 

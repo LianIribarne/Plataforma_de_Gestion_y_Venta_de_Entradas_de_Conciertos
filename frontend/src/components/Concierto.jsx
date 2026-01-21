@@ -18,6 +18,7 @@ import { MdPayments } from "react-icons/md";
 import { useAuth } from "../services/AuthContext";
 import ModificarConcierto from '../components/ModificarConcierto'
 import ModificarTipo from '../components/ModificarTipo'
+import CrearTipo from '../components/CrearTipo'
 import { useRef, useState } from "react";
 import api from "../services/api"
 
@@ -66,6 +67,12 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
     isOpen: isEntradaOpen,
     onOpen: onEntradaOpen,
     onClose: onEntradaClose
+  } = useDisclosure()
+
+  const {
+    isOpen: isCrearTipoOpen,
+    onOpen: onCrearTipoOpen,
+    onClose: onCrearTipoClose
   } = useDisclosure()
 
   const {
@@ -300,7 +307,6 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                       </MenuButton>
                       <MenuList minWidth='170px'>
                         <MenuItem
-                          as={Link}
                           onClick={onModificarOpen}
                           icon={<SettingsIcon boxSize={4} />}
                         >
@@ -343,7 +349,19 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
       <Modal isCentered isOpen={isEntradaOpen} onClose={onEntradaClose}>
         <ModalOverlay backdropFilter='blur(10px)' />
         <ModalContent bg="whiteAlpha.500" borderRadius={20} w='fit-content' maxW='90vw' color="white">
-          <ModalHeader>Tipos de Entrada</ModalHeader>
+          <ModalHeader>
+            Tipos de Entrada
+            <Button
+              ml={2}
+              mb={2}
+              size='sm'
+              rounded='full'
+              rightIcon={<AddIcon />}
+              onClick={onCrearTipoOpen}
+            >
+              Crear Tipo
+            </Button>
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Wrap align='center' justify='center' spacing={10}>
@@ -419,6 +437,12 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      <CrearTipo 
+        isOpen={isCrearTipoOpen} 
+        onClose={onCrearTipoClose} 
+        concierto={id}
+      />
 
       <ModificarTipo 
         isOpen={isModificarTipoOpen} 

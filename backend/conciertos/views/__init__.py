@@ -14,6 +14,7 @@ from .concierto import (
     ConciertoDetailView, ConciertoStatsView
 )
 from .tipoEntrada import (
-    TipoEntradaCancelarView, TipoEntradaCancelarCantidadView,
-    TipoEntradaModificarView, TipoEntradaAgregarEntradasView
+    TipoEntradaCreateView, TipoEntradaCancelarView,
+    TipoEntradaCancelarCantidadView, TipoEntradaModificarView,
+    TipoEntradaAgregarEntradasView
 )

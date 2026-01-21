@@ -196,10 +196,16 @@ class TipoEntrada(models.Model):
         ]
     )
     cantidad_total = models.PositiveIntegerField(
-        validators=[MaxValueValidator(10000)]
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(10000)
+        ]
     )
     limite_reserva = models.PositiveIntegerField(
-        validators=[MaxValueValidator(6)]
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(6)
+        ]
     )
     activo = models.BooleanField(default=True)
 

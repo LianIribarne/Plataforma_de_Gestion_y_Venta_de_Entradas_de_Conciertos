@@ -168,7 +168,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
         itemErrors.nombre = "Falta nombre";
       }
 
-      if ((Number(e.precio) > 1000000) || (Number(e.precio) < 500)) {
+      if ((Number(e.precio) > 1000000) || (Number(e.precio) < 100)) {
         itemErrors.precio = "Precio inválido";
       }
 

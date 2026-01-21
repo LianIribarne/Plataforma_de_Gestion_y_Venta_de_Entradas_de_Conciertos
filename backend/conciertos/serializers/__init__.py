@@ -13,6 +13,7 @@ from .concierto import (
     ConciertoDetailSerializer, ConciertoDashboardSerializer
 )
 from .tipoEntrada import (
-    TipoEntradaCancelarSerializer, TipoEntradaCancelarCantidadSerializer,
-    TipoEntradaModificarSerializer, TipoEntradaAgregarSerializer
+    CreateTipoEntradaSerializer, TipoEntradaCancelarSerializer,
+    TipoEntradaCancelarCantidadSerializer, TipoEntradaModificarSerializer,
+    TipoEntradaAgregarSerializer
 )

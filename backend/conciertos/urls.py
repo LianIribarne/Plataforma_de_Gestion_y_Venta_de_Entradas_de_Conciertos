@@ -5,8 +5,9 @@ from conciertos.views import (
     ArtistaCreateView, ArtistaListView, ArtistaModificarView,
     ConciertoMetaListView, ConciertoCreateView, ConciertoListView,
     ConciertoUpdateView, ConciertoDetailView, ConciertoStatsView,
-    TipoEntradaCancelarView, TipoEntradaCancelarCantidadView,
-    TipoEntradaModificarView, TipoEntradaAgregarEntradasView
+    TipoEntradaCreateView, TipoEntradaCancelarView,
+    TipoEntradaCancelarCantidadView, TipoEntradaModificarView,
+    TipoEntradaAgregarEntradasView
 )
 
 urlpatterns = [
@@ -43,6 +44,7 @@ urlpatterns = [
     path('analitica_concierto/<int:concierto_id>', ConciertoStatsView.as_view(), name='analitica_concierto'),
 
     # tiposEntrada
+    path('agregar_tipo/', TipoEntradaCreateView.as_view(), name='agregar_tipo'),
     path('cancelar_tipo/<int:id>', TipoEntradaCancelarView.as_view(), name='cancelar_tipo'),
     path('cancelar_cantidad_tipo/<int:id>', TipoEntradaCancelarCantidadView.as_view(), name='cancelar_cantidad_tipo'),
     path('modificar_tipo/<int:id>', TipoEntradaModificarView.as_view(), name='modificar_tipo'),
