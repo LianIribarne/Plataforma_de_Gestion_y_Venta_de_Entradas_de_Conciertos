@@ -2,116 +2,17 @@ import {
   Box, Text, Heading, Grid,
   GridItem, Wrap, WrapItem, Button,
   useDisclosure, IconButton, Tooltip, Badge,
-  Skeleton, HStack,
+  Skeleton, HStack, Center,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import formatoPrecio from '../utils/FormatoPrecio'
 import Evento from "../components/Concierto";
 import Pago from "../components/Pago";
 import Carrusel from "../components/Artistas";
 import FiltrosEventos from '../components/FiltrosConciertos';
 import FiltrosPagos from '../components/FiltrosPagos';
 import api from '../services/api'
-
-const eventos = [
-  {
-    id: '1',
-    imagen: 'https://www.musikblog.de/wp-content/uploads/2022/08/Pale_Waves_Credit_Dirty_Hit-8.jpg',
-    artista: 'Pale Waves',
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    fecha: '04/11/2025',
-    hora: '12:00',
-    genero: 'Indie Pop',
-    estado: 'Programado'
-  },
-  {
-    id: '2',
-    imagen: 'https://i.scdn.co/image/ab67616d0000b2730315d0b066cebbdd7128a764',
-    artista: 'Chaos Chaos',
-    titulo: 'Chaos Chaos – “Bright Futures Live Set”',
-    fecha: '04/11/2025',
-    hora: '12:00',
-    genero: 'Indie Electronic',
-    estado: 'Agotado'
-  },
-  {
-    id: '4',
-    imagen: 'https://i.scdn.co/image/ab67616d0000b273d6dfb454b77efaccc1371d14',
-    artista: 'iDKHOW',
-    titulo: 'iDKHOW – “RetroFuture Live Experience”',
-    fecha: '04/11/2025',
-    hora: '12:00',
-    genero: 'Alternative Pop',
-    estado: 'Cancelado'
-  },
-]
-
-const pagos = [
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    codigo: 'A9F3C1B27E',
-    fecha: '02/11/2025',
-    hora: '15:01',
-    monto: 310000,
-    entradas: [
-      {
-        nombre: 'General',
-        cantidad: 2,
-        precio: 25000,
-      },
-      {
-        nombre: 'VIP',
-        cantidad: 1,
-        precio: 45000,
-      },
-      {
-        nombre: 'VIP Access Early',
-        cantidad: 3,
-        precio: 55000,
-      },
-      {
-        nombre: 'OH YEAH!',
-        cantidad: 1,
-        precio: 50000,
-      },
-    ]
-  },
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    codigo: 'A9F2C1B27E',
-    fecha: '02/11/2025',
-    hora: '13:37',
-    monto: 50000,
-    entradas: [
-      {
-        nombre: 'General',
-        cantidad: 2,
-        precio: 25000,
-      },
-    ]
-  },
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    codigo: 'A9F1C1B27E',
-    fecha: '02/11/2025',
-    hora: '20:01',
-    monto: 265000,
-    entradas: [
-      {
-        nombre: 'General',
-        cantidad: 1,
-        precio: 25000,
-      },
-      {
-        nombre: 'VIP Access Early',
-        cantidad: 4,
-        precio: 60000,
-      },
-    ]
-  },
-]
 
 export default function DetallesUsuarios() {
   const [datos, setDatos] = useState(null);
@@ -122,17 +23,87 @@ export default function DetallesUsuarios() {
   const navigate = useNavigate();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { 
+    isOpen: isPagoOpen, 
+    onOpen: onPagoOpen, 
+    onClose: onPagoClose 
+  } = useDisclosure();
 
   const [verPagos, setVerPagos] = useState(true);
   const [verEventos, setVerEventos] = useState(true);
 
   const [selectedArtist, setSelectedArtist] = useState('');
 
-  const handleApplyFilters = async (filtros) => {
-    const params = new URLSearchParams(filtros);
-    const res = await axios.get(`/api/eventos/?${params.toString()}`);
-    setEventos(res.data);
+  const [conciertos, setConciertos] = useState([])
+  const [ultimosConciertos, setUltimosConciertos] = useState([])
+
+  const fetchConciertos = async (filtros) => {
+    setLoading(true);
+
+    const params = {organizador: id}
+
+    if (filtros?.categoria) params.categoria = filtros.categoria;
+    if (filtros?.artista) params.artista = filtros.artista;
+    if (filtros?.rango_horario) params.rango_horario = filtros.rango_horario;
+    if (filtros?.provincia) params.provincia = filtros.provincia;
+    if (filtros?.mood) params.mood = filtros.mood;
+    if (filtros?.estado) params.estado = filtros.estado;
+    if (filtros?.entradas) params.entradas = filtros.entradas;
+
+    try {
+      const response = await api.get(
+        "/conciertos/conciertos/", 
+        { params }
+      );
+
+      setConciertos(response.data.results);
+
+      const res = await api.get("/conciertos/conciertos/", { organizador: id });
+
+      setUltimosConciertos(res.data.results)
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchConciertos();
+  }, []);
+
+  const [pagos, setPagos] = useState([])
+  const [ultimosPagos, setUltimosPagos] = useState([])
+  
+  const fetchPagos = async (filtros) => {
+    setLoading(true);
+
+    const params = {organizador: id}
+
+    if (filtros?.fechaDesde) params.fecha_desde = filtros.fechaDesde;
+    if (filtros?.fechaHasta) params.fecha_hasta = filtros.fechaHasta;
+    if (filtros?.montoMin > 0) params.monto_min = filtros.montoMin;
+    if (filtros?.montoMax > 0) params.monto_max = filtros.montoMax;
+
+    try {
+      const response = await api.get(
+        "/pagos/pagos/", 
+        { params }
+      );
+
+      setPagos(response.data.results);
+
+      const res = await api.get("/pagos/pagos/", { organizador: id });
+
+      setUltimosPagos(res.data.results)
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchPagos();
+  }, []);
 
   const handleArtistFromCarrusel = (artistName) => {
     setSelectedArtist(artistName);
@@ -179,6 +150,7 @@ export default function DetallesUsuarios() {
 
   const conciertosBase = [
     { label: 'Creados', key: 'conciertos_creados' },
+    { label: 'Borradores', key: 'conciertos_borradores' },
     { label: 'Programados', key: 'conciertos_programados' },
     { label: 'Cancelados', key: 'conciertos_cancelados' },
     { label: 'Agotados', key: 'conciertos_agotados' },
@@ -265,127 +237,6 @@ export default function DetallesUsuarios() {
                     </WrapItem>
                   ))}
                 </Wrap>
-
-                <Heading my={4} fontSize='2xl' align='center'>Últimos cambios</Heading>
-                <Wrap justify='center'>
-                  
-                </Wrap>
-
-                <Heading my={4} fontSize='2xl' align='center'>Analítica</Heading>
-                <Wrap justify='center'>
-                  <WrapItem
-                    bg='whiteAlpha.400' 
-                    fontWeight='medium' 
-                    px={2}
-                    py={1}
-                    borderRadius={10}
-                    align='center'
-                    display='inline-block'
-                  >
-                    <Heading fontSize='xl'>
-                      ${formatoPrecio(678245000)}
-                    </Heading>
-                    <Text>
-                      Ingreso total generado
-                    </Text>
-                  </WrapItem>
-                  <WrapItem
-                    bg='whiteAlpha.400' 
-                    fontWeight='medium' 
-                    px={2}
-                    py={1}
-                    borderRadius={10}
-                    align='center'
-                    display='inline-block'
-                  >
-                    <Heading fontSize='xl'>
-                      ${formatoPrecio(8245000)}
-                    </Heading>
-                    <Text>
-                      Ingreso promedio por concierto
-                    </Text>
-                  </WrapItem>
-                  <WrapItem
-                    bg='whiteAlpha.400' 
-                    fontWeight='medium' 
-                    px={2}
-                    py={1}
-                    borderRadius={10}
-                    align='center'
-                    display='inline-block'
-                  >
-                    <Heading fontSize='xl'>
-                      561
-                    </Heading>
-                    <Text>
-                      Reservas totales
-                    </Text>
-                  </WrapItem>
-                  <WrapItem
-                    bg='whiteAlpha.400' 
-                    fontWeight='medium' 
-                    px={2}
-                    py={1}
-                    borderRadius={10}
-                    align='center'
-                    display='inline-block'
-                  >
-                    <Heading fontSize='xl'>
-                      201
-                    </Heading>
-                    <Text>
-                      Reservas expiradas
-                    </Text>
-                  </WrapItem>
-                  <WrapItem
-                    bg='whiteAlpha.400' 
-                    fontWeight='medium' 
-                    px={2}
-                    py={1}
-                    borderRadius={10}
-                    align='center'
-                    display='inline-block'
-                  >
-                    <Heading fontSize='xl'>
-                      360
-                    </Heading>
-                    <Text>
-                      Reservas finalizadas
-                    </Text>
-                  </WrapItem>
-                  <WrapItem
-                    bg='whiteAlpha.400' 
-                    fontWeight='medium' 
-                    px={2}
-                    py={1}
-                    borderRadius={10}
-                    align='center'
-                    display='inline-block'
-                  >
-                    <Heading fontSize='xl'>
-                      14 días
-                    </Heading>
-                    <Text>
-                      Promedio para vender el 50%
-                    </Text>
-                  </WrapItem>
-                  <WrapItem
-                    bg='whiteAlpha.400' 
-                    fontWeight='medium' 
-                    px={2}
-                    py={1}
-                    borderRadius={10}
-                    align='center'
-                    display='inline-block'
-                  >
-                    <Heading fontSize='xl'>
-                      {((360 / 561) * 100).toFixed(2)}%
-                    </Heading>
-                    <Text>
-                      Ratio de reserva a compra
-                    </Text>
-                  </WrapItem>
-                </Wrap>
               </Box>
             )}
         </GridItem>
@@ -399,13 +250,23 @@ export default function DetallesUsuarios() {
               <Skeleton h={400} w={64} borderRadius={20} />
             </HStack>
           ) : (
-            <Grid templateColumns='repeat(3, 1fr)' ml={20}>
-              {eventos.map((e) => (
-                <GridItem key={e.id}>
-                  <Evento {...e}/>
-                </GridItem>
+            <Wrap spacing={10} align='center' justify='center'>
+              {ultimosConciertos.slice(0, 3).map((c) => (
+                <WrapItem key={c.id}>
+                  <Evento
+                    id={c.id}
+                    imagen={c.imagen}
+                    artista={c.artista.nombre}
+                    titulo={c.titulo}
+                    genero={c.artista.categoria.nombre}
+                    estado={c.estado}
+                    fecha={c.fecha}
+                    hora={c.show_hora}
+                    tipos_entrada={c.tipos_entrada}
+                  />
+                </WrapItem>
               ))}
-            </Grid>
+            </Wrap>
           )}
 
           <Heading my={4} color='white' align='center'>Últimas ventas registradas</Heading>
@@ -417,7 +278,7 @@ export default function DetallesUsuarios() {
             </HStack>
           ) : (
             <Wrap spacing={10} align='center' justify='center'>
-              {pagos.map((p) => (
+              {ultimosPagos.slice(0, 3).map((p) => (
                 <WrapItem align='center' key={p.codigo}>
                   <Pago {...p}/>
                 </WrapItem>
@@ -455,7 +316,7 @@ export default function DetallesUsuarios() {
           <FiltrosEventos
             isOpen={isOpen} 
             onClose={onClose} 
-            onApply={handleApplyFilters}
+            onApply={fetchConciertos}
             artistaSeleccionado={selectedArtist}
             onClear={handleClearFilters}
           />
@@ -468,14 +329,40 @@ export default function DetallesUsuarios() {
               <Skeleton h={400} w={64} borderRadius={20} />
               <Skeleton h={400} w={64} borderRadius={20} />
             </HStack>
-          ) : (
+          ) : conciertos.length > 0 ? (
             <Wrap spacing={10} align='center' justify='center' mt={6} display={verEventos ? undefined : 'none'}>
-              {eventos.map((e) => (
-                <WrapItem key={e.id}>
-                  <Evento {...e}/>
+              {conciertos.map((c) => (
+                <WrapItem key={c.id}>
+                  <Evento
+                    id={c.id}
+                    imagen={c.imagen}
+                    artista={c.artista.nombre}
+                    titulo={c.titulo}
+                    genero={c.artista.categoria.nombre}
+                    estado={c.estado}
+                    fecha={c.fecha}
+                    hora={c.show_hora}
+                    tipos_entrada={c.tipos_entrada}
+                  />
                 </WrapItem>
               ))}
             </Wrap>
+          ) : (
+            <Center>
+              <Text
+                bg='whiteAlpha.400'
+                color='white'
+                mt={6}
+                py={2}
+                px={3}
+                borderRadius={20}
+                fontSize='4xl'
+                fontWeight='medium'
+                display='inline-block'
+              >
+                Sin información.
+              </Text>
+            </Center>
           )}
         </GridItem>
 
@@ -488,7 +375,7 @@ export default function DetallesUsuarios() {
               rounded='full' 
               ml={2}
               mt={-3}
-              onClick={onOpen}
+              onClick={onPagoOpen}
             >
               Filtros
             </Button>
@@ -506,9 +393,9 @@ export default function DetallesUsuarios() {
           </Box>
 
           <FiltrosPagos 
-            isOpen={isOpen} 
-            onClose={onClose} 
-            onApply={handleApplyFilters}
+            isOpen={isPagoOpen} 
+            onClose={onPagoClose} 
+            onApply={fetchPagos}
           />
 
           {loading ? (
@@ -517,7 +404,7 @@ export default function DetallesUsuarios() {
               <Skeleton h={400} w={72} />
               <Skeleton h={400} w={72} />
             </HStack>
-          ) : (
+          ) : pagos.length > 0 ? (
             <Wrap spacing={10} align='center' justify='center' mt={6} display={verPagos ? undefined : 'none'}>
               {pagos.map((p) => (
                 <WrapItem align='center' key={p.codigo}>
@@ -525,6 +412,22 @@ export default function DetallesUsuarios() {
                 </WrapItem>
               ))}
             </Wrap>
+          ) : (
+            <Center>
+              <Text
+                bg='whiteAlpha.400'
+                color='white'
+                mt={6}
+                py={2}
+                px={3}
+                borderRadius={20}
+                fontSize='4xl'
+                fontWeight='medium'
+                display='inline-block'
+              >
+                Sin información.
+              </Text>
+            </Center>
           )}
         </GridItem>
       </Grid>

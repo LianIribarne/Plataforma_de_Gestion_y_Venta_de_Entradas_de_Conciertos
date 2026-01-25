@@ -14,4 +14,7 @@ urlpatterns = [
 
     # ENTRADAS
     path('api/entradas/', include(('entradas.urls', 'entradas'))),
+
+    # PAGOS
+    path('api/pagos/', include(('pagos.urls', 'pagos'))),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

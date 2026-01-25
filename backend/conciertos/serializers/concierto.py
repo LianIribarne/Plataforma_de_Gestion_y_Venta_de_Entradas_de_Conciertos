@@ -1,15 +1,15 @@
 from rest_framework import serializers
+import secrets
 from django.db import transaction
-from conciertos.models import ConciertoMeta, Concierto, Lugar, Artista, TipoEntrada
+from django.utils import timezone, formats
 from entradas.models import Entrada
+from conciertos.models import ConciertoMeta, Concierto, Lugar, Artista, TipoEntrada
 from conciertos.serializers.tipoEntrada import (
     TipoEntradaCreateSerializer, TipoEntradaMiniSerializer,
-    TipoEntradaConciertoSerializer, TipoEntradaStatsSerializer,
-    TipoEntradaReservasStatsSerializer
+    TipoEntradaConciertoSerializer,
 )
 from conciertos.serializers.artista import ArtistaConciertoSerializer
 from conciertos.serializers.lugar import LugarDetailSerializer
-from django.utils import formats
 from backend.utils.images import image_to_webp
 from django.utils.translation import activate
 activate("es")
@@ -61,7 +61,7 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
             'show_hora', 'puertas_hora', 'limite_reserva_total',
             'lugar_id', 'artista_id', 'organizador', 'tipos_entrada'
         ]
-    
+
     def validate(self, data):
         tipos = data.get("tipos_entrada", [])
 
@@ -72,12 +72,19 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
                     f"El límite de reserva total del concierto ({data['limite_reserva_total']}) "
                     f"no puede ser menor a la cantidad del tipo de entrada con más tickets ({max_cantidad})."
                 )
-            
+
             if len(tipos) > 4:
-                raise serializers.ValidationError("Solo puede haber 4 tipos de entradas por concierto.")
+                raise serializers.ValidationError(
+                    "Solo puede haber 4 tipos de entradas por concierto."
+                )
+
+        fecha = data.get("fecha")
+
+        if fecha and fecha <= timezone.localdate():
+            raise serializers.ValidationError("La fecha debe ser futura.")
 
         return data
-    
+
     @transaction.atomic
     def create(self, validated_data):
         tipos_data = validated_data.pop("tipos_entrada")
@@ -95,13 +102,24 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
                 limite_reserva=tipo["limite_reserva"]
             )
 
-            entradas = [
-                Entrada(
-                    tipo=tipo_entrada,
-                    precio=tipo["precio"]
+            tokens = set()
+            entradas = []
+
+            for _ in range(tipo["cantidad_total"]):
+                while True:
+                    token = secrets.token_urlsafe(32)
+                    if token not in tokens:
+                        tokens.add(token)
+                        break
+
+                entradas.append(
+                    Entrada(
+                        tipo=tipo_entrada,
+                        precio=tipo["precio"],
+                        qr_token=token
+                    )
                 )
-                for _ in range(tipo["cantidad_total"])
-            ]
+
             Entrada.objects.bulk_create(entradas)
 
         return concierto
@@ -112,14 +130,15 @@ class ConciertoListSerializer(serializers.ModelSerializer):
     show_hora = serializers.TimeField(format="%H:%M")
     imagen = serializers.SerializerMethodField()
     tipos_entrada = TipoEntradaMiniSerializer(many=True)
-    
+
     class Meta:
         model = Concierto
         fields = [
             'id', 'titulo', 'artista', 'fecha',
-            'show_hora', 'imagen', 'tipos_entrada'
+            'show_hora', 'imagen', 'tipos_entrada',
+            'estado'
         ]
-    
+
     def get_imagen(self, obj):
         request = self.context.get("request")
         if obj.imagen and request:
@@ -168,7 +187,7 @@ class ConciertoUpdateSerializer(serializers.ModelSerializer):
             'show_hora', 'puertas_hora', 'limite_reserva_total',
             'lugar_id', 'artista_id', 'imagen'
         ]
-    
+
     def validate_imagen(self, image):
         if image.content_type == 'image/webp':
             return image
@@ -204,7 +223,7 @@ class ConciertoDetailSerializer(serializers.ModelSerializer):
             'imagen', 'lugar', 'artista', 'organizador', 'fecha_legible',
             'tipos_entrada', 'puertas_hora_legible', 'show_hora_legible'
         ]
-    
+
     def get_fecha_legible(self, obj):
         fecha = formats.date_format(
             obj.fecha, "l d \\d\\e F"
@@ -213,90 +232,3 @@ class ConciertoDetailSerializer(serializers.ModelSerializer):
         palabras[0] = palabras[0].capitalize()
         palabras[-1] = palabras[-1].capitalize()
         return " ".join(palabras)
-
-class ConciertoStatsSerializer(serializers.ModelSerializer):
-    entradas_totales = serializers.SerializerMethodField()
-    entradas_disponibles = serializers.SerializerMethodField()
-    entradas_reservadas = serializers.SerializerMethodField()
-    entradas_vendidas = serializers.SerializerMethodField()
-
-    cantidad_ventas = serializers.SerializerMethodField()
-
-    ingreso_real = serializers.SerializerMethodField()
-    ingreso_estimado = serializers.SerializerMethodField()
-
-    ocupacion = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Concierto
-        fields = [
-            "entradas_totales", "entradas_disponibles", "entradas_reservadas", "cantidad_ventas",
-            "entradas_vendidas", "ingreso_real", "ingreso_estimado", "ocupacion",
-        ]
-    
-    def _valor_o_sin_info(self, value):
-        return "Sin información" if value in [0, None] else value
-    
-    def get_entradas_totales(self, obj):
-        return self._valor_o_sin_info(obj.entradas_totales)
-    
-    def get_entradas_disponibles(self, obj):
-        return self._valor_o_sin_info(obj.entradas_disponibles)
-    
-    def get_entradas_reservadas(self, obj):
-        return self._valor_o_sin_info(obj.entradas_reservadas)
-    
-    def get_cantidad_ventas(self, obj):
-        return self._valor_o_sin_info(obj.cantidad_ventas)
-    
-    def get_entradas_vendidas(self, obj):
-        return self._valor_o_sin_info(obj.entradas_vendidas)
-    
-    def get_ingreso_real(self, obj):
-        if obj.ingreso_real in [0, None]:
-            return "Sin información"
-        return f"${obj.ingreso_real:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    
-    def get_ingreso_estimado(self, obj):
-        if obj.ingreso_estimado in [0, None]:
-            return "Sin información"
-        return f"${obj.ingreso_estimado:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    
-    def get_ocupacion(self, obj):
-        if obj.ocupacion in [0, None]:
-            return "Sin información"
-        
-        porcentaje = obj.ocupacion * 100
-        porcentaje = round(porcentaje, 2)
-
-        return f"{porcentaje:.2f}".replace(".", ",") + "%"
-
-class ConciertoMiniSerializer(serializers.ModelSerializer):
-    estado = ConciertoMetaListSerializer()
-    mood = ConciertoMetaListSerializer()
-    lugar = LugarDetailSerializer()
-    artista = ArtistaConciertoSerializer()
-    show_hora = serializers.TimeField(format="%H:%M")
-    puertas_hora = serializers.TimeField(format="%H:%M")
-    fecha = serializers.DateField(format="%d/%m/%Y")
-    organizador = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Concierto
-        fields = [
-            'titulo', 'estado', 'mood', 'fecha', 'lugar', 'artista',
-            'show_hora', 'puertas_hora', 'limite_reserva_total', 'organizador'
-        ]
-    
-    def get_organizador(self, obj):
-        return {
-            "nombre": obj.organizador.first_name,
-            "apellido": obj.organizador.last_name,
-            "email": obj.organizador.email,
-        }
-
-class ConciertoDashboardSerializer(serializers.Serializer):
-    detalles = ConciertoMiniSerializer()
-    concierto = ConciertoStatsSerializer()
-    tipos_entrada = TipoEntradaStatsSerializer(many=True)
-    tipos_reservas = TipoEntradaReservasStatsSerializer(many=True)

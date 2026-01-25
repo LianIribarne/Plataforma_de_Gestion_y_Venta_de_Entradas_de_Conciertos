@@ -1,66 +1,45 @@
 import {
   Heading, Box, AbsoluteCenter, Wrap,
   WrapItem, Button, useDisclosure,
+  Spinner,
 } from "@chakra-ui/react";
+import { useEffect, useState } from "react"
 import Pago from '../components/Pago';
 import FiltrosPagos from "../components/FiltrosPagos";
-
-const pagos = [
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    codigo: 'A9F3C1B27E',
-    fecha: '02.11.2025',
-    hora: '15:01',
-    monto: 310000,
-    entradas: [
-      {
-        nombre: 'General',
-        cantidad: 2,
-        precio: 25000,
-      },
-      {
-        nombre: 'VIP',
-        cantidad: 1,
-        precio: 45000,
-      },
-      {
-        nombre: 'VIP Access Early',
-        cantidad: 3,
-        precio: 55000,
-      },
-      {
-        nombre: 'OH YEAH!',
-        cantidad: 1,
-        precio: 50000,
-      },
-    ]
-  },
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    codigo: 'A9F2C1B27E',
-    fecha: '02.11.2025',
-    hora: '13:37',
-    monto: 50000,
-    entradas: [
-      {
-        nombre: 'General',
-        cantidad: 2,
-        precio: 25000,
-      },
-    ]
-  },
-]
+import api from '../services/api'
 
 export default function Pagos() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [pagos, setPagos] = useState([])
+  const [loading, setLoading] = useState(true)
   
-  const handleApplyFilters = async (filtros) => {
-    const params = new URLSearchParams(filtros);
-    const res = await axios.get(`/api/eventos/?${params.toString()}`);
-    setEventos(res.data);
-  };
+  const fetchPagos = async (filtros) => {
+    setLoading(true);
 
-  return pagos.length > 0 ? (
+    const params = {}
+
+    if (filtros?.fechaDesde) params.fecha_desde = filtros.fechaDesde;
+    if (filtros?.fechaHasta) params.fecha_hasta = filtros.fechaHasta;
+    if (filtros?.montoMin > 0) params.monto_min = filtros.montoMin;
+    if (filtros?.montoMax > 0) params.monto_max = filtros.montoMax;
+
+    try {
+      const response = await api.get(
+        "/pagos/pagos/", 
+        { params }
+      );
+
+      setPagos(response.data.results);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchPagos();
+  }, []);
+
+  return (
     <Box p={5} align='center'>
       <Heading mb={6} align='center' color='gray.50' size='2xl'>Tus pagos</Heading>
       <Button 
@@ -73,24 +52,30 @@ export default function Pagos() {
         Filtros
       </Button>
       <Wrap spacing={10} align='center' justify='center'>
-        {pagos.map((p) => (
-          <WrapItem align='center' key={p.codigo}>
-            <Pago {...p}/>
-          </WrapItem>
-        ))}
+        {!loading ? (
+          pagos.length > 0 ? (
+            pagos.map((p) => (
+              <WrapItem align='center' key={p.id}>
+                <Pago {...p}/>
+              </WrapItem>
+            ))
+          ) : (
+            <AbsoluteCenter>
+              <Box bg='whiteAlpha.500' p={4} borderRadius={8} color='white'>
+                <Heading align='center'>No hay compras/pagos realizados</Heading>
+              </Box>
+            </AbsoluteCenter>
+          )
+        ) : (
+          <Spinner size='xl' color='white' />
+        )}
       </Wrap>
 
       <FiltrosPagos 
         isOpen={isOpen} 
         onClose={onClose} 
-        onApply={handleApplyFilters}
+        onApply={fetchPagos}
       />
     </Box>
-  ) : (
-    <AbsoluteCenter>
-      <Box bg='whiteAlpha.500' p={4} borderRadius={8} color='white'>
-        <Heading align='center'>No hay compras/pagos realizados</Heading>
-      </Box>
-    </AbsoluteCenter>
   )
 }

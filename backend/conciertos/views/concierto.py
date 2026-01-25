@@ -2,15 +2,17 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.db.models import Q, Count
+from rest_framework.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from usuarios.permissions import EsOrganizador
 from conciertos.models import ConciertoMeta, Concierto
 from conciertos.serializers import (
     ConciertoMetaListSerializer, ConciertoCreateSerializer,
     ConciertoListSerializer, ConciertoUpdateSerializer,
-    ConciertoDetailSerializer, ConciertoDashboardSerializer
+    ConciertoDetailSerializer,
 )
-from conciertos.stats import concierto_finanzas_queryset, reservas_stats_por_tipo, tipos_entrada_stats_queryset
+from conciertos.services import cancelar_concierto
 
 # conciertoMeta
 class ConciertoMetaListView(generics.ListAPIView):
@@ -63,7 +65,7 @@ class ConciertoListView(generics.ListAPIView):
         provincia = self.request.query_params.get('provincia')
         estado = self.request.query_params.get('estado')
         mood = self.request.query_params.get('mood')
-        entradas = self.request.query_params.get('entradas')
+        organizador = self.request.query_params.get('organizador')
 
         if artista:
             queryset = queryset.filter(artista_id=artista)
@@ -82,30 +84,18 @@ class ConciertoListView(generics.ListAPIView):
                 queryset = queryset.filter(
                     Q(show_hora__gte="23:00") | Q(show_hora__lt="05:00")
                 )
-        
+
         if provincia:
             queryset = queryset.filter(lugar__ciudad__provincia_id=provincia)
-        
+
         if estado:
             queryset = queryset.filter(estado_id=estado)
-        
+
         if mood:
             queryset = queryset.filter(mood_id=mood)
-        
-        entradas = self.request.query_params.get('entradas')
 
-        if entradas:
-            entrada = entradas.lower()
-            queryset = queryset.annotate(
-                entradas_disponibles=Count(
-                    'tipos_entrada__entradas',
-                    filter=Q(tipos_entrada__entradas__estado='disponible')
-                )
-            )
-            if entrada == "disponibles":
-                queryset = queryset.filter(entradas_disponibles__gt=0)
-            elif entrada == 'agotadas':
-                queryset = queryset.filter(entradas_disponibles=0)
+        if organizador:
+            queryset = queryset.filter(organizador_id=organizador)
 
         return queryset
 
@@ -121,11 +111,21 @@ class ConciertoUpdateView(generics.RetrieveUpdateAPIView):
 
         if user.es_administrador:
             return qs
-        
+
         if user.es_organizador:
             return qs.filter(organizador=user)
 
         return qs.none()
+
+    def perform_update(self, serializer):
+        concierto = self.get_object()
+
+        if concierto.estado.codigo in ['cancelado', 'finalizado']:
+            raise ValidationError(
+                {"detail": "No se puede modificar el concierto."}
+            )
+
+        serializer.save()
 
 class ConciertoDetailView(generics.RetrieveAPIView):
     serializer_class = ConciertoDetailSerializer
@@ -144,14 +144,12 @@ class ConciertoDetailView(generics.RetrieveAPIView):
 
         return qs.none()
 
-class ConciertoStatsView(generics.GenericAPIView):
-    serializer_class = ConciertoDashboardSerializer
-    lookup_url_kwarg = "concierto_id"
+class CancelarConciertoView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        qs = concierto_finanzas_queryset()
+        qs = Concierto.objects.all()
 
         if user.es_administrador:
             return qs
@@ -160,19 +158,22 @@ class ConciertoStatsView(generics.GenericAPIView):
             return qs.filter(organizador=user)
 
         return qs.none()
-    
-    def get(self, request, *args, **kwargs):
-        detalles = self.get_object()
-        concierto = self.get_object()
-        tipos = tipos_entrada_stats_queryset(concierto.id)
-        reservas = reservas_stats_por_tipo(concierto.id)
 
-        data = {
-            "detalles": detalles,
-            "concierto": concierto,
-            "tipos_entrada": tipos.order_by('-cantidad_total'),
-            "tipos_reservas": reservas
-        }
+    def post(self, request, id, **kwargs):
+        concierto = get_object_or_404(self.get_queryset(), id=id)
 
-        serializer = self.get_serializer(instance=data)
-        return Response(serializer.data)
+        if concierto.estado.codigo in ['cancelado', 'finalizado']:
+            return Response(
+                {"detail": "El concierto ya está cancelado o ya finalizo."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cancelar_concierto(concierto.id)
+
+        return Response(
+            {
+                "detail": 
+                "Concierto cancelado. Tipos y entradas canceladas. Reservas activas liberadas."
+            },
+            status=status.HTTP_200_OK
+        )

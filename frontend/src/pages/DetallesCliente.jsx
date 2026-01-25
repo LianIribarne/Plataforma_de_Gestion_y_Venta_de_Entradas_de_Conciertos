@@ -8,73 +8,9 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import Pago from "../components/Pago";
+import Entrada from "../components/Entrada";
 import FiltrosPagos from '../components/FiltrosPagos';
 import api from '../services/api'
-
-const pagos = [
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    codigo: 'A9F3C1B27E',
-    fecha: '02/11/2025',
-    hora: '15:01',
-    monto: 310000,
-    entradas: [
-      {
-        nombre: 'General',
-        cantidad: 2,
-        precio: 25000,
-      },
-      {
-        nombre: 'VIP',
-        cantidad: 1,
-        precio: 45000,
-      },
-      {
-        nombre: 'VIP Access Early',
-        cantidad: 3,
-        precio: 55000,
-      },
-      {
-        nombre: 'OH YEAH!',
-        cantidad: 1,
-        precio: 50000,
-      },
-    ]
-  },
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    codigo: 'A9F2C1B27E',
-    fecha: '02/11/2025',
-    hora: '13:37',
-    monto: 50000,
-    entradas: [
-      {
-        nombre: 'General',
-        cantidad: 2,
-        precio: 25000,
-      },
-    ]
-  },
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    codigo: 'A9F1C1B27E',
-    fecha: '02/11/2025',
-    hora: '20:01',
-    monto: 265000,
-    entradas: [
-      {
-        nombre: 'General',
-        cantidad: 1,
-        precio: 25000,
-      },
-      {
-        nombre: 'VIP Access Early',
-        cantidad: 4,
-        precio: 60000,
-      },
-    ]
-  },
-]
 
 export default function DetallesUsuarios() {
   const [datos, setDatos] = useState(null);
@@ -88,11 +24,53 @@ export default function DetallesUsuarios() {
   const [verPagos, setVerPagos] = useState(true);
   const [verEntradas, setVerEntradas] = useState(true);
 
-  const handleApplyFilters = async (filtros) => {
-    const params = new URLSearchParams(filtros);
-    const res = await axios.get(`/api/eventos/?${params.toString()}`);
-    setEventos(res.data);
-  };
+  const [pagos, setPagos] = useState([])
+  
+  const fetchPagos = async (filtros) => {
+    setLoading(true);
+
+    const params = {cliente: id}
+
+    if (filtros?.fechaDesde) params.fecha_desde = filtros.fechaDesde;
+    if (filtros?.fechaHasta) params.fecha_hasta = filtros.fechaHasta;
+    if (filtros?.montoMin > 0) params.monto_min = filtros.montoMin;
+    if (filtros?.montoMax > 0) params.monto_max = filtros.montoMax;
+
+    try {
+      const response = await api.get(
+        "/pagos/pagos/", 
+        { params }
+      );
+
+      setPagos(response.data.results);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchPagos();
+  }, []);
+
+  const [entradas, setEntradas] = useState([])
+  
+  const fetchEntradas = async () => {
+    setLoading(true);
+
+    try {
+      const response = await api.get(
+        "/entradas/entradas/"
+      );
+
+      setEntradas(response.data)
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchEntradas();
+  }, []);
 
   if (!id) navigate("/usuarios");;
 
@@ -127,6 +105,13 @@ export default function DetallesUsuarios() {
         value: datos[item.key] ?? ''
       }))
     : [];
+  
+  const toggleVerEntradas = (eventoId) => {
+    setVerEntradas((s) => ({
+      ...s,
+      [eventoId]: !s[eventoId],
+    }));
+  };
 
   return (
     <Box p={5}>
@@ -174,11 +159,6 @@ export default function DetallesUsuarios() {
                   </WrapItem>
                 ))}
               </Wrap>
-
-              <Heading my={4} fontSize='2xl' align='center'>Últimos cambios</Heading>
-              <Wrap justify='center'>
-                
-              </Wrap>
             </Box>
           )}
         </GridItem>
@@ -193,7 +173,7 @@ export default function DetallesUsuarios() {
             </HStack>
           ) : (
             <Wrap spacing={10} align='center' justify='center'>
-              {pagos.map((p) => (
+              {pagos.slice(0, 3).map((p) => (
                 <WrapItem align='center' key={p.codigo}>
                   <Pago {...p}/>
                 </WrapItem>
@@ -231,7 +211,7 @@ export default function DetallesUsuarios() {
           <FiltrosPagos 
             isOpen={isOpen} 
             onClose={onClose} 
-            onApply={handleApplyFilters}
+            onApply={fetchPagos}
           />
 
           {loading ? (
@@ -249,6 +229,53 @@ export default function DetallesUsuarios() {
               ))}
             </Wrap>
           )}
+        </GridItem>
+
+        <GridItem colSpan={3}>
+          <Box align='center' mt={4}>
+            <Heading color='white' as='span'>Entradas Adquiridas</Heading>
+          </Box>
+
+          {entradas.map((ev) => {
+            const visibles = verEntradas[ev.concierto.titulo] ?? true;
+
+            return (
+              <Box key={ev.concierto.titulo} mt={5}>
+                <HStack>
+                  <Heading ml={4} color='white' size='lg'>{ev.concierto.titulo}</Heading>
+                  <Tooltip label={visibles  ? 'Ocultar' : 'Mostrar'} placement='top'>
+                    <IconButton  
+                      bg='whiteAlpha.800'
+                      color='blackAlpha.800'
+                      rounded='full' 
+                      ml={2}
+                      onClick={() => toggleVerEntradas(ev.concierto.titulo)}
+                      icon={visibles ? <ViewOffIcon /> : <ViewIcon />}
+                    />
+                  </Tooltip>
+                </HStack>
+                  
+                <Wrap spacing={3} justify='center' align='center' mt={4} display={visibles ? undefined : 'none'}>
+                  {ev.entradas.map((x) => (
+                    <WrapItem key={x.codigo}>
+                      <Entrada
+                        qr={x.qr_url}
+                        artista={ev.concierto.artista}
+                        titulo={ev.concierto.titulo}
+                        fecha={ev.concierto.fecha}
+                        puertas={ev.concierto.puertas_hora}
+                        show={ev.concierto.show_hora}
+                        precio={x.precio}
+                        codigo={x.codigo}
+                        tipo={x.tipo}
+                        estado={ev.concierto.estado}
+                      />
+                    </WrapItem>
+                  ))}
+                </Wrap>
+              </Box>
+            );
+          })}
         </GridItem>
       </Grid>
     </Box>

@@ -62,11 +62,12 @@ export default function Perfil() {
       }
     };
 
-    fetchOrganizador();
+    if (user.rol === 'Organizador') fetchOrganizador();
   }, [user.id]);
 
   const conciertosBase = [
     { label: 'Creados', key: 'conciertos_creados' },
+    { label: 'Borradores', key: 'conciertos_borradores' },
     { label: 'Programados', key: 'conciertos_programados' },
     { label: 'Cancelados', key: 'conciertos_cancelados' },
     { label: 'Agotados', key: 'conciertos_agotados' },

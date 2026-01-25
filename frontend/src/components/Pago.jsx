@@ -4,12 +4,12 @@ import {
   Text,
   Divider, 
 } from "@chakra-ui/react";
-import formatoPrecio from "../utils/FormatoPrecio";
 
-export default function Pago({ titulo, codigo, fecha, hora, monto, entradas }) {
+export default function Pago({ concierto, codigo, fecha, hora, monto, cant_entradas, items }) {
   return (
     <Box 
       maxW='300px' 
+      minW='300px' 
       bg='whiteAlpha.900'
       py={3}
       px={4}
@@ -22,7 +22,7 @@ export default function Pago({ titulo, codigo, fecha, hora, monto, entradas }) {
       }}
     >
       <Heading size='md' textAlign='left' mb={2}>RECIBO - {codigo}</Heading>
-      <Text textAlign='left' mb={2}>Concierto: {titulo}</Text>
+      <Text textAlign='left' mb={2}>Concierto: {concierto}</Text>
 
       <Box display="flex" justifyContent="space-between">
         <Text>Fecha: {fecha}</Text>
@@ -31,21 +31,22 @@ export default function Pago({ titulo, codigo, fecha, hora, monto, entradas }) {
 
       <Divider my={2} borderColor='gray.600' borderWidth={1} />
 
-      <Box my={3}>
-        {entradas.map((e) => (
-          <Box display="flex" justifyContent="space-between" key={e.nombre} mt={1}>
+      <Box my={2}>
+        <Text mt={-1}>Cant. de entradas: {cant_entradas}</Text>
+        {items.map((i) => (
+          <Box display="flex" justifyContent="space-between" key={i.nombre} mt={2}>
             <Box align='start'>
-              <Text>{e.nombre}{e.cantidad > 1 ? `(${e.cantidad})`: undefined}</Text>
-              <Text fontSize='x-small'>${formatoPrecio(e.precio)}</Text>
+              <Text>{i.nombre}{i.cantidad > 1 ? `(${i.cantidad})`: undefined}</Text>
+              <Text fontSize='x-small'>{i.precio}</Text>
             </Box>
-            <Text>${formatoPrecio((e.precio * e.cantidad))}</Text>
+            <Text>{i.subtotal}</Text>
           </Box>
         ))}
       </Box>
 
       <Divider my={2} borderColor='gray.600' borderWidth={1} />
 
-      <Text textAlign="right">Total: ${formatoPrecio(monto)}</Text>
+      <Text textAlign="right">Monto total: {monto}</Text>
     </Box>
   )
 }

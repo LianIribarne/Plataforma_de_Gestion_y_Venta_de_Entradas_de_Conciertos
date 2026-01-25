@@ -1,8 +1,8 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.utils import timezone
-from backend.utils.validarImagen import validar_tamano_imagen, validar_cuadrada, validar_formato_imagen
+from backend.utils.validarImagen import (
+    validar_tamano_imagen, validar_cuadrada, validar_formato_imagen
+)
 
 class Categoria(models.Model):
     nombre = models.CharField(
@@ -122,18 +122,6 @@ class ConciertoMeta(models.Model):
 class Concierto(models.Model):
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
-    estado = models.ForeignKey(
-        ConciertoMeta,
-        on_delete=models.PROTECT,
-        related_name="conciertos_por_estado",
-        limit_choices_to={"tipo": "estado"}
-    )
-    mood = models.ForeignKey(
-        ConciertoMeta,
-        on_delete=models.PROTECT,
-        related_name="conciertos_por_mood",
-        limit_choices_to={"tipo": "mood"}
-    )
     fecha = models.DateField()
     show_hora = models.TimeField()
     puertas_hora = models.TimeField()
@@ -168,14 +156,22 @@ class Concierto(models.Model):
         on_delete=models.PROTECT,
         related_name='artistas'
     )
-    
-    def clean(self):
-        if self.fecha and self.fecha <= timezone.localdate():
-            raise ValidationError('La fecha debe ser futuro.')
+    estado = models.ForeignKey(
+        ConciertoMeta,
+        on_delete=models.PROTECT,
+        related_name="conciertos_por_estado",
+        limit_choices_to={"tipo": "estado"}
+    )
+    mood = models.ForeignKey(
+        ConciertoMeta,
+        on_delete=models.PROTECT,
+        related_name="conciertos_por_mood",
+        limit_choices_to={"tipo": "mood"}
+    )
 
     def __str__(self):
         return self.titulo
-    
+
     def save(self, *args, **kwargs):
         if not self.estado_id:
             self.estado = ConciertoMeta.objects.get(
@@ -217,3 +213,4 @@ class TipoEntrada(models.Model):
 
     class Meta:
         unique_together = ("nombre", "evento")
+        ordering = ['precio']

@@ -149,7 +149,7 @@ function Artista({ id, nombre, imagen, categoria, estadoArtista }) {
         isCentered
       >
         <AlertDialogOverlay backdropFilter='blur(10px) invert(100%)'>
-          <AlertDialogContent bg='whiteAlpha.500' color='white' alignSelf='center'>
+          <AlertDialogContent bg='red.600' color='white' alignSelf='center'>
             <AlertDialogHeader fontSize='2xl'>
               Suspender Artista
             </AlertDialogHeader>

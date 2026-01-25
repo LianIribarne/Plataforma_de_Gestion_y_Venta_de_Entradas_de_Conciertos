@@ -16,7 +16,7 @@ class RegistroClienteSerializer(serializers.ModelSerializer):
         if len(value) < 8:
             raise serializers.ValidationError("La contraseña debe tener al menos 8 caracteres")
         return value
-    
+
     def validate_fecha_nacimiento(self, value):
         hoy = timezone.localdate()
         edad = hoy.year - value.year
@@ -61,7 +61,7 @@ class RegistroUsuarioSerializer(serializers.ModelSerializer):
         if len(value) < 8:
             raise serializers.ValidationError("La contraseña debe tener al menos 8 caracteres")
         return value
-    
+
     def validate_fecha_nacimiento(self, value):
         hoy = timezone.localdate()
         edad = hoy.year - value.year
@@ -112,7 +112,7 @@ class ActualizarUsuarioSerializer(serializers.ModelSerializer):
         if Usuario.objects.exclude(pk=user.pk).filter(email=value).exists():
             raise serializers.ValidationError("Ese email ya está en uso.")
         return value
-    
+
     def validate_fecha_nacimiento(self, value):
         hoy = timezone.localdate()
         edad = hoy.year - value.year
@@ -143,7 +143,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({
                 "new_password": "La nueva contraseña no puede ser igual a la actual."
             })
-        
+
         return data
 
 class AdminUsuarioSerializer(serializers.ModelSerializer):
@@ -167,11 +167,11 @@ class AdminUsuarioSerializer(serializers.ModelSerializer):
         # No permitir modificar otro administrador
         if self.instance and self.instance.es_administrador and self.instance != user:
             raise serializers.ValidationError("No puedes modificar a otro administrador")
-        
+
         # Evitar modificarse a sí mismo desde este endpoint
         if self.instance == user:
             raise serializers.ValidationError("No puedes modificar tu propio usuario desde este endpoint")
-        
+
         return attrs
 
     def validate_password(self, value):
@@ -219,7 +219,7 @@ class AdminUsuarioDetailSerializer(serializers.ModelSerializer):
             "last_name", "fecha_nacimiento", "is_active",
             "last_login", "date_joined"
         ]
-    
+
     def get_rol(self, obj):
         return {
             "id": obj.rol.id,
@@ -228,7 +228,7 @@ class AdminUsuarioDetailSerializer(serializers.ModelSerializer):
 
     def get_is_active(self, obj):
         return "Activo" if obj.is_active else "Suspendido"
-    
+
     def get_last_login(self, obj):
         if obj.last_login is None:
             return "Sin información"
@@ -236,6 +236,7 @@ class AdminUsuarioDetailSerializer(serializers.ModelSerializer):
 
 class OrganizadorStatsSerializer(serializers.ModelSerializer):
     conciertos_creados = serializers.SerializerMethodField()
+    conciertos_borradores = serializers.SerializerMethodField()
     conciertos_programados = serializers.SerializerMethodField()
     conciertos_agotados = serializers.SerializerMethodField()
     conciertos_finalizados = serializers.SerializerMethodField()
@@ -248,16 +249,19 @@ class OrganizadorStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = [
-            "conciertos_creados", "conciertos_programados", "conciertos_agotados", "conciertos_finalizados",
+            "conciertos_creados", "conciertos_borradores", "conciertos_programados", "conciertos_finalizados",
             "conciertos_cancelados", "tipos_entrada_creados", "entradas_totales", "entradas_vendidas",
-            "ocupacion_promedio",
+            "ocupacion_promedio", "conciertos_agotados"
         ]
-    
+
     def _valor_o_sin_info(self, value):
         return "Sin información" if value in [0, None] else value
 
     def get_conciertos_creados(self, obj):
         return self._valor_o_sin_info(obj.conciertos_creados)
+
+    def get_conciertos_borradores(self, obj):
+        return self._valor_o_sin_info(obj.conciertos_borradores)
 
     def get_conciertos_programados(self, obj):
         return self._valor_o_sin_info(obj.conciertos_programados)
@@ -281,10 +285,9 @@ class OrganizadorStatsSerializer(serializers.ModelSerializer):
         return self._valor_o_sin_info(obj.entradas_vendidas)
 
     def get_ocupacion_promedio(self, obj):
-        if obj.entradas_totales in [0, None]:
+        if obj.entradas_totales in [0, None] or obj.ocupacion_promedio is None:
             return "Sin información"
-        
-        porcentaje = obj.ocupacion_promedio * 100
-        porcentaje = round(porcentaje, 2)
+
+        porcentaje = round(obj.ocupacion_promedio, 2)
 
         return f"{porcentaje:.2f}".replace(".", ",") + "%"

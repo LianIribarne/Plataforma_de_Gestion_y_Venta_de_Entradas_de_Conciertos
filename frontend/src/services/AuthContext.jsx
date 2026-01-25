@@ -13,6 +13,32 @@ export const AuthProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : null;
   });
 
+  const [tieneReservaActiva, setTieneReservaActiva] = useState(null);
+  const [reservaActiva, setReservaActiva] = useState(null);
+  const [loadingReserva, setLoadingReserva] = useState(false);
+  const isCliente = user?.rol === "Cliente";
+
+  const fetchReservaActiva = async () => {
+    setLoadingReserva(true);
+
+    try {
+      if (isCliente) {
+        const res = await api.get("/entradas/reserva_activa/");
+        setReservaActiva(res.data.reserva);
+        setTieneReservaActiva(res.data.tiene_reserva);
+      }
+    } catch (err) {
+      setReservaActiva(null);
+      setTieneReservaActiva(false);
+    } finally {
+      setLoadingReserva(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) fetchReservaActiva();
+  }, []);
+
   const loginUser = async (email, password) => {
     try {
       const data = await login(email, password);
@@ -53,7 +79,15 @@ export const AuthProvider = ({ children }) => {
     registerForcedLogout(logoutUser);
   }, []);
 
-  const value = { user, loginUser, logoutUser };
+  const value = {
+    user,
+    loginUser,
+    logoutUser,
+    tieneReservaActiva,
+    reservaActiva,
+    loadingReserva,
+    fetchReservaActiva
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

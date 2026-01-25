@@ -1,18 +1,17 @@
 import {
   Card, Image, Stack, CardBody,
-  Heading, Grid, Container, Box,
+  Heading, Container, Box,
   Button, Menu, MenuButton, MenuList, Text,
   MenuItem, Badge, AlertDialog, AlertDialogBody, useToast,
   AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay,
   useDisclosure, Modal, ModalOverlay, FormControl, FormLabel,
   ModalContent, ModalHeader, ModalBody, ModalCloseButton, ModalFooter,
-  Wrap, WrapItem, NumberInput, Switch, Alert, AlertIcon,
+  Wrap, WrapItem, NumberInput, Switch,
   NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
 } from "@chakra-ui/react";
-import { SettingsIcon, InfoIcon, TriangleDownIcon, AddIcon } from '@chakra-ui/icons';
+import { SettingsIcon, InfoIcon, TriangleDownIcon, AddIcon, BellIcon } from '@chakra-ui/icons';
 import { TbCancel } from "react-icons/tb";
 import { Link } from 'react-router-dom';
-import { TbReportAnalytics } from "react-icons/tb";
 import { IoTicketSharp } from "react-icons/io5";
 import { MdPayments } from "react-icons/md";
 import { useAuth } from "../services/AuthContext";
@@ -21,6 +20,7 @@ import ModificarTipo from '../components/ModificarTipo'
 import CrearTipo from '../components/CrearTipo'
 import { useRef, useState } from "react";
 import api from "../services/api"
+import formatoPrecio from "../utils/FormatoPrecio"
 
 const slugify = (str) =>
   str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
@@ -29,7 +29,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
   const { user } = useAuth();
   const slug = slugify(titulo);
   const toast = useToast()
-  const cancelado = estado === 'Cancelado';
+  const cancelado = estado === 5;
 
   const cancelRef = useRef()
   const { 
@@ -137,7 +137,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
       setEntradaSeleccionada(null);
       setCantidadCancelar(1);
       setModoCancelarTodo(false);
-
+      window.location.reload()
     } catch (error) {
       console.error("Error al cancelar entradas", error);
     }
@@ -164,10 +164,56 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
       
       setEntradaSeleccionada(null)
       setCantidad(1)
+      window.location.reload()
     } catch (error) {
       console.error("Error al cancelar entradas", error);
     }
   }
+
+  const handleCancelarConciertoSubmit = async () => {
+    try {
+      const res = await api.post(`/conciertos/cancelar_concierto/${id}`)
+
+      const mensaje = res?.data?.message ?? "Se cancelo con exito";
+
+      toast({
+        title: mensaje,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+
+      onCancelarClose()
+      window.location.reload()
+    } catch (error) {
+      console.error("Error al cancelar:", error);
+    }
+  }
+
+  const handleProgramar = async () => {
+    try {
+      const payload = new FormData();
+
+      payload.append('estado_id', 2)
+
+      await api.patch(`/conciertos/modificar_concierto/${id}`, payload)
+
+      toast({
+        title: "Se programo con exito",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+
+      window.location.reload()
+    } catch (error) {
+      console.error("Error al programar:", error);
+    }
+  }
+
+  const mostrar = [3, 4, 5].includes(estado)
 
   return (
     <Box maxW={250}>
@@ -199,24 +245,35 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
             <Image
               src={imagen}
               borderTopRadius={14}
-              filter={!cancelado ? 'grayscale(1%)' : 'brightness(50%)'} 
+              filter={estado === 1 || estado === 2 ? 'grayscale(1%)' : 'brightness(50%)'} 
             />
             <Box 
               fontSize='3xl' 
               align='center'
-              bg='blackAlpha.800'
-              color='rgba(255, 0, 0, 0.8)'
+              bg='black'
+              color={cancelado ? 'rgba(255, 0, 0, 0.8)' : 'white'}
               position='absolute' 
-              display={cancelado ? 'inline-block' : 'none'} 
+              display={mostrar ? 'inline-block' : 'none'} 
               zIndex={2} 
               p={3}
               top='50%'
               left='50%'
-              transform='translate(-50%, -50%) rotate(-12deg)'
+              transform='translate(-50%, -50%)'
               border='4px'
-              borderColor='rgba(255, 0, 0, 0.8)'
+              borderRadius={10}
+              borderColor={cancelado ? 'rgba(255, 0, 0, 0.8)' : 'white'}
             >
-              <b>CANCELADO</b>
+              <b>
+                {estado === 3 ? (
+                  'AGOTADO'
+                ) : estado === 4 ? (
+                  'FINALIZADO'
+                ) : estado === 5 ? (
+                  'CANCELADO'
+                ) : (
+                  ''
+                )}
+              </b>
             </Box>
           </Box>
           <Stack spacing='3'>
@@ -246,53 +303,22 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                   Hora: {hora}
                 </Heading>
               </Box>
-              <Grid templateColumns="100px 1fr" mt={3}>
-
+              <Box mt={2} align='end'>
                 {/* INFO */}
-                {user.rol === 'Cliente' && 
-                  <>
-                    <Button
-                      as={Link}
-                      to={`/conciertos/${slug}`}
-                      state={id}
-                      rounded='full'
-                      colorScheme={cancelado ? 'red' : 'whiteAlpha'}
-                      leftIcon={<InfoIcon />}
-                      size='xs'
-                    >
-                      Más info
-                    </Button>
-                    <Button
-                      as={Link}
-                      to={`/conciertos/${slug}`}
-                      state={id}
-                      rounded='full'
-                      colorScheme={cancelado ? 'red' : 'whiteAlpha'}
-                      rightIcon={<IoTicketSharp />}
-                      size='xs'
-                      ml={2}
-                    >
-                      {cancelado ? 'Cancelado' : 'Adquirir'}
-                    </Button>
-                  </>
-                }
+                <Button
+                  as={Link}
+                  to={`/conciertos/${slug}`}
+                  state={id}
+                  rounded='full'
+                  colorScheme={cancelado ? 'red' : 'whiteAlpha'}
+                  leftIcon={<InfoIcon />}
+                  size='xs'
+                >
+                  {user.rol === 'Cliente' ? 'Más info' : 'Detalles'}
+                </Button>
 
                 {user.rol !== 'Cliente' && 
                   <>
-                    {/* ANALITICA */}
-                    <Button
-                      as={Link}
-                      to='/analitica'
-                      state={id}
-                      rounded='full'
-                      colorScheme={cancelado ? 'red' : 'whiteAlpha'}
-                      rightIcon={<TbReportAnalytics size={16} />}
-                      size='xs'
-                      ml={2}
-                    >
-                      Analítica
-                    </Button>
-
                     {/* MENU */}
                     <Menu>
                       <MenuButton
@@ -300,8 +326,8 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                         rounded='full'
                         colorScheme={cancelado ? 'red' : 'whiteAlpha'}
                         rightIcon={<TriangleDownIcon />}
-                        ml={2}
                         size='xs'
+                        ml={4}
                       >
                         Opciones
                       </MenuButton>
@@ -309,16 +335,9 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                         <MenuItem
                           onClick={onModificarOpen}
                           icon={<SettingsIcon boxSize={4} />}
+                          display={estado === 4 || estado === 5 ? 'none': undefined}
                         >
                           Modificar
-                        </MenuItem>
-                        <MenuItem 
-                          as={Link}
-                          to='/pagos_concierto'
-                          color='green'
-                          icon={<MdPayments size={18} />}
-                        >
-                          Pagos
                         </MenuItem>
                         <MenuItem 
                           color='teal'
@@ -328,9 +347,27 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                           Entradas
                         </MenuItem>
                         <MenuItem 
+                          as={Link}
+                          to='/pagos_concierto'
+                          state={id}
+                          color='green'
+                          icon={<MdPayments size={18} />}
+                        >
+                          Ventas
+                        </MenuItem>
+                        <MenuItem 
+                          color='gray'
+                          onClick={handleProgramar}
+                          icon={<BellIcon boxSize={5} ml={-0.5} />}
+                          display={user.rol === 'Organizador' && estado === 1 ? undefined : 'none'}
+                        >
+                          Programar
+                        </MenuItem>
+                        <MenuItem 
                           color='red'
                           onClick={onCancelarOpen}
                           icon={<TbCancel size={18} />}
+                          display={estado === 4 || estado === 5 ? 'none': undefined}
                         >
                           Cancelar
                         </MenuItem>
@@ -338,7 +375,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                     </Menu>
                   </>
                 }
-              </Grid>
+              </Box>
             </Container>
           </Stack>
         </CardBody>
@@ -358,6 +395,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
               rounded='full'
               rightIcon={<AddIcon />}
               onClick={onCrearTipoOpen}
+              display={user.rol === 'Organizador' && estado !== 4 && estado !== 5? undefined : 'none'}
             >
               Crear Tipo
             </Button>
@@ -401,7 +439,15 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                       <Text fontSize='2xl' fontWeight='medium'>{t.reservadas}</Text>
                     </WrapItem>
                   </Wrap>
-                  <Box mt={2} display={t.activo ? undefined : 'none'}>
+                  <Box color='blackAlpha.900' fontWeight='medium'>  
+                    <Text my={2}>
+                      Precio: ${formatoPrecio(t.precio)}
+                    </Text>
+                    <Text my={2}>
+                      Limite de reserva: {t.limite_reserva}
+                    </Text>
+                  </Box>
+                  <Box mt={2} display={t.activo && estado !== 4 && estado !== 5 ? undefined : 'none'}>
                     <Button 
                       rounded='full' 
                       colorScheme='red' 
@@ -427,6 +473,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                       mt={2} 
                       onClick={() => handleAgregar(t.id)}
                       rightIcon={<AddIcon />}
+                      display={user.rol === 'Organizador' ? undefined: 'none'}
                     >
                       Agregar
                     </Button>
@@ -492,13 +539,13 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
         onClose={onCancelarClose}
       >
         <AlertDialogOverlay backdropFilter='blur(10px) invert(100%)'>
-          <AlertDialogContent bg='whiteAlpha.500' color='white' alignSelf='center'>
+          <AlertDialogContent bg='red.600' color='white' alignSelf='center'>
             <AlertDialogHeader fontSize='2xl'>
               Cancelar Concierto
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Se cancelara el concierto al igual que todas sus entradas. No podra generar ventas.
+              Se cancelara el concierto al igual que todos sus tipos de entradas con sus entradas. No podra generar ventas, ni ser modificado.
             </AlertDialogBody>
 
             <AlertDialogFooter>
@@ -513,7 +560,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
               <Button 
                 colorScheme='red' 
                 rounded='full' 
-                onClick={onCancelarClose} 
+                onClick={handleCancelarConciertoSubmit} 
                 ml={3}
                 _hover={{transform: 'scale(1.1)'}}
               >
@@ -530,7 +577,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
         onClose={onCancelarEntradaClose}
       >
         <AlertDialogOverlay backdropFilter='blur(10px) invert(100%)'>
-          <AlertDialogContent bg='whiteAlpha.500' color='white' alignSelf='center'>
+          <AlertDialogContent bg='red.600' color='white' alignSelf='center'>
             <AlertDialogHeader fontSize='2xl'>
               Cancelar Tipo de Entrada
             </AlertDialogHeader>
@@ -551,10 +598,9 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
 
                 {/* Modo cancelar TODO */}
                 {modoCancelarTodo ? (
-                  <Alert status="warning" rounded="md" color='orange'>
-                    <AlertIcon />
+                  <Text>
                     Esta acción cancelará todas las entradas de este tipo.
-                  </Alert>
+                  </Text>
                 ) : (
                   /* Modo cancelar por cantidad */
                   <>

@@ -9,14 +9,14 @@ import {
 export default function FiltrosPagos({ isOpen, onClose, onApply }) {
   const [fechaDesde, setFechaDesde] = useState('');
   const [fechaHasta, setFechaHasta] = useState('');
-  const [montoMin, setMontoMin] = useState('500.00');
-  const [montoMax, setMontoMax] = useState('500.00');
+  const [montoMin, setMontoMin] = useState('');
+  const [montoMax, setMontoMax] = useState('');
 
   const limpiar = () => {
     setFechaDesde('');
     setFechaHasta('');
-    setMontoMin('500.00');
-    setMontoMax('500.00');
+    setMontoMin('');
+    setMontoMax('');
   };
 
   const handleApply = () => {
@@ -82,8 +82,8 @@ export default function FiltrosPagos({ isOpen, onClose, onApply }) {
             precision={2}
             mb={2}
             value={montoMin}
-            onChange={(valueNumber) => {
-              setMontoMin(valueNumber)
+            onChange={(_, valueAsNumber) => {
+              setMontoMin(valueAsNumber)
             }}
           >
             <NumberInputField rounded='full' />
@@ -108,8 +108,8 @@ export default function FiltrosPagos({ isOpen, onClose, onApply }) {
             precision={2}
             mb={6}
             value={montoMax}
-            onChange={(valueNumber) => {
-              setMontoMax(valueNumber)
+            onChange={(_, valueAsNumber) => {
+              setMontoMax(valueAsNumber)
             }}
           >
             <NumberInputField rounded='full' />

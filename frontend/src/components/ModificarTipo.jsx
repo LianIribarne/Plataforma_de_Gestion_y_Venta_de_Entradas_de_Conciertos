@@ -7,7 +7,7 @@ import {
   NumberDecrementStepper,
 } from "@chakra-ui/react";
 import { useState, useEffect } from 'react';
-import formatoPrecio from "../utils/formatoPrecio";
+import formatoPrecio from "../utils/FormatoPrecio";
 import api from '../services/api'
 
 export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, limite_reserva }) {

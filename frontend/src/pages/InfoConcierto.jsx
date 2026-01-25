@@ -4,11 +4,12 @@ import {
   Box, Heading, Text, Image, 
   Grid, GridItem, AspectRatio, Button,
   Accordion, useToast, SimpleGrid,
-  Skeleton, SkeletonText,
+  Skeleton, SkeletonText, Center
 } from '@chakra-ui/react';
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { IoTicketSharp } from "react-icons/io5";
 import { InfoOutlineIcon, ArrowRightIcon, CalendarIcon, TimeIcon } from '@chakra-ui/icons';
+import { useAuth } from "../services/AuthContext";
 import EntradaInfo from '../components/ReservaEntrada';
 import formatoPrecio from '../utils/FormatoPrecio'
 import api from '../services/api';
@@ -42,7 +43,7 @@ export default function EventoDetalle() {
 
     fetchConcierto()
   }, [id_concierto])
-  
+
   const toast = useToast()
   const id = 'toast-activo';
 
@@ -57,10 +58,10 @@ export default function EventoDetalle() {
   // Obtener cantidades de entradas
   const [cantidades, setCantidades] = useState({});
 
-  const handleCantidadChange = (tipo, valor, precio) => {
+  const handleCantidadChange = (idTipoEntrada, valor, precio) => {
     setCantidades(prev => ({
       ...prev,
-      [tipo]: {
+      [idTipoEntrada]: {
         cantidad: valor,
         precio: precio,
       }
@@ -135,6 +136,62 @@ export default function EventoDetalle() {
     }
   }, [])
 
+  const { fetchReservaActiva, user } = useAuth();
+
+  if (concierto?.estado.nombre === 'Borrador' && user?.rol === 'Cliente') navigate("/conciertos")
+
+  const handleSubmit = async (e) => {
+    try {
+      const payload = {
+        items: Object.entries(cantidades)
+          .filter(([_, v]) => v.cantidad > 0)
+          .map(([tipoId, v]) => ({
+            tipo: Number(tipoId),
+            cantidad: v.cantidad,
+          }))
+      }
+
+      if (payload.items.length === 0) return;
+
+      const res = await api.post("/entradas/reservar/", payload);
+
+      const mensaje = res?.data?.message ?? "Reserva creada exitosamente";
+
+      toast({
+        title: mensaje,
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+        position: 'top',
+      });
+
+      fetchReservaActiva()
+      navigate("/pagos/proceso_pago")
+    } catch (error) {
+      let msg = "Error inesperado";
+
+      const data = error?.response?.data;
+        
+      if (data && typeof data === "object") {
+        const firstField = Object.keys(data)[0];
+        const firstError = data[firstField]?.[0];
+      
+        if (firstError) msg = firstError;
+      }
+
+      toast({
+        title: "Error",
+        description: msg,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+    }
+  };
+
+  const mostrar = ['Agotado', 'Finalizado', 'Cancelado'].includes(concierto?.estado.nombre)
+
   return (
     <Box px={5} pb={5}>
       {/* Titulo */}
@@ -172,17 +229,47 @@ export default function EventoDetalle() {
             {loading ? (
               <Skeleton w={400} h={400} borderRadius={10} />
             ) : (
-              <Image 
-                src={concierto?.imagen}
-                maxW="400px" 
-                borderRadius={10} 
-              />
+              <Center ml={14}>
+                <Image 
+                  src={concierto?.imagen}
+                  maxW="400px" 
+                  minW="400px" 
+                  borderRadius={10} 
+                  filter={mostrar ? 'brightness(50%)' : 'grayscale(1%)'} 
+                />
+
+                <Box 
+                  fontSize='5xl' 
+                  align='center'
+                  bg='black'
+                  color={concierto?.estado.nombre === 'Cancelado' ? 'rgba(255, 0, 0, 0.8)' : 'white'}
+                  position='absolute' 
+                  display={mostrar ? 'inline-block' : 'none'} 
+                  zIndex={2} 
+                  p={3}
+                  border='4px'
+                  borderRadius={10}
+                  borderColor={concierto?.estado.nombre === 'Cancelado' ? 'rgba(255, 0, 0, 0.8)' : 'white'}
+                >
+                  <b>
+                    {concierto?.estado.nombre === 'Agotado' ? (
+                      'AGOTADO'
+                    ) : concierto?.estado.nombre === 'Finalizado' ? (
+                      'FINALIZADO'
+                    ) : concierto?.estado.nombre === 'Cancelado' ? (
+                      'CANCELADO'
+                    ) : (
+                      ''
+                    )}
+                  </b>
+                </Box>
+              </Center>
             )}
 
             {loading ? (
               <Skeleton w={60} h={320} ml={20} my={12} borderRadius={10} />
             ) : (
-              <Box my={12} ml={20} fontSize='xl' color='whiteAlpha.800' bg='whiteAlpha.400' borderRadius={10}>
+              <Box my={12} pb={2} ml={20} fontSize='xl' color='whiteAlpha.800' bg='whiteAlpha.400' borderRadius={10}>
                 <Heading fontSize='2xl' my={3}>
                   <CalendarIcon mb={1} />{' '}
                   Fecha{' '}
@@ -223,46 +310,61 @@ export default function EventoDetalle() {
             color='gray.200'
             fontSize='3xl'
             mb={4}
+            display={concierto?.estado.nombre === 'Programado' || user.rol !== 'Cliente' ? undefined : 'none'}
           >
             <IoTicketSharp style={{ display: 'inline', marginBottom: '-4' }} />{' '}
             Entradas{' '}
             <IoTicketSharp style={{ display: 'inline', marginBottom: '-4' }} />
           </Heading>
 
-          <Box>
+          <Box display={concierto?.estado.nombre === 'Programado' || user.rol !== 'Cliente' ? undefined : 'none'}>
             <Accordion allowToggle bg='whiteAlpha.400' borderColor='whiteAlpha.50' py={5} width='600px' borderRadius={20}>
               {entradas.map((e) => (
                 <EntradaInfo
-                  key={e.nombre}
+                  key={e.id}
+                  id={e.id}
                   tipo={e.nombre}
                   disponibles={e.disponibles}
                   reservadas={e.reservadas}
                   precio={e.precio_legible}
                   precioNumber={e.precio}
                   cantMax={e.limite_reserva}
+                  activo={e.activo}
                   onCantChange={handleCantidadChange}
                 />
               ))}
             </Accordion>
 
             {/* Boton para reservar */}
-            <Box align='center'>
-              <Text 
-                mt={2} 
-                fontSize={14} 
-                color='gray.200'
-              >
-                <InfoOutlineIcon boxSize={3} mb={0.5} /> Podés reservar hasta {TOTAL_MAX} entradas en total.
-              </Text>
+            <Box align='center' display={concierto?.estado.nombre === 'Programado'  || user.rol !== 'Cliente' ? undefined : 'none'}>
+              {user.rol === 'Cliente' ? (
+                <Text 
+                  mt={2} 
+                  fontSize={14} 
+                  color='gray.200'
+                >
+                  <InfoOutlineIcon boxSize={3} mb={0.5} /> Podés reservar hasta {TOTAL_MAX} entradas en total.
+                </Text>
+              ) : (
+                <Text 
+                  mt={2} 
+                  fontSize={14} 
+                  color='gray.200'
+                >
+                  <InfoOutlineIcon boxSize={3} mb={0.5} /> Se puede reservar hasta {TOTAL_MAX} entradas en total.
+                </Text>
+              )}
 
               <Button 
-                colorScheme='whiteAlpha'
                 mt={2}
-                isDisabled={totalReserva === 0 || limiteSuperado ? true: false}
                 size='lg'
                 rounded='full'
+                onClick={handleSubmit}
+                colorScheme='whiteAlpha'
                 transition="all 0.3s ease"
                 _hover={{ transform: 'scale(1.1)' }}
+                isDisabled={totalReserva === 0 || limiteSuperado}
+                display={user.rol === 'Cliente' ? undefined : 'none'}
               >
                 Reservar
               </Button>
@@ -304,7 +406,7 @@ export default function EventoDetalle() {
                   style={{ border: 0, borderRadius: '12px' }}
                   loading="lazy"
                   allowFullScreen
-                  src={`https://www.google.com/maps?q=${concierto?.lugar.direccion}+${concierto?.lugar.provincia.ciudad.nombre}+${concierto?.lugar.provincia.nombre}+${concierto?.lugar.nombre}$&output=embed`}
+                  src={`https://www.google.com/maps?q=${concierto?.lugar.direccion}+${concierto?.lugar.provincia.ciudad.nombre}+${concierto?.lugar.provincia.nombre}+${concierto?.lugar.nombre}&output=embed`}
                 ></iframe>
               </AspectRatio>
             )}

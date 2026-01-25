@@ -1,4 +1,4 @@
-from decouple import config # lee los datos sensibles en el archivo .env
+from decouple import config, Csv # lee los datos sensibles en el archivo .env
 from datetime import timedelta
 from pathlib import Path
 import os
@@ -14,11 +14,14 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1'
+]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-CORS_ALLOWED_ORIGINS = [config("CORS_ALLOWED_ORIGINS")]
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", cast=Csv())
 
 CORS_ALLOW_CREDENTIALS = True
 

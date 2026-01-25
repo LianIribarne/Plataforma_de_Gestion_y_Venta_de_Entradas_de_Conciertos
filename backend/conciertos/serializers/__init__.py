@@ -10,7 +10,7 @@ from .artista import (
 from .concierto import (
     ConciertoMetaListSerializer, ConciertoCreateSerializer,
     ConciertoListSerializer, ConciertoUpdateSerializer,
-    ConciertoDetailSerializer, ConciertoDashboardSerializer
+    ConciertoDetailSerializer,
 )
 from .tipoEntrada import (
     CreateTipoEntradaSerializer, TipoEntradaCancelarSerializer,

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
-    CreateReservaView, CancelarReservaView, AdminCancelarReservaView,
-    ReservaActivaView
+    CreateReservaView, CancelarReservaView, ReservaActivaView,
+    QuitarEntradaReservaView, EntradaListaView, entrada_qr_view
 )
 
 urlpatterns = [
@@ -10,7 +10,14 @@ urlpatterns = [
 
     # cancelar reserva
     path('cancelar_reserva/', CancelarReservaView.as_view(), name='cancelar_reserva'),
-    path('admin/cancelar_reserva/<int:id>', AdminCancelarReservaView.as_view(), name='admin_cancelar_reserva'), # administrador
-    
+
+    # ver detalles de la reserva
     path('reserva_activa/', ReservaActivaView.as_view(), name='get-reservar_hasta-cliente'),
+
+    # quitar una entrada de la reserva
+    path('quitar_entrada/<int:tipo_id>', QuitarEntradaReservaView.as_view(), name='quitar_entrada'),
+
+    # entradas
+    path("entradas/qr/<str:token>/", entrada_qr_view),
+    path('entradas/', EntradaListaView.as_view(), name='listar_entradas'),
 ]

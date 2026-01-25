@@ -1,11 +1,18 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from celery.result import AsyncResult
+from collections import defaultdict
+import qrcode
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.db import transaction
 from usuarios.permissions import EsCliente, EsAdministrador
-from .models import Reserva
-from .serializers import ReservaCreateSerializer, ReservaEstadoSerializer
-from .services import liberar_reserva
+from .models import Reserva, Entrada
+from .serializers import ReservaCreateSerializer, ReservaActivaSerializer, ConciertoHeaderSerializer, EntradaItemSerializer
+from .services import liberar_reserva, liberar_entrada
 
+# reserva
 class CreateReservaView(generics.CreateAPIView):
     queryset = Reserva.objects.all()
     serializer_class = ReservaCreateSerializer
@@ -46,32 +53,151 @@ class CancelarReservaView(generics.GenericAPIView):
 
         return Response({"detail": "Reserva cancelada"}, status=status.HTTP_200_OK)
 
-class AdminCancelarReservaView(generics.GenericAPIView):
-    permission_classes = [EsAdministrador]
-    queryset = Reserva.objects.all()
+class ReservaActivaView(generics.RetrieveAPIView):
+    permission_classes = [EsCliente]
 
-    def post(self, request, id):
-        reserva = self.get_queryset().get(pk=id)
+    def get(self, request):
+        user = request.user
+
+        reserva = Reserva.objects.filter(
+            cliente=user,
+            activo=True
+        ).order_by("-id").first()
+
+        if not reserva:
+            return Response({
+                "tiene_reserva": False,
+                "reserva": None
+            })
+
+        serializer = ReservaActivaSerializer(reserva)
+
+        return Response({
+            "tiene_reserva": True,
+            "reserva": serializer.data
+        })
+
+class QuitarEntradaReservaView(generics.GenericAPIView):
+    permission_classes = [EsCliente]
+
+    @transaction.atomic
+    def post(self, request, **kwargs):
+        tipo_id = self.kwargs.get("tipo_id")
+
+        if not tipo_id:
+            return Response(
+                {"detail": "Tipo de entrada no especificado"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        reserva = Reserva.objects.filter(
+            cliente=request.user,
+            activo=True
+        ).select_for_update().first()
 
         if not reserva:
             return Response(
-                {"detail": "El cliente no tiene una reserva activa"},
+                {"detail": "No tenés una reserva activa"},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if reserva.task_id:
-            AsyncResult(reserva.task_id).revoke(terminate=False)
+        entrada = (
+            Entrada.objects
+            .select_for_update()
+            .filter(
+                reserva=reserva,
+                tipo_id=tipo_id,
+                estado="reservada"
+            )
+            .first()
+        )
 
-        liberar_reserva(reserva, cancelada=True)
+        if not entrada:
+            return Response(
+                {"detail": "No hay entradas de ese tipo en la reserva"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        return Response({"detail": "Reserva cancelada"}, status=status.HTTP_200_OK)
+        liberar_entrada(entrada)
 
-class ReservaActivaView(generics.RetrieveAPIView):
-    serializer_class = ReservaEstadoSerializer
-    permission_classes = [EsCliente]
+        quedan = Entrada.objects.filter(
+            reserva=reserva,
+            estado="reservada"
+        ).exists()
 
-    def get_object(self):
-        return Reserva.objects.filter(
-            cliente=self.request.user,
-            activo=True
-        ).first()
+        if not quedan:
+            if reserva.task_id:
+                AsyncResult(reserva.task_id).revoke(terminate=False)
+            reserva.activo = False
+            reserva.cancelada = True
+            reserva.save()
+
+            return Response(
+                {"detail": "Entrada quitada correctamente, y reserva cancelada."},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            {"detail": "Entrada quitada correctamente."},
+            status=status.HTTP_200_OK
+        )
+
+# entrada
+def entrada_qr_view(request, token):
+    entrada = get_object_or_404(
+        Entrada,
+        qr_token=token,
+        estado="vendida"
+    )
+
+    img = qrcode.make(entrada.qr_token)
+
+    response = HttpResponse(content_type="image/webp")
+    img.save(
+        response,
+        format="WEBP",
+        lossless=True,
+        quality=90
+    )
+    return response
+
+class EntradaListaView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.es_cliente:
+            return Entrada.objects.filter(
+                pago__cliente=user
+            ).select_related("pago", "tipo").order_by("tipo__precio")
+
+        if user.es_administrador:
+            return Entrada.objects.filter(
+                pago__isnull=False
+            ).select_related("pago", "tipo").order_by("tipo__precio")
+
+        return Entrada.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        agrupado = defaultdict(list)
+
+        for entrada in queryset:
+            concierto = entrada.tipo.evento
+            agrupado[concierto].append(entrada)
+
+        response = []
+
+        for concierto, entradas in agrupado.items():
+            response.append({
+                "concierto": ConciertoHeaderSerializer(concierto).data,
+                "entradas": EntradaItemSerializer(
+                    entradas,
+                    many=True,
+                    context={"request": request}
+                ).data
+            })
+
+        return Response(response)

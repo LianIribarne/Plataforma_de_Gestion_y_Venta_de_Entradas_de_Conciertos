@@ -11,7 +11,6 @@ import { useAuth } from "../services/AuthContext";
 export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSeleccionado, onClear }) {
   const [categoria, setCategoria] = useState(null);
   const [provincia, setProvincia] = useState(null);
-  const [entradas, setEntradas] = useState('');
   const [estado, setEstado] = useState(null);
   const [mood, setMood] = useState(null);
   const [rango_horario, setHorario] = useState('');
@@ -23,7 +22,6 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
     setCategoriaSel('')
     setProvincia(null);
     setProvinciaSel('')
-    setEntradas('');
     setEstado(null);
     setEstadoSel('')
     setMood(null);
@@ -37,7 +35,6 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
     onApply({
       categoria,
       provincia,
-      entradas,
       estado,
       mood,
       rango_horario,
@@ -107,24 +104,6 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
       <DrawerOverlay />
       <DrawerContent bg="whiteAlpha.900">
         <DrawerBody alignSelf='center' align='center' mt={20}>
-          
-          {/* ENTRADAS */}
-          <Menu>
-            <MenuButton 
-              as={Button} 
-              rightIcon={<ChevronDownIcon />} 
-              rounded='full' 
-              mb={6}
-              w="100%"
-              bg="whiteAlpha.800"
-            >
-              {entradas || "Entradas"}
-            </MenuButton>
-            <MenuList>
-              <MenuItem onClick={() => setEntradas("Disponibles")}>Disponibles</MenuItem>
-              <MenuItem onClick={() => setEntradas("Agotadas")}>Agotadas</MenuItem>
-            </MenuList>
-          </Menu>
 
           {/* CATEGORIA */}
           <Menu>

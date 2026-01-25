@@ -105,7 +105,7 @@ export default function Form() {
       h="100vh" 
       textAlign="center" 
       w='100%' 
-      bgGradient='radial(circle at center, cyan.600, teal.800)'
+      bgGradient='linear(to-r, cyan.800, cyan.500, cyan.800)'
     >
       <AbsoluteCenter w="70vh" color="gray.700" axis="both">
         <Heading textAlign="center" color='white' mb={4} fontSize='6xl'>

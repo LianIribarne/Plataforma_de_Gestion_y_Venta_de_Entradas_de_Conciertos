@@ -260,7 +260,7 @@ class AdminUsuarioDetailView(generics.RetrieveAPIView):
             raise PermissionDenied("No tenés permiso para ver información de administradores.")
 
         return user
-    
+
 class OrganizadorStatsView(generics.RetrieveAPIView):
     serializer_class = OrganizadorStatsSerializer
     permission_classes = [IsAuthenticated]

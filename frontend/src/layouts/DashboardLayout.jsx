@@ -13,6 +13,7 @@ import CrearArtista from '../components/CrearArtista';
 import CrearUsuario from '../components/CrearUsuario';
 import CrearLugar from '../components/CrearLugar';
 import { useAuth } from "../services/AuthContext";
+import useCountdown from '../utils/Temporizador'
 
 function Seccion({ url, label }) {
   return (
@@ -37,7 +38,12 @@ function Seccion({ url, label }) {
 }
 
 export default function DashboardLayout() {
-  const { user } = useAuth();
+  const { 
+    user, 
+    tieneReservaActiva, 
+    reservaActiva, 
+    fetchReservaActiva 
+  } = useAuth();
   const location = useLocation();
 
   const {
@@ -83,12 +89,18 @@ export default function DashboardLayout() {
 
   const tabIndexSafe = tabIndex === -1 ? 0 : tabIndex;
 
+  const timeLeft = useCountdown(reservaActiva?.reservar_hasta);
+  
+    useEffect(() => {
+      if (timeLeft?.total === 0) fetchReservaActiva()
+    }, [timeLeft]);
+
   return (
     <Box 
       w='100%' 
       pt={5} 
       minH='100vh' 
-      bgGradient='radial(circle at center, cyan.600, teal.800)'
+      bgGradient='linear(to-r, cyan.800, cyan.500, cyan.800)'
     >
       <Tabs 
         index={tabIndexSafe} 
@@ -200,18 +212,22 @@ export default function DashboardLayout() {
               </>
             }
             
-            {user.rol === 'Cliente' && location.pathname !== "/pagos/proceso_pago" && (
+            {user.rol === 'Cliente' && location.pathname !== "/pagos/proceso_pago" && tieneReservaActiva && (
               <Tooltip 
                 label={
                   <Box display="flex" alignItems="center" gap={2}>
-                    7:32 <TimeIcon />
+                    {timeLeft
+                      ? `${String(timeLeft.minutes).padStart(2, "0")}:${String(timeLeft.seconds).padStart(2, "0")}`
+                      : "--:--"}
+                    <TimeIcon />
                   </Box>
                 }
                 placement='left'
                 fontWeight='bold'
                 fontSize='2xl'
                 mr={1}
-                bg='red' 
+                bg={timeLeft?.minutes < 2 ? 'black' : 'white'} 
+                color={timeLeft?.minutes < 2 ? 'red.500' : 'black'}
                 closeOnClick={false} 
                 hasArrow 
                 isOpen

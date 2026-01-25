@@ -3,35 +3,18 @@ import {
   FormLabel, Input, Stat, StatLabel,
   StatNumber, StatHelpText, Text, Heading,
   Image, InputGroup, InputRightElement, Flex,
-  Tooltip, Select, Box, SimpleGrid,
+  Tooltip, Select, Box, SimpleGrid, IconButton,
+  useToast, AlertDialog, AlertDialogBody, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogContent, AlertDialogOverlay,
+  AlertDialogCloseButton, useDisclosure,
 } from "@chakra-ui/react";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useAuth } from "../services/AuthContext";
 import { MdLocalGroceryStore } from "react-icons/md";
-import { LockIcon, UnlockIcon } from "@chakra-ui/icons"
-import formatoPrecio from '../utils/FormatoPrecio'
-
-const reservas = [
-  {
-    tipo: 'General',
-    cantidad: 4,
-    precio: 25000,
-  },
-  {
-    tipo: 'VIP Early Access',
-    cantidad: 1,
-    precio: 45000,
-  },
-  // {
-  //   tipo: 'VIP+',
-  //   cantidad: 2,
-  //   precio: 45000,
-  // },
-  // {
-  //   tipo: 'VIP PLUS',
-  //   cantidad: 2,
-  //   precio: 45000,
-  // },
-]
+import { LockIcon, UnlockIcon, MinusIcon, TimeIcon } from "@chakra-ui/icons"
+import { useNavigate } from 'react-router-dom';
+import useCountdown from '../utils/Temporizador'
+import api from "../services/api";
 
 export default function ProcesoPago() {
   const [formData, setFormData] = useState({
@@ -40,19 +23,48 @@ export default function ProcesoPago() {
     cvv: "",
     nombre: "",
     apellido: "",
-    // provincia: "",
-    // ciudad: "",
     direccion: "",
   });
 
+  const { 
+    isOpen: isCancelarOpen, 
+    onOpen: onCancelarOpen, 
+    onClose: onCancelarClose 
+  } = useDisclosure()
+  const cancelCancelarRef = useRef()
+
+  const { 
+    isOpen: isQuitarOpen, 
+    onOpen: onQuitarOpen, 
+    onClose: onQuitarClose 
+  } = useDisclosure()
+  const cancelQuitarRef = useRef()
+
+  const toast = useToast()
+
+  const navigate = useNavigate()
+
+  const {
+    fetchReservaActiva,
+    tieneReservaActiva,
+    loadingReserva,
+    reservaActiva
+  } = useAuth();
+
+  useEffect(() => {
+    fetchReservaActiva()
+  }, []);
+
+  useEffect(() => {
+    if (loadingReserva) return;
+    if (tieneReservaActiva === null) return;
+    if (tieneReservaActiva === false) {
+      navigate("/conciertos");
+    }
+  }, [loadingReserva, tieneReservaActiva]);
+
   const [errors, setErrors] = useState({});
   const [tipoTarjeta, setTipoTarjeta] = useState(null);
-
-  // const [provincia, setProvincia] = useState("");
-  // const [ciudad, setCiudad] = useState("");
-
-  // const provincias = Object.keys(provinciasCiudades);
-  // const ciudades = provincia ? provinciasCiudades[provincia] : [];
 
   const detectarTipoTarjeta = (numero) => {
     if (/^4/.test(numero)) return "visa";
@@ -144,15 +156,9 @@ export default function ProcesoPago() {
     if (formData.cvv.length !== 3) newErrors.cvv = "CVV inválido";
     if (!formData.nombre.trim()) newErrors.nombre = "Es necesario";
     if (!formData.apellido.trim()) newErrors.apellido = "Es necesario";
-    // if (formData.provincia === "") newErrors.provincia = "Es necesario";
-    // if (formData.ciudad === "") newErrors.ciudad = "Es necesario";
     if (formData.direccion === "") newErrors.direccion = "Es necesario";
 
     setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      alert("Pago procesado ✅");
-    }
   };
 
   const [completo, setCompleto] = useState(false);
@@ -164,355 +170,492 @@ export default function ProcesoPago() {
       formData.cvv.length === 3 && 
       formData.nombre && 
       formData.apellido && 
-      // formData.provincia != "" && 
-      // formData.ciudad != "" && 
       formData.direccion;
 
     setCompleto(ok);
-  }, [formData]);
+  }, [formData])
 
-  const totalPagar = reservas.reduce(
-    (sum, r) => sum + r.precio * r.cantidad,
-    0
-  );
+  const quitarEntrada = async () => {
+    try {
+      const res = await api.post(`/entradas/quitar_entrada/${quitarId}`)
+
+      const mensaje = res?.data?.detail ?? "Se quito la entrada";
+
+      toast({
+        title: mensaje,
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+        position: 'top',
+      });
+
+      fetchReservaActiva()
+      setQuitarId(null)
+    } catch (error) {
+      let msg = "Error inesperado";
+
+      const data = error?.response?.data;
+        
+      if (data && typeof data === "object") {
+        const firstField = Object.keys(data)[0];
+        const firstError = data[firstField]?.[0];
+      
+        if (firstError) msg = firstError;
+      }
+
+      toast({
+        title: "Error",
+        description: msg,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+    }
+  };
+
+  const [quitarId, setQuitarId] = useState(null)
+  const handleQuitarClick = (id) => {
+    setQuitarId(id)
+    setOpen(false)
+    onQuitarOpen()
+  }
+
+  const timeLeft = useCountdown(reservaActiva?.reservar_hasta);
+
+  useEffect(() => {
+    if (timeLeft?.total === 0) {
+      fetchReservaActiva(); 
+      navigate("/conciertos");
+      window.location.reload();
+    }
+  }, [timeLeft]);
+
+  const cancelarReserva = async () => {
+    try {
+      const res = await api.post("/entradas/cancelar_reserva/")
+
+      const mensaje = res?.data?.detail ?? "Se cancelo";
+
+      toast({
+        title: mensaje,
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+        position: 'top',
+      });
+
+      fetchReservaActiva()
+      navigate("/conciertos")
+      window.location.reload()
+    } catch (error) {
+      let msg = "Error inesperado";
+
+      const data = error?.response?.data;
+        
+      if (data && typeof data === "object") {
+        const firstField = Object.keys(data)[0];
+        const firstError = data[firstField]?.[0];
+      
+        if (firstError) msg = firstError;
+      }
+
+      toast({
+        title: "Error",
+        description: msg,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+    }
+  }
+
+  const [open, setOpen] = useState(true) 
+
+  const handleComprar = async () => {
+    try {
+      const res = await api.post("/pagos/pagar_reserva/")
+
+      const mensaje = res?.data?.detail ?? "Se realizo la compra";
+
+      toast({
+        title: mensaje,
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+        position: 'top',
+      });
+
+      fetchReservaActiva()
+      navigate("/pagos")
+      window.location.reload()
+    } catch (error) {
+      let msg = "Error inesperado";
+
+      const data = error?.response?.data;
+        
+      if (data && typeof data === "object") {
+        const firstField = Object.keys(data)[0];
+        const firstError = data[firstField]?.[0];
+      
+        if (firstError) msg = firstError;
+      }
+
+      toast({
+        title: "Error",
+        description: msg,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+    }
+  }
 
   return (
-    <Box p={5}>
-      <Box
-        mb={8} 
-        align='center' 
-        color='white' 
-      >
-        <Heading display='inline-block' bg='whiteAlpha.400' p={2} borderRadius={20}>
-          Tu reserva expira en 07:32
-        </Heading>
-      </Box>
-
-      <form onSubmit={handleSubmit}>
-      <SimpleGrid 
-        columns={2}
-        spacing={4}
-        w='80%'
-        ml='10%'
-        align='center'
-      >
-        <Box 
-          align='center'
-          p={5}
-          bg='whiteAlpha.400'
-          borderRadius={18}
+    <>
+      <Box p={5}>
+        <Box
+          mb={8} 
+          align='center' 
+          color='white' 
         >
-          <Heading mb={4} color='white'>Método de Pago</Heading>
+          <Heading 
+            display="inline-block" 
+            bg={timeLeft?.minutes < 2 ? 'blackAlpha.800' : 'whiteAlpha.400'} 
+            px={3}
+            py={2} 
+            borderRadius={20}
+            color={timeLeft?.minutes < 2 ? 'red.500' : 'white'}
+          >
+            Tiempo restante:{" "}
+            {timeLeft
+              ? `${String(timeLeft.minutes).padStart(2, "0")}:${String(timeLeft.seconds).padStart(2, "0")}`
+              : "--:--"}
+            <TimeIcon ml={2} mb={2} />
+          </Heading>
+        </Box>
 
-          <Flex gap={2} align="flex-end">
-            <FormControl isInvalid={errors.numero} maxW={240}>
-              <FormLabel color='white'>Número de tarjeta</FormLabel>
-              <Tooltip
-                label={errors.numero}
-                isOpen={!!errors.numero}
-                placement="top"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <InputGroup maxW={240}>
+        <form onSubmit={handleSubmit}>
+        <SimpleGrid 
+          columns={2}
+          spacing={4}
+          w='80%'
+          ml='10%'
+          align='center'
+        >
+          <Box 
+            align='center'
+            p={5}
+            bg='whiteAlpha.400'
+            borderRadius={18}
+          >
+            <Heading mb={4} color='white'>Método de Pago</Heading>
+
+            <Flex gap={2} align="flex-end">
+              <FormControl isInvalid={errors.numero} maxW={240}>
+                <FormLabel color='white'>Número de tarjeta</FormLabel>
+                <Tooltip
+                  label={errors.numero}
+                  isOpen={!!errors.numero && open}
+                  placement="bottom"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <InputGroup maxW={240}>
+                    <Input
+                      name="numero"
+                      placeholder="1234 5678 9012 3456"
+                      autoComplete="cc-number"
+                      inputMode="numeric"
+                      variant="custom"
+                      rounded='full'
+                      value={formData.numero}
+                      onChange={handleChange}
+                    />
+                    {tipoTarjeta && (
+                      <InputRightElement>
+                        <Image
+                          src={
+                            tipoTarjeta === "visa"
+                              ? "https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
+                              : "https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
+                          }
+                          alt={tipoTarjeta}
+                          mr={2}
+                        />
+                      </InputRightElement>
+                    )}
+                  </InputGroup>
+                </Tooltip>
+              </FormControl>
+                
+              <FormControl isInvalid={errors.fecha} maxW={160}>
+                <FormLabel color='white'>Fecha de caducidad</FormLabel>
+                <Tooltip
+                  label={errors.fecha}
+                  isOpen={!!errors.fecha && open}
+                  placement="bottom"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
                   <Input
-                    name="numero"
-                    placeholder="1234 5678 9012 3456"
-                    autoComplete="cc-number"
+                    name="fecha"
+                    placeholder="MM/AA"
+                    autoComplete="cc-exp"
                     inputMode="numeric"
                     variant="custom"
                     rounded='full'
-                    value={formData.numero}
+                    maxW={90}
+                    value={formData.fecha}
                     onChange={handleChange}
                   />
-                  {tipoTarjeta && (
-                    <InputRightElement>
-                      <Image
-                        src={
-                          tipoTarjeta === "visa"
-                            ? "https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
-                            : "https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
-                        }
-                        alt={tipoTarjeta}
-                        mr={2}
+                </Tooltip>
+              </FormControl>
+                
+              <FormControl isInvalid={errors.cvv} maxW={70}>
+                <FormLabel color='white'>CVV</FormLabel>
+                <Tooltip
+                  label={errors.cvv}
+                  isOpen={!!errors.cvv && open}
+                  placement="bottom"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <Input
+                    name="cvv"
+                    type="password"
+                    placeholder="123"
+                    autoComplete="cc-csc"
+                    inputMode="numeric"
+                    variant="custom"
+                    rounded='full'
+                    maxW={70}
+                    value={formData.cvv}
+                    onChange={handleChange}
+                  />
+                </Tooltip>
+              </FormControl>
+            </Flex>
+
+            <Heading mt={8} color='white'>Información de Facturación</Heading>
+            <SimpleGrid columns={2} spacing={2}>
+              <FormControl mt={2}>
+                <FormLabel color='white'>Nombre</FormLabel>
+                <Tooltip
+                  label={errors.nombre}
+                  isOpen={!!errors.nombre && open}
+                  placement="top"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <Input
+                    name="nombre"
+                    placeholder="Ingrese su nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    variant='custom'
+                    rounded='full'
+                  />
+                </Tooltip>
+              </FormControl>
+
+              <FormControl mt={2}>
+                <FormLabel color='white'>Apellido</FormLabel>
+                <Tooltip
+                  label={errors.apellido}
+                  isOpen={!!errors.apellido && open}
+                  placement="top"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <Input
+                    name="apellido"
+                    placeholder="Ingrese su apellido"
+                    value={formData.apellido}
+                    onChange={handleChange}
+                    variant='custom'
+                    rounded='full'
+                  />
+                </Tooltip>
+              </FormControl>
+            </SimpleGrid>
+
+            <FormControl mt={2}>
+              <FormLabel color='white'>Dirección</FormLabel>
+              <Tooltip
+                label={errors.direccion}
+                isOpen={!!errors.direccion && open}
+                placement="top"
+                bg="red.500"
+                color="white"
+                hasArrow
+              >
+                <Input
+                  name="direccion"
+                  placeholder="Ingrese una dirección"
+                  value={formData.direccion}
+                  onChange={handleChange}
+                  variant='custom'
+                  rounded='full'
+                />
+              </Tooltip>
+            </FormControl>
+          </Box>
+
+          <Box 
+            align='center'
+            p={5}
+            bg='whiteAlpha.400'
+            borderRadius={18}
+            color='white'
+          >
+            <Heading>Información de Compra</Heading>
+            <Heading mb={6} mt={2} fontSize='2xl'>
+              <MdLocalGroceryStore 
+                style={{ 
+                  display: 'inline-block', 
+                  marginBottom: -6, 
+                  marginRight: 4,
+                }} 
+              />
+              Entradas
+            </Heading>
+
+            <Box>
+              <Wrap justify='center' align='center' spacing={4} w='90%'>
+                {reservaActiva?.items.map((r) => (
+                    <WrapItem key={r.tipo_id} bg='whiteAlpha.400' borderRadius={20} p={2}>
+                      <Stat>
+                        <StatLabel>{r.tipo_nombre} (Cant. {r.cantidad})</StatLabel>
+                        <StatNumber>{r.precio_total_tipo}</StatNumber>
+                        <StatHelpText>Precio unidad{" "}{r.precio_unitario}</StatHelpText>
+                      </Stat>
+                      <IconButton 
+                        position='absolute' 
+                        mt='-2vh' 
+                        ml={-2}
+                        size='xs' 
+                        colorScheme="red" 
+                        rounded='full'
+                        icon={<MinusIcon />}
+                        onClick={() => handleQuitarClick(r.tipo_id)}
                       />
-                    </InputRightElement>
-                  )}
-                </InputGroup>
-              </Tooltip>
-            </FormControl>
-              
-            <FormControl isInvalid={errors.fecha} maxW={160}>
-              <FormLabel color='white'>Fecha de caducidad</FormLabel>
-              <Tooltip
-                label={errors.fecha}
-                isOpen={!!errors.fecha}
-                placement="top"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Input
-                  name="fecha"
-                  placeholder="MM/AA"
-                  autoComplete="cc-exp"
-                  inputMode="numeric"
-                  variant="custom"
-                  rounded='full'
-                  maxW={90}
-                  value={formData.fecha}
-                  onChange={handleChange}
-                />
-              </Tooltip>
-            </FormControl>
-              
-            <FormControl isInvalid={errors.cvv} maxW={70}>
-              <FormLabel color='white'>CVV</FormLabel>
-              <Tooltip
-                label={errors.cvv}
-                isOpen={!!errors.cvv}
-                placement="bottom"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Input
-                  name="cvv"
-                  type="password"
-                  placeholder="123"
-                  autoComplete="cc-csc"
-                  inputMode="numeric"
-                  variant="custom"
-                  rounded='full'
-                  maxW={70}
-                  value={formData.cvv}
-                  onChange={handleChange}
-                />
-              </Tooltip>
-            </FormControl>
-          </Flex>
+                    </WrapItem>
+                ))}
+              </Wrap>
+            </Box>
 
-          <Heading mt={8} color='white'>Información de Facturación</Heading>
-          <SimpleGrid columns={2} spacing={2}>
-            <FormControl mt={2}>
-              <FormLabel color='white'>Nombre</FormLabel>
-              <Tooltip
-                label={errors.nombre}
-                isOpen={!!errors.nombre}
-                placement="top"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Input
-                  name="nombre"
-                  placeholder="Ingrese su nombre"
-                  value={formData.nombre}
-                  onChange={handleChange}
-                  variant='custom'
-                  rounded='full'
-                />
-              </Tooltip>
-            </FormControl>
+            <Box mt={6}>
+              <Text as='b' fontSize='2xl' display='inline-block' bg='whiteAlpha.400' p={3} borderRadius={20}>
+                Monto total{" "}
+                {reservaActiva?.precio_total_reserva}
+              </Text>
+            </Box>
 
-            <FormControl mt={2}>
-              <FormLabel color='white'>Apellido</FormLabel>
-              <Tooltip
-                label={errors.apellido}
-                isOpen={!!errors.apellido}
-                placement="top"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Input
-                  name="apellido"
-                  placeholder="Ingrese su apellido"
-                  value={formData.apellido}
-                  onChange={handleChange}
-                  variant='custom'
-                  rounded='full'
-                />
-              </Tooltip>
-            </FormControl>
-
-            {/* Select Provincia */}
-            {/* <FormControl mb={4}>
-              <FormLabel color="white">Provincia</FormLabel>
-              <Tooltip
-                label={errors.provincia}
-                isOpen={!!errors.provincia}
-                placement="top"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Select
-                  name="provincia"
-                  placeholder="Selecciona una provincia"
-                  value={provincia}
-                  variant='custom'
-                  onChange={(e) => {
-                    setProvincia(e.target.value);
-                    setCiudad("");
-                    handleChange(e);
-                  }}
-                  rounded='full'
-                >
-                  {provincias.map((prov) => (
-                    <option key={prov} value={prov} style={{ color: "black" }}>
-                      {prov}
-                    </option>
-                  ))}
-                </Select>
-              </Tooltip>
-            </FormControl> */}
-
-            {/* Select Ciudad */}
-            {/* <FormControl>
-              <FormLabel color="white">Ciudad</FormLabel>
-              <Tooltip
-                label={errors.ciudad}
-                isOpen={!!errors.ciudad}
-                placement="top"
-                bg="red.500"
-                color="white"
-                hasArrow
-              >
-                <Select
-                  name="ciudad"
-                  placeholder="Selecciona una ciudad"
-                  value={ciudad}
-                  variant='custom'
-                  onChange={(e) => {
-                    setCiudad(e.target.value);
-                    handleChange(e);
-                  }}
-                  isDisabled={!provincia}
-                  rounded='full'
-                >
-                  {ciudades.map((c) => (
-                    <option key={c} value={c} style={{ color: "black" }}>
-                      {c}
-                    </option>
-                  ))}
-                </Select>
-              </Tooltip>
-            </FormControl> */}
-          </SimpleGrid>
-
-          <FormControl>
-            <FormLabel color='white'>Dirección</FormLabel>
-            <Tooltip
-              label={errors.direccion}
-              isOpen={!!errors.direccion}
-              placement="top"
-              bg="red.500"
-              color="white"
-              hasArrow
-            >
-              <Input
-                name="direccion"
-                placeholder="Ingrese una dirección"
-                value={formData.direccion}
-                onChange={handleChange}
-                variant='custom'
+            <Box display='inline-block'>
+              <Button 
+                mt={6} 
+                colorScheme="red" 
                 rounded='full'
-              />
-            </Tooltip>
-          </FormControl>
-        </Box>
+                size='lg'
+                onClick={() => {onCancelarOpen(), setOpen(false)}}
+              >
+                Cancelar
+              </Button>
 
-        <Box 
-          align='center'
-          p={5}
-          bg='whiteAlpha.400'
-          borderRadius={18}
-           color='white'
-        >
-          <Heading>Información de Compra</Heading>
-          <Heading mb={6} mt={2} fontSize='2xl'>
-            <MdLocalGroceryStore 
-              style={{ 
-                display: 'inline-block', 
-                marginBottom: -6, 
-                marginRight: 4,
-              }} 
-            />
-            Entradas
-          </Heading>
+              <Button 
+                mt={6} 
+                colorScheme="whiteAlpha" 
+                type="submit"
+                rounded='full'
+                size='lg'
+                isDisabled={!completo}
+                ml={2}
+                onClick={handleComprar}
+              >
+                Comprar
+              </Button>
+            </Box>
 
-          <Box>
-            <Wrap justify='center' align='center' spacing={4} w='90%'>
-              {reservas.map((r) => (
-                  <WrapItem key={r.tipo} bg='whiteAlpha.400' borderRadius={20} p={2}>
-                    <Stat>
-                      <StatLabel>{r.tipo} (Cant. {r.cantidad})</StatLabel>
-                      <StatNumber>${formatoPrecio((r.precio * r.cantidad))}</StatNumber>
-                      <StatHelpText>Precio unidad ${formatoPrecio(r.precio)}</StatHelpText>
-                    </Stat>
-                    <Button 
-                      position='absolute' 
-                      mt='-3vh' 
-                      ml='16vh' 
-                      size='xs' 
-                      colorScheme="red" 
-                      rounded='full'
-                    >
-                      Quitar 1
-                    </Button>
-                  </WrapItem>
-              ))}
-            </Wrap>
+            <Box display='inline' ml={2}>
+              {!completo ? 
+                <LockIcon 
+                  boxSize={10} 
+                  mt={5} 
+                  color='whiteAlpha.600'
+                /> : 
+                <UnlockIcon 
+                  boxSize={10} 
+                  mt={5} 
+                  color='whiteAlpha.600'
+                />
+              }
+            </Box>
           </Box>
+        </SimpleGrid>
+        </form>
+      </Box>
 
-          <Box mt={6}>
-            <Text as='b' fontSize='2xl' display='inline-block' bg='whiteAlpha.400' p={3} borderRadius={20}>
-              Monto total $
-              {formatoPrecio(totalPagar)}
-            </Text>
-          </Box>
+      <AlertDialog
+        motionPreset='slideInBottom'
+        leastDestructiveRef={cancelCancelarRef}
+        onClose={() => {onCancelarClose(), setOpen(true)}}
+        isOpen={isCancelarOpen}
+        isCentered
+      >
+        <AlertDialogOverlay backdropFilter='blur(10px) invert(100%)' />
 
-          <Box display='inline-block'>
-            <Button 
-              mt={6} 
-              colorScheme="red" 
-              rounded='full'
-              size='lg'
-            >
-              Cancelar
+        <AlertDialogContent bg='red.600' color='white'>
+          <AlertDialogHeader>Cancelar Reserva</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+            ¿Querés cancelar la reserva?<br />
+            Las entradas se liberarán y podrán ser reservadas por otra persona. Esta acción no se puede deshacer.
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button rounded='full' ref={cancelCancelarRef} onClick={() => {onCancelarClose(), setOpen(true)}}>
+              No
             </Button>
-
-            <Button 
-              mt={6} 
-              colorScheme="whiteAlpha" 
-              type="submit"
-              rounded='full'
-              size='lg'
-              ml={2}
-            >
-              Comprar
+            <Button rounded='full' colorScheme='red' ml={3} onClick={cancelarReserva}>
+              Si
             </Button>
-          </Box>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-          <Box display='inline' ml={2}>
-            {!completo ? 
-              <LockIcon 
-                boxSize={10} 
-                mt={5} 
-                color='whiteAlpha.600'
-              /> : 
-              <UnlockIcon 
-                boxSize={10} 
-                mt={5} 
-                color='whiteAlpha.600'
-              />
-            }
-          </Box>
-        </Box>
-      </SimpleGrid>
-      </form>
-    </Box>
+      <AlertDialog
+        motionPreset='slideInBottom'
+        leastDestructiveRef={cancelQuitarRef}
+        onClose={() => {onQuitarClose(), setOpen(true)}}
+        isOpen={isQuitarOpen}
+        isCentered
+      >
+        <AlertDialogOverlay backdropFilter='blur(10px) invert(100%)' />
+
+        <AlertDialogContent bg='red.600' color='white'>
+          <AlertDialogHeader>Quitar Entrada</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+            ¿Querés quitar 1 entrada de este tipo de tu reserva?<br />
+            Se liberará inmediatamente y volverá a estar disponible para otros.
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button rounded='full' ref={cancelQuitarRef} onClick={() => {onQuitarClose(), setQuitarId(null), setOpen(true)}}>
+              No
+            </Button>
+            <Button rounded='full' colorScheme='red' ml={3} onClick={() => {quitarEntrada(), onQuitarClose(), setOpen(true)}}>
+              Si
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

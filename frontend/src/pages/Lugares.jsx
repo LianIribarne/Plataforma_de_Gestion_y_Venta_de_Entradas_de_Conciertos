@@ -1,5 +1,5 @@
 import { 
-  Box, Heading,
+  Box, Heading, AspectRatio,
   Text, Wrap, WrapItem, HStack,
   Button, Popover, PopoverTrigger, PopoverContent,
   PopoverHeader, PopoverBody, PopoverArrow, PopoverCloseButton,
@@ -13,7 +13,7 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import ModificarLugar from "../components/ModificarLugar"
 import api from '../services/api'
 
-function Lugar({ id, nombre, direccion, estadoLugar }) {
+function Lugar({ id, nombre, direccion, ciudad, provincia, estadoLugar }) {
   const { isOpen, onToggle, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -75,6 +75,10 @@ function Lugar({ id, nombre, direccion, estadoLugar }) {
     }
   }
 
+  const query = encodeURIComponent(
+    `${direccion} ${ciudad} ${provincia} ${nombre}`
+  )
+
   return (
     <>
       <Popover isOpen={isOpen} onClose={onClose}>
@@ -90,13 +94,26 @@ function Lugar({ id, nombre, direccion, estadoLugar }) {
             <Badge colorScheme={estado ? "green" : "red"} fontSize='2xs' position='absolute'>
               {estado ? undefined : "Suspendido"}
             </Badge>
-            <Box p={4}>
+            <Box p={4} align='center'>
               <Text color='whiteAlpha.900' as='b' fontSize='xl'>{nombre}</Text><br />
               <Text color='whiteAlpha.800' as='b' fontSize='sm'>
                 <FaMapMarkerAlt style={{ display: 'inline', marginRight: 4 }} />
                 {direccion}
                 <FaMapMarkerAlt style={{ display: 'inline', marginLeft: 4 }} />
               </Text>
+              <AspectRatio 
+                mt={2}
+                minW="200px" 
+                maxW="200px" 
+                ratio={16 / 9}
+              >
+                <iframe
+                  style={{ border: 0, borderRadius: '12px' }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://www.google.com/maps?q=${query}&output=embed`}
+                />
+              </AspectRatio>
             </Box>
           </WrapItem>
         </PopoverTrigger>   
@@ -145,7 +162,7 @@ function Lugar({ id, nombre, direccion, estadoLugar }) {
         isCentered
       >
         <AlertDialogOverlay backdropFilter='blur(10px) invert(100%)'>
-          <AlertDialogContent bg='whiteAlpha.500' color='white' alignSelf='center'>
+          <AlertDialogContent bg='red.600' color='white' alignSelf='center'>
             <AlertDialogHeader fontSize='2xl'>
               Suspender Lugar
             </AlertDialogHeader>
@@ -429,6 +446,8 @@ export default function Lugares() {
                                 id={lugar.id}
                                 nombre={lugar.nombre}
                                 direccion={lugar.direccion}
+                                ciudad={ciudad.nombre}
+                                provincia={provincia.nombre}
                                 estadoLugar={lugar.activo}
                               />
                             ))}

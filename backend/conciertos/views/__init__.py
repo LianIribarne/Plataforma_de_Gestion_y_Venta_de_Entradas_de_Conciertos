@@ -1,5 +1,5 @@
 from .lugar import (
-    ProvinciaListView, CiudadListView, 
+    ProvinciaListView, CiudadListView,
     LugarCreateView, LugarListView,
     LugarModificarView
 )
@@ -11,7 +11,7 @@ from .artista import (
 from .concierto import (
     ConciertoMetaListView, ConciertoCreateView,
     ConciertoListView, ConciertoUpdateView,
-    ConciertoDetailView, ConciertoStatsView
+    ConciertoDetailView, CancelarConciertoView
 )
 from .tipoEntrada import (
     TipoEntradaCreateView, TipoEntradaCancelarView,

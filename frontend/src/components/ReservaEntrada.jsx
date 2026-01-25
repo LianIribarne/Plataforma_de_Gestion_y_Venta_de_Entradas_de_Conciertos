@@ -15,6 +15,7 @@ import {
 import { IoTicketSharp } from "react-icons/io5";
 import { MdLocalGroceryStore } from "react-icons/md";
 import { ArrowRightIcon } from '@chakra-ui/icons';
+import { useAuth } from "../services/AuthContext";
 
 function Reservar({ value, onChange, max, placeholder }) {
   const {
@@ -49,16 +50,18 @@ function Reservar({ value, onChange, max, placeholder }) {
   );
 }
 
-export default function EntradaInfo({ tipo, disponibles, reservadas, precio, precioNumber, cantMax, onCantChange }) {
+export default function EntradaInfo({ id, tipo, disponibles, reservadas, precio, precioNumber, cantMax, activo, onCantChange }) {
   const [cant, setCant] = useState(0);
 
   const handleChange = (valor) => {
     setCant(valor);
-    onCantChange?.(tipo, valor, precioNumber); // avisa a EventoDetalle
+    onCantChange?.(id, valor, precioNumber); // avisa a EventoDetalle
   }
 
+  const { user } = useAuth();
+
   return (
-    <AccordionItem>
+    <AccordionItem display={activo && (disponibles > 0 || reservadas > 0) ? undefined : 'none'}>
       <h2>
         <AccordionButton>
           <Badge 
@@ -85,7 +88,7 @@ export default function EntradaInfo({ tipo, disponibles, reservadas, precio, pre
               <b>{tipo} <ArrowRightIcon mb={1} boxSize={4} /> {precio}</b>
             </Text>
           </Box>
-          <AccordionIcon />
+          <AccordionIcon color='white' />
         </AccordionButton>
       </h2>
       <AccordionPanel pb={4} align='center'>
@@ -114,15 +117,23 @@ export default function EntradaInfo({ tipo, disponibles, reservadas, precio, pre
         >
           <b>Reservadas <ArrowRightIcon mb={1} boxSize={4} /> {reservadas} <IoTicketSharp style={{ display: 'inline', marginBottom: '-3' }} /></b>
         </Text>
-        <Text color='whiteAlpha.900' mb={2}>
-          <b>Cantidad a reservar (max. {cantMax})</b>
-        </Text>
-        <Reservar
-          value={cant}
-          onChange={handleChange}
-          max={cantMax}
-          placeholder="Cantidad"
-        />
+        {user.rol === 'Cliente' ? (
+          <Text color='whiteAlpha.900' mb={2}>
+            <b>Cantidad de entradas reservar (max. {cantMax})</b>
+          </Text>
+        ) : (
+          <Text color='whiteAlpha.900' mb={2}>
+            <b>Limite de reserva {cantMax}</b>
+          </Text>
+        )}
+        <Box display={user.rol === 'Cliente' ? undefined : 'none'}>
+          <Reservar
+            value={cant}
+            onChange={handleChange}
+            max={disponibles > cantMax ? cantMax : disponibles}
+            placeholder="Cantidad"
+          />
+        </Box>
       </AccordionPanel>
     </AccordionItem>
   )

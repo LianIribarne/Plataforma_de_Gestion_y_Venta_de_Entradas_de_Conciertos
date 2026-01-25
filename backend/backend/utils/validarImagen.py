@@ -1,6 +1,5 @@
 from PIL import Image
 from django.core.exceptions import ValidationError
-from io import BytesIO
 
 MAX_SIZE = 5 * 1024 * 1024  # 5 MB
 FORMATOS_PERMITIDOS = ("JPEG", "PNG", "WEBP")

@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
 import Conciertos from '../pages/Conciertos';
 import InfoConcierto from '../pages/InfoConcierto';
-import AnaliticaConcierto from '../pages/AnaliticaConcierto';
 import Usuarios from '../pages/Usuarios';
 import Lugares from '../pages/Lugares';
 import Artistas from '../pages/Artistas';
@@ -35,15 +34,13 @@ export default function AppRoutes() {
 
         {/* CONCIERTOS */}
         <Route path="conciertos" element={<Conciertos />} />
+        <Route path="conciertos/:slug" element={<InfoConcierto />} />
 
         {/* PERFIL */}
         <Route path="perfil" element={<Perfil />} />
 
         {/* -----CLIENTE----- */}
         <Route element={<ProtectedRoute allowedRoles={['Administrador', 'Organizador']} />}>
-          {/* CONCIERTO */}
-          <Route path="conciertos/:slug" element={<InfoConcierto />} />
-
           {/* PAGOS */}
           <Route path="pagos" element={<Pagos />} />
           <Route path="pagos/proceso_pago" element={<ProcesoPago />} />
@@ -55,8 +52,6 @@ export default function AppRoutes() {
 
         {/* -----ADMIN/ORGANIZADOR----- */}
         <Route element={<ProtectedRoute allowedRoles={['Cliente']} />}>
-          {/* ANALÍTICA */}
-          <Route path="analitica" element={<AnaliticaConcierto />} />
           <Route path="pagos_concierto" element={<PagosConcierto />} />
         </Route>
         {/* -----ADMIN/ORGANIZADOR----- */}
@@ -67,8 +62,10 @@ export default function AppRoutes() {
           <Route path="usuarios" element={<Usuarios />} />
           <Route path="usuarios/detalle_organizador" element={<DetallesOrganizador />} />
           <Route path="usuarios/detalle_cliente" element={<DetallesCliente />} />
+
           {/* LUGARES */}
           <Route path="lugares" element={<Lugares />} />
+          
           {/* ARTISTAS */}
           <Route path="artistas" element={<Artistas />} />
         </Route>

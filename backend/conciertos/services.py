@@ -1,7 +1,12 @@
+from celery.result import AsyncResult
+import secrets
+from django.db.models import Count, Q
 from django.db import transaction
 from django.db.models import Max
 from django.core.exceptions import ValidationError
-from entradas.models import Entrada
+from entradas.models import Entrada, Reserva
+from conciertos.models import Concierto, TipoEntrada, ConciertoMeta
+from entradas.services import liberar_reserva
 
 def cancelar_tipo(tipo):
     with transaction.atomic():
@@ -48,17 +53,26 @@ def agregar_entradas(tipo, cantidad):
         if nueva_cantidad_total > 10000:
             raise ValidationError("La cantidad total no puede superar 10000")
 
-        nuevas = [
-            Entrada(
-                tipo=tipo,
-                precio=tipo.precio,
-                estado="disponible"
+        tokens = set()
+        nuevas = []
+
+        for _ in range(cantidad):
+            while True:
+                token = secrets.token_urlsafe(32)
+                if token not in tokens:
+                    tokens.add(token)
+                    break
+
+            nuevas.append(
+                Entrada(
+                    tipo=tipo,
+                    precio=tipo.precio,
+                    qr_token=token
+                )
             )
-            for _ in range(cantidad)
-        ]
 
         Entrada.objects.bulk_create(nuevas)
-                
+
         tipo.cantidad_total = nueva_cantidad_total
         tipo.save(update_fields=["cantidad_total"])
 
@@ -72,3 +86,79 @@ def sincronizar_limite_concierto(concierto):
     if concierto.limite_reserva_total < max_limite_tipo:
         concierto.limite_reserva_total = max_limite_tipo
         concierto.save(update_fields=["limite_reserva_total"])
+
+@transaction.atomic
+def cancelar_concierto(concierto_id: int):
+    concierto = (
+        Concierto.objects
+        .select_for_update()
+        .get(id=concierto_id)
+    )
+
+    if concierto.estado.codigo in ["cancelado", "finalizado"]:
+        return concierto
+
+    estado_cancelado = ConciertoMeta.objects.get(nombre="Cancelado")
+
+    if hasattr(concierto, "estado"):
+        concierto.estado = estado_cancelado
+    concierto.save(update_fields=["estado"])
+
+    TipoEntrada.objects.filter(evento=concierto, activo=True).update(activo=False)
+
+    reservas_activas = (
+        Reserva.objects
+        .select_for_update()
+        .filter(concierto=concierto, activo=True)
+    )
+
+    for reserva in reservas_activas:
+        if getattr(reserva, "task_id", None):
+            AsyncResult(reserva.task_id).revoke(terminate=False)
+
+        liberar_reserva(reserva, cancelada=True)
+
+    Entrada.objects.filter(
+        tipo__evento=concierto,
+        estado__in=["disponible", "reservada", "vendida"],
+    ).update(estado="cancelada")
+
+    return concierto
+
+def actualizar_estado_por_stock(concierto):
+    estado_actual = concierto.estado.codigo
+
+    if estado_actual in ["borrador", "cancelado", "finalizado"]:
+        return
+
+    tipos_activos = concierto.tipos_entrada.filter(activo=True)
+
+    if not tipos_activos.exists():
+        return
+
+    quedan = (
+        tipos_activos
+        .annotate(
+            disponibles=Count(
+                "entrada",
+                filter=Q(entrada__estado="disponible")
+            )
+        )
+        .filter(disponibles__gt=0)
+        .exists()
+    )
+
+    if quedan:
+        if estado_actual == "agotado":
+            concierto.estado = ConciertoMeta.objects.get(
+                tipo="estado",
+                codigo="programado"
+            )
+            concierto.save(update_fields=["estado"])
+    else:
+        if estado_actual != "agotado":
+            concierto.estado = ConciertoMeta.objects.get(
+                tipo="estado",
+                codigo="agotado"
+            )
+            concierto.save(update_fields=["estado"])

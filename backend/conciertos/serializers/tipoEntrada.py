@@ -1,136 +1,18 @@
 from rest_framework import serializers
+import secrets
 from django.db import transaction
 from conciertos.models import TipoEntrada
+from conciertos.services import sincronizar_limite_concierto, actualizar_estado_por_stock
 from entradas.models import Entrada
 
+# crear concierto
 class TipoEntradaCreateSerializer(serializers.Serializer):
     nombre = serializers.CharField(max_length=100)
     precio = serializers.DecimalField(max_digits=10, decimal_places=2)
     cantidad_total = serializers.IntegerField(min_value=1)
     limite_reserva = serializers.IntegerField(min_value=1)
 
-class TipoEntradaStatsSerializer(serializers.ModelSerializer):
-    disponibles = serializers.SerializerMethodField()
-    vendidas = serializers.SerializerMethodField()
-    canceladas = serializers.SerializerMethodField()
-    precio = serializers.SerializerMethodField()
-
-    class Meta:
-        model = TipoEntrada
-        fields = [
-            "id", "nombre", "precio", "cantidad_total",
-            "disponibles", "vendidas", "canceladas", "limite_reserva",
-        ]
-
-    def _valor_o_sin_info(self, value):
-        return "Sin información" if value in [0, None] else value
-
-    def get_disponibles(self, obj):
-        return self._valor_o_sin_info(obj.disponibles)
-
-    def get_vendidas(self, obj):
-        return self._valor_o_sin_info(obj.vendidas)
-
-    def get_canceladas(self, obj):
-        return self._valor_o_sin_info(obj.canceladas)
-
-    def get_precio(self, obj):
-        return f"${obj.precio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
-class TipoEntradaReservasStatsSerializer(serializers.ModelSerializer):
-    reservas_totales = serializers.SerializerMethodField()
-    reservas_activas = serializers.SerializerMethodField()
-    reservas_expiradas = serializers.SerializerMethodField()
-    reservas_finalizadas = serializers.SerializerMethodField()
-
-    reservas_activas_pct = serializers.SerializerMethodField()
-    reservas_expiradas_pct = serializers.SerializerMethodField()
-    reservas_finalizadas_pct = serializers.SerializerMethodField()
-
-    ratio_reserva_compra = serializers.SerializerMethodField()
-
-    ingreso_real = serializers.SerializerMethodField()
-    ingreso_estimado = serializers.SerializerMethodField()
-
-    class Meta:
-        model = TipoEntrada
-        fields = [
-            "id", "nombre",
-
-            # reservas
-            "reservas_totales", "reservas_activas", "reservas_expiradas", "reservas_finalizadas",
-
-            # porcentajes
-            "reservas_activas_pct", "reservas_expiradas_pct", "reservas_finalizadas_pct",
-
-            # ratio
-            "ratio_reserva_compra",
-
-            # dinero
-            "ingreso_real", "ingreso_estimado",
-        ]
-
-    def _valor_o_sin_info(self, value):
-        return "Sin información" if value in [0, None] else value
-
-    def get_reservas_totales(self, obj):
-        return self._valor_o_sin_info(obj.reservas_totales)
-
-    def get_reservas_activas(self, obj):
-        return self._valor_o_sin_info(obj.reservas_activas)
-
-    def get_reservas_expiradas(self, obj):
-        return self._valor_o_sin_info(obj.reservas_expiradas)
-
-    def get_reservas_finalizadas(self, obj):
-        return self._valor_o_sin_info(obj.reservas_finalizadas)
-
-    def get_reservas_activas_pct(self, obj):
-        if obj.reservas_activas_pct in [0, None]:
-            return "Sin información"
-
-        porcentaje = obj.reservas_activas_pct * 100
-        porcentaje = round(porcentaje, 2)
-
-        return f"{porcentaje:.2f}".replace(".", ",") + "%"
-
-    def get_reservas_expiradas_pct(self, obj):
-        if obj.reservas_expiradas_pct in [0, None]:
-            return "Sin información"
-
-        porcentaje = obj.reservas_expiradas_pct * 100
-        porcentaje = round(porcentaje, 2)
-
-        return f"{porcentaje:.2f}".replace(".", ",") + "%"
-
-    def get_reservas_finalizadas_pct(self, obj):
-        if obj.reservas_finalizadas_pct in [0, None]:
-            return "Sin información"
-
-        porcentaje = obj.reservas_finalizadas_pct * 100
-        porcentaje = round(porcentaje, 2)
-
-        return f"{porcentaje:.2f}".replace(".", ",") + "%"
-
-    def get_ratio_reserva_compra(self, obj):
-        if obj.ratio_reserva_compra in [0, None]:
-            return "Sin información"
-
-        porcentaje = obj.ratio_reserva_compra * 100
-        porcentaje = round(porcentaje, 2)
-
-        return f"{porcentaje:.2f}".replace(".", ",") + "%"
-
-    def get_ingreso_real(self, obj):
-        if obj.ingreso_real in [0, None]:
-            return "Sin información"
-        return f"${obj.ingreso_real:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
-    def get_ingreso_estimado(self, obj):
-        if obj.ingreso_estimado in [0, None]:
-            return "Sin información"
-        return f"${obj.ingreso_estimado:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
+# ver detalle del concierto
 class TipoEntradaConciertoSerializer(serializers.ModelSerializer):
     disponibles = serializers.SerializerMethodField()
     reservadas = serializers.SerializerMethodField()
@@ -139,13 +21,9 @@ class TipoEntradaConciertoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoEntrada
         fields = [
-            "nombre",
-            "precio",
-            "precio_legible",
-            "cantidad_total",
-            "limite_reserva",
-            "disponibles",
-            "reservadas",
+            "id", "nombre", "precio", "precio_legible",
+            "cantidad_total", "limite_reserva", "disponibles",
+            "reservadas", "activo"
         ]
 
     def get_disponibles(self, obj):
@@ -166,20 +44,15 @@ class CreateTipoEntradaSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         usuario = request.user
         concierto = attrs["evento"]
-        limite_reserva = attrs["limite_reserva"]
 
         if concierto.organizador != usuario:
             raise serializers.ValidationError(
                 {"evento": "No sos el organizador de este concierto."}
             )
 
-        if limite_reserva > concierto.limite_reserva_total:
+        if concierto.estado.codigo in ['cancelado', 'finalizado']:
             raise serializers.ValidationError(
-                {
-                    "limite_reserva": (
-                        "No puede superar el límite de reserva total del concierto."
-                    )
-                }
+                {"evento": "No se puede agregar otro tipo de entrada al concierto."}
             )
 
         tipos_activos = TipoEntrada.objects.filter(
@@ -197,23 +70,31 @@ class CreateTipoEntradaSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         tipo = TipoEntrada.objects.create(**validated_data)
+        sincronizar_limite_concierto(tipo.evento)
 
-        entradas = [
-            Entrada(
-                tipo=tipo,
-                precio=tipo.precio
+        tokens = set()
+        entradas = []
+
+        for _ in range(tipo.cantidad_total):
+            while True:
+                token = secrets.token_urlsafe(32)
+                if token not in tokens:
+                    tokens.add(token)
+                    break
+
+            entradas.append(
+                Entrada(
+                    tipo=tipo,
+                    precio=tipo.precio,
+                    qr_token=token
+                )
             )
-            for _ in range(tipo.cantidad_total)
-        ]
 
         Entrada.objects.bulk_create(entradas)
 
-        return tipo
+        actualizar_estado_por_stock(tipo.evento)
 
-class TipoEntadaUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TipoEntrada
-        fields = ['nombre', 'precio', 'limite_reserva', 'activo']
+        return tipo
 
 class TipoEntradaMiniSerializer(serializers.ModelSerializer):
     disponibles = serializers.SerializerMethodField()

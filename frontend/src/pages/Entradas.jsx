@@ -1,83 +1,13 @@
 import {
-  Heading, 
-  HStack,
-  Grid, 
-  GridItem,
-  Wrap,
-  WrapItem,
-  Text, 
-  Box, 
-  Checkbox,
-  Button,
-  AbsoluteCenter,
-  Link,
+  Heading, HStack, Wrap, WrapItem,
+  Text, Box, Checkbox, Button,
+  AbsoluteCenter, Link, Tooltip,
+  IconButton,
 } from "@chakra-ui/react";
-import { useState } from 'react';
-import { ExternalLinkIcon } from '@chakra-ui/icons';
+import { useState, useEffect } from 'react';
+import { ExternalLinkIcon, ViewOffIcon, ViewIcon } from '@chakra-ui/icons';
 import Entrada from '../components/Entrada'
-
-const entradas = [
-  {
-    titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-    estado: 'Programado',
-    entradas: [
-      {
-        codigo: 'A9F3C1B27EF4',
-        qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
-        artista: "Pale Waves",
-        titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-        fecha: "04.12.2025",
-        puertas: "19:30hs",
-        show: "21:00hs",
-        tipo: "General",
-        precio: 25000,
-        estado: 'Disponible'
-      },
-      {
-        codigo: 77880011,
-        qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
-        artista: "Pale Waves",
-        titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-        fecha: "04.12.2025",
-        puertas: "19:30hs",
-        show: "21:00hs",
-        tipo: "VIP Early Access",
-        precio: 45000,
-        estado: 'Disponible'
-      },
-      {
-        codigo: 77880011,
-        qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
-        artista: "Pale Waves",
-        titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-        fecha: "04.12.2025",
-        puertas: "19:30hs",
-        show: "21:00hs",
-        tipo: "VIP Early Access",
-        precio: 45000,
-        estado: 'Disponible'
-      },
-    ]
-  },
-  {
-    titulo: 'Metal Nights',
-    estado: 'Cancelado',
-    entradas: [
-      {
-        codigo: 2419,
-        qr: "https://upload.wikimedia.org/wikipedia/commons/d/d7/Commons_QR_code.png",
-        artista: "Pale Waves",
-        titulo: 'Pale Waves – “Neon Nights Tour – Buenos Aires”',
-        fecha: "04.12.2025",
-        puertas: "19:30hs",
-        show: "21:00hs",
-        tipo: "General",
-        precio: 25000,
-        estado: 'Cancelado'
-      },
-    ]
-  }
-]
+import api from "../services/api";
 
 export default function Entradas() {
   const [selected, setSelected] = useState({});
@@ -93,11 +23,56 @@ export default function Entradas() {
     setSelected(next);
   };
 
-  const imprimir = () => window.print();
+  const [eventoAImprimir, setEventoAImprimir] = useState(null);
 
-  const anySelected = Object.values(selected).some(Boolean);
+  const imprimirEvento = (eventoId) => {
+    setEventoAImprimir(eventoId);
+    setTimeout(() => window.print(), 0);
+  };
 
-  return entradas.length > 0 ? (
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      setEventoAImprimir(null);
+    };
+
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, []);
+
+  const [verEntradas, setVerEntradas] = useState({});
+
+  const toggleVerEntradas = (eventoId) => {
+    setVerEntradas((s) => ({
+      ...s,
+      [eventoId]: !s[eventoId],
+    }));
+  };
+
+  const [entradas, setEntradas] = useState([])
+  const [loading, setLoading] = useState(true)
+  
+  const fetchEntradas = async () => {
+    setLoading(true);
+
+    try {
+      const response = await api.get(
+        "/entradas/entradas/"
+      );
+
+      setEntradas(response.data)
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchEntradas();
+  }, []);
+
+  return entradas ? (
     <Box py={5}>
       <Heading 
         align='center' 
@@ -109,21 +84,34 @@ export default function Entradas() {
       
       {entradas.map((ev) => {
         const allChecked = ev.entradas.every((x) => selected[x.codigo]);
+        const visibles = verEntradas[ev.concierto.titulo] ?? true;
 
         return (
-          <Box key={ev.titulo} mt={5}>
+          <Box key={ev.concierto.titulo} mt={5}>
             <HStack>
-              <Heading ml={4} color='white'>{ev.titulo}</Heading>
-              <Button 
-                onClick={imprimir} 
-                size='sm' 
+              <Heading ml={4} color='white'>{ev.concierto.titulo}</Heading>
+              <Button
+                onClick={() => imprimirEvento(ev.concierto.titulo)}
+                size='md'
                 rounded='full'
                 mt={3}
-                display={ev.estado === 'Cancelado' ? 'none' : 'block'}
-                isDisabled={!anySelected}
+                isDisabled={
+                  !ev.entradas.some((x) => selected[x.codigo])
+                }
               >
                 Imprimir
               </Button>
+              <Tooltip label={visibles  ? 'Ocultar' : 'Mostrar'} placement='top'>
+                <IconButton  
+                  bg='whiteAlpha.800'
+                  color='blackAlpha.800'
+                  rounded='full' 
+                  ml={2}
+                  mb={-3}
+                  onClick={() => toggleVerEntradas(ev.concierto.titulo)}
+                  icon={visibles ? <ViewOffIcon /> : <ViewIcon />}
+                />
+              </Tooltip>
             </HStack>
 
             {/* checkbox general del evento */}
@@ -136,7 +124,7 @@ export default function Entradas() {
                 size='lg'
                 colorScheme="whiteAlpha"
                 color='white'
-                display={ev.estado === 'Cancelado' ? 'none' : 'inline-block' }
+                display={ev.concierto.estado === 'Cancelado' || !visibles ? 'none' : 'inline-block' }
               />
               
               <Text 
@@ -144,17 +132,28 @@ export default function Entradas() {
                 ml={2}
                 color='white'
                 fontSize='lg'
-                display={ev.estado === 'Cancelado' ? 'none' : 'inline-block' }
+                display={ev.concierto.estado === 'Cancelado' || !visibles ? 'none' : 'inline-block' }
               >
                 <b>Seleccionar todas</b>
               </Text>
             </Box>
 
-            <Wrap spacing={6} justify='center' align='center' mt={4}>
+            <Wrap spacing={6} justify='center' align='center' mt={4} display={visibles ? undefined : 'none'}>
               {ev.entradas.map((x) => (
                 <WrapItem key={x.codigo}>
                   <Box>
-                    <Entrada {...x} />
+                    <Entrada
+                      qr={x.qr_url}
+                      artista={ev.concierto.artista}
+                      titulo={ev.concierto.titulo}
+                      fecha={ev.concierto.fecha}
+                      puertas={ev.concierto.puertas_hora}
+                      show={ev.concierto.show_hora}
+                      precio={x.precio}
+                      codigo={x.codigo}
+                      tipo={x.tipo}
+                      estado={ev.concierto.estado}
+                    />
 
                     <HStack>
                       <Checkbox
@@ -164,14 +163,14 @@ export default function Entradas() {
                         colorScheme="whiteAlpha"
                         mt={2}
                         color='white'
-                        display={x.estado === 'Cancelado' ? 'none' : 'inline-block' }
+                        display={ev.concierto.estado === 'Cancelado' ? 'none' : 'inline-block' }
                       />
                       
                       <Text 
                         mt={1}
                         color='white'
                         fontSize='lg'
-                        display={x.estado === 'Cancelado' ? 'none' : 'inline-block' }
+                        display={ev.concierto.estado === 'Cancelado' ? 'none' : 'inline-block' }
                       >
                         <b>Seleccionar</b>
                       </Text>
@@ -185,11 +184,26 @@ export default function Entradas() {
       })}
 
       <div id="entrada-print">
-        {entradas.map((ev) =>
-          ev.entradas
-            .filter((x) => selected[x.codigo])
-            .map((x) => <Entrada key={x.codigo} {...x} />)
-        )}
+        {entradas
+          .filter((ev) => ev.concierto.titulo === eventoAImprimir)
+          .flatMap((ev) =>
+            ev.entradas
+              .filter((x) => selected[x.codigo])
+              .map((x) => 
+              <Entrada 
+                key={x.codigo}
+                qr={x.qr_url}
+                artista={ev.concierto.artista}
+                titulo={ev.concierto.titulo}
+                fecha={ev.concierto.fecha}
+                puertas={ev.concierto.puertas_hora}
+                show={ev.concierto.show_hora}
+                precio={x.precio}
+                codigo={x.codigo}
+                tipo={x.tipo}
+                estado={ev.concierto.estado} 
+              />)
+          )}
       </div>
     </Box>
   ) : (
@@ -199,7 +213,7 @@ export default function Entradas() {
         <Text align='center'>
           <b>
             Para adquirir entradas, vaya a la seccion de{' '}
-            <Link href='http://localhost:5173/eventos'>
+            <Link href='http://localhost:5173/conciertos'>
               Eventos <ExternalLinkIcon mx='2px' mb={1} />
             </Link>
           </b>

@@ -1,20 +1,12 @@
 import {
-  Card, 
-  Image, 
-  Stack, 
-  CardBody, 
-  Heading, 
-  HStack,
-  Grid, 
-  GridItem,
-  Text, 
-  Box, 
+  Card, Image, Stack, CardBody, 
+  Heading, HStack, Grid, GridItem,
+  Text, Box, Skeleton,
 } from "@chakra-ui/react";
 import { ArrowRightIcon } from '@chakra-ui/icons';
-import formatoPrecio from '../utils/FormatoPrecio';
 
 export default function Entrada({ qr, artista, titulo, fecha, puertas, show, precio, codigo, tipo, estado }) {
-  const disponible = estado === 'Disponible';
+  const disponible = estado !== 'Cancelado';
 
   return (
     <Box position='relative'>
@@ -64,15 +56,20 @@ export default function Entrada({ qr, artista, titulo, fecha, puertas, show, pre
             align='center'
           >
             <HStack>
-              <Image
-                objectFit='cover'
-                maxW={{ base: '100%', sm: '200px' }}
-                src={qr}
-                filter={disponible ? 'none' : 'auto'} 
-                contrast='0.001%'
-                p={2}
-                bg='white'
-              />
+              {qr ? (
+                <Image
+                  objectFit='cover'
+                  maxW={200}
+                  minW={200}
+                  src={qr}
+                  filter={disponible ? 'none' : 'auto'} 
+                  contrast='0.001%'
+                  p={2}
+                  bg='white'
+                />
+              ) : (
+                <Skeleton w={200} h={200} />
+              )}
 
               <Grid 
                 rowGap={4} 
@@ -127,7 +124,7 @@ export default function Entrada({ qr, artista, titulo, fecha, puertas, show, pre
                         {tipo}
                     </Text><br />
                     <Text as='b'>
-                      ${formatoPrecio(precio)}
+                      {precio}
                     </Text>
                   </Box>
                 </GridItem>

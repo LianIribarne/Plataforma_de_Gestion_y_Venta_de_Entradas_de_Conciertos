@@ -11,6 +11,11 @@ def organizador_stats_queryset():
                 "organizadores",
                 distinct=True
             ),
+            conciertos_borradores=Count(
+                "organizadores",
+                filter=Q(organizadores__estado__codigo="borrador"),
+                distinct=True
+            ),
             conciertos_programados=Count(
                 "organizadores",
                 filter=Q(organizadores__estado__codigo="programado"),
@@ -49,7 +54,7 @@ def organizador_stats_queryset():
         )
         .annotate(
             ocupacion_promedio=ExpressionWrapper(
-                F("entradas_vendidas") * 1.0 /
+                F("entradas_vendidas") * 100.0 /
                 NullIf(F("entradas_totales"), 0),
                 output_field=FloatField()
             )
