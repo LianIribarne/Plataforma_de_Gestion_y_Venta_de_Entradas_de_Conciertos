@@ -1,6 +1,8 @@
+from conciertos.models import Artista, Categoria, Pais
 from rest_framework import serializers
+
 from backend.utils.images import image_to_webp
-from conciertos.models import Categoria, Pais, Artista
+
 
 # CATEGORIA
 class CategoriaSerializer(serializers.ModelSerializer):
@@ -31,7 +33,7 @@ class ArtistaCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artista
         fields = ['nombre', 'pais_origen_id', 'imagen', 'categoria_id']
-    
+
     def validate_imagen(self, image):
         if image.content_type == 'image/webp':
             return image
@@ -72,7 +74,7 @@ class ArtistaModificarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artista
         fields = ['nombre', 'pais_origen_id', 'imagen', 'categoria_id', 'activo']
-    
+
     def validate_imagen(self, image):
         if image.content_type == 'image/webp':
             return image

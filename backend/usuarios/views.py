@@ -1,20 +1,22 @@
+from django.conf import settings
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.models import update_last_login
+from django.db.models import Q
+from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import generics, status
-from django.db.models import Q
-from django.contrib.auth.models import update_last_login
-from django.contrib.auth import authenticate, get_user_model
-from django.conf import settings
-from .permissions import EsAdministrador
+
 from .models import Usuario
+from .permissions import EsAdministrador
+from .serializers import (ActualizarUsuarioSerializer,
+                          AdminUsuarioDetailSerializer,
+                          AdminUsuarioListSerializer, AdminUsuarioSerializer,
+                          ChangePasswordSerializer, OrganizadorStatsSerializer,
+                          RegistroClienteSerializer, RegistroUsuarioSerializer)
 from .stats import organizador_stats_queryset
-from .serializers import (
-    RegistroClienteSerializer, RegistroUsuarioSerializer, ActualizarUsuarioSerializer, ChangePasswordSerializer,
-    AdminUsuarioSerializer, AdminUsuarioListSerializer, AdminUsuarioDetailSerializer, OrganizadorStatsSerializer,
-)
 
 access_lifetime = settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()
 refresh_lifetime = settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()
@@ -28,10 +30,10 @@ class LoginCookieView(APIView):
 
         if not email or not password:
             return Response({"error": "Se requieren email y contraseña"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         if not User.objects.filter(email=email).exists():
             return Response({"error": "El email no se encuentra registrado"}, status=status.HTTP_404_NOT_FOUND)
-        
+
         user = authenticate(request, email=email, password=password)
 
         if not user:
@@ -132,7 +134,7 @@ class RegistroClienteView(generics.CreateAPIView):
 
 class RegistroUsuarioView(generics.CreateAPIView):
     permission_classes = [EsAdministrador]
-    
+
     def post(self, request):
         serializer = RegistroUsuarioSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

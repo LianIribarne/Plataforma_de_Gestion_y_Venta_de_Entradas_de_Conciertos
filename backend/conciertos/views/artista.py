@@ -1,11 +1,12 @@
+from conciertos.models import Artista, Categoria, Pais
+from conciertos.serializers import (ArtistaCreateSerializer,
+                                    ArtistaModificarSerializer,
+                                    ArtistaSerializer, CategoriaSerializer,
+                                    PaisSerializer)
 from rest_framework import generics
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import FormParser, MultiPartParser
 from usuarios.permissions import EsAdministrador
-from conciertos.models import Categoria, Pais, Artista
-from conciertos.serializers import (
-    CategoriaSerializer, PaisSerializer, ArtistaCreateSerializer,
-    ArtistaSerializer, ArtistaModificarSerializer
-)
+
 
 # categoria
 class CategoriaListView(generics.ListAPIView):
@@ -53,7 +54,7 @@ class ArtistaListView(generics.ListAPIView):
 
         if pais_origen:
             queryset = queryset.filter(pais_origen_id=pais_origen)
-        
+
         if activo in ['true', 'false']:
             queryset = queryset.filter(activo=(activo == 'true'))
 

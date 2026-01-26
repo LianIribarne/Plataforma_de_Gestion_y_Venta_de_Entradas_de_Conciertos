@@ -1,8 +1,10 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
-from django.utils import timezone
+from django.contrib.auth.models import (AbstractUser, BaseUserManager, Group,
+                                        Permission)
 from django.core.exceptions import ValidationError
-from backend.utils.validarImagen import validar_tamano_imagen, validar_cuadrada
+from django.db import models
+from django.utils import timezone
+
+from backend.utils.validarImagen import validar_cuadrada, validar_tamano_imagen
 
 ROLES = [
     ('admin', 'Administrador'),

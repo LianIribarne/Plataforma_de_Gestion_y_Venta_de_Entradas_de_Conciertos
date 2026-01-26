@@ -1,18 +1,32 @@
-import { 
-  Button, FormControl, FormLabel, Input, 
-  Textarea, Box, HStack, Heading,
-  Image, Text, NumberInput, NumberInputField,
-  NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Tooltip,
-  Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalFooter, ModalBody, ModalCloseButton,
-  Menu, MenuButton, MenuList, MenuItem,
-  useToast,
+import { AddIcon, ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
+import {
+  Box,
+  Button, FormControl, FormLabel,
+  HStack,
+  Image,
+  Input,
+  Menu, MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput, NumberInputField,
+  NumberInputStepper,
+  Text,
+  Textarea,
+  Tooltip,
+  useToast
 } from "@chakra-ui/react";
-import React, { useState, useEffect } from 'react';
-import { AddIcon, DeleteIcon, ChevronDownIcon } from '@chakra-ui/icons'
-import formatoPrecio from "../utils/formatoPrecio";
+import React, { useEffect, useState } from 'react';
 import api from "../services/api";
-import convertToWebp from "../utils/convertToWebp"
+import convertToWebp from "../utils/convertToWebp";
+import formatoPrecio from "../utils/formatoPrecio";
 
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
@@ -97,7 +111,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
       cleanImage();
       return;
     }
-  
+
     const url = URL.createObjectURL(file);
     const img = new window.Image();
     img.src = url;
@@ -116,11 +130,11 @@ export default function CrearConcierto({ isOpen, onClose }) {
           cleanImage();
           return;
         }
-        
+
         convertToWebp({ file, maxSize: 1024, quality: 0.8 })
           .then((webpFile) => {
             const previewUrl = URL.createObjectURL(webpFile);
-            
+
             setFormData(prev => ({ ...prev, imagen: webpFile }));
             setPreview(previewUrl);
           })
@@ -220,7 +234,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
 
     const entradasErr = validateEntradas();
     if (Object.keys(entradasErr).length > 0) e.entradas = entradasErr;
-    
+
     return e
   };
 
@@ -228,11 +242,11 @@ export default function CrearConcierto({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const validationErrors = validateForm();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
-  
+
     try {
       const payload = {
         titulo: formData.titulo,
@@ -255,7 +269,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
       const res = await api.post("/conciertos/crear_concierto/", payload);
 
       const conciertoId = res?.data?.id;
-      
+
       if (formData.imagen && conciertoId) {
         const formDataImg = new FormData();
         formDataImg.append("imagen", formData.imagen);
@@ -271,21 +285,19 @@ export default function CrearConcierto({ isOpen, onClose }) {
         isClosable: true,
         position: "top"
       });
-    
+
       onClose();
-    
+
     } catch (error) {
       let msg = "Error inesperado";
-    
+
       const data = error?.response?.data;
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
         if (firstError) msg = firstError;
       }
-    
-      console.log(error);
-    
+
       toast({
         title: "Error",
         description: msg,
@@ -357,12 +369,12 @@ export default function CrearConcierto({ isOpen, onClose }) {
                       placeholder="Ingrese un titulo"
                       variant='custom'
                       rounded='full'
-                      value={formData.titulo} 
+                      value={formData.titulo}
                       onChange={handleChange("titulo")}
                     />
                   </Tooltip>
                 </FormControl>
-    
+
                 <FormControl mb={2} isInvalid={errors.descripcion}>
                   <FormLabel color='white'>Descripción</FormLabel>
                   <Tooltip
@@ -373,17 +385,17 @@ export default function CrearConcierto({ isOpen, onClose }) {
                     color="white"
                     hasArrow
                   >
-                    <Textarea 
-                      placeholder='Ingrese una descripción' 
-                      resize='none' 
+                    <Textarea
+                      placeholder='Ingrese una descripción'
+                      resize='none'
                       variant='custom'
                       rounded='2xl'
-                      value={formData.descripcion} 
+                      value={formData.descripcion}
                       onChange={handleChange("descripcion")}
                     />
                   </Tooltip>
                 </FormControl>
-    
+
                 <HStack mb={2}>
                   <FormControl isInvalid={errors.fecha}>
                     <FormLabel color='white'>Fecha</FormLabel>
@@ -399,12 +411,12 @@ export default function CrearConcierto({ isOpen, onClose }) {
                         type="date"
                         variant='custom'
                         rounded='full'
-                        value={formData.fecha} 
+                        value={formData.fecha}
                         onChange={handleChange("fecha")}
                       />
                     </Tooltip>
                   </FormControl>
-    
+
                   <FormControl isInvalid={errors.show}>
                     <FormLabel color='white'>Show</FormLabel>
                     <Tooltip
@@ -419,12 +431,12 @@ export default function CrearConcierto({ isOpen, onClose }) {
                         type="time"
                         variant='custom'
                         rounded='full'
-                        value={formData.show} 
+                        value={formData.show}
                         onChange={handleChange("show")}
                       />
                     </Tooltip>
                   </FormControl>
-    
+
                   <FormControl isInvalid={errors.puertas}>
                     <FormLabel color='white'>Puertas</FormLabel>
                     <Tooltip
@@ -439,13 +451,13 @@ export default function CrearConcierto({ isOpen, onClose }) {
                         type="time"
                         variant='custom'
                         rounded='full'
-                        value={formData.puertas} 
+                        value={formData.puertas}
                         onChange={handleChange("puertas")}
                       />
                     </Tooltip>
                   </FormControl>
                 </HStack>
-    
+
                 <HStack>
                   <FormControl isInvalid={errors.lugar}>
                     <FormLabel color='white'>Lugar</FormLabel>
@@ -467,7 +479,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                           {lugarSel || "Seleccionar lugar"}
                         </MenuButton>
                       </Tooltip>
-    
+
                       <MenuList maxH="200px" overflowY="auto">
                         {lugares.map((l) => (
                           <MenuItem
@@ -488,7 +500,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                       </MenuList>
                     </Menu>
                   </FormControl>
-    
+
                   <FormControl isInvalid={errors.artista}>
                     <FormLabel color='white'>Artista</FormLabel>
                     <Menu onOpen={() => setMenuOpen(true)} onClose={() => setMenuOpen(false)}>
@@ -509,7 +521,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                           {artistaSel || "Seleccionar artista"}
                         </MenuButton>
                       </Tooltip>
-    
+
                       <MenuList maxH="200px" overflowY="auto">
                         {artistas.map((a) => (
                           <MenuItem
@@ -532,7 +544,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                       </MenuList>
                     </Menu>
                   </FormControl>
-    
+
                   <FormControl isInvalid={errors.mood}>
                     <FormLabel color='white'>Mood</FormLabel>
                     <Menu onOpen={() => setMenuOpen(true)} onClose={() => setMenuOpen(false)}>
@@ -553,7 +565,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                           {moodSel || "Seleccionar mood"}
                         </MenuButton>
                       </Tooltip>
-    
+
                       <MenuList maxH="200px" overflowY="auto">
                         {moods.map(m => (
                           <MenuItem
@@ -571,10 +583,10 @@ export default function CrearConcierto({ isOpen, onClose }) {
                   </FormControl>
                 </HStack>
               </Box>
-    
-              <Box 
-                w="300px" 
-                ml={2} 
+
+              <Box
+                w="300px"
+                ml={2}
               >
                 <FormControl mb={2} isInvalid={errors.imagen}>
                   <FormLabel color='white'>Imagen (opcional)</FormLabel>
@@ -598,8 +610,8 @@ export default function CrearConcierto({ isOpen, onClose }) {
                     />
                   </Tooltip>
                 </FormControl>
-    
-                <Box 
+
+                <Box
                   w={250}
                   h={250}
                   bg='whiteAlpha.300'
@@ -640,7 +652,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                         />
                       </Tooltip>
                     </FormControl>
-                
+
                     <FormControl isInvalid={!!item.precio}>
                       <FormLabel color='white'>Precio</FormLabel>
                       <NumberInput
@@ -668,7 +680,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                         </NumberInputStepper>
                       </NumberInput>
                     </FormControl>
-                      
+
                     <FormControl isInvalid={!!item.cantidad}>
                       <FormLabel color='white'>Cantidad</FormLabel>
                       <NumberInput
@@ -685,7 +697,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                         </NumberInputStepper>
                       </NumberInput>
                     </FormControl>
-                      
+
                     <FormControl isInvalid={!!item.limite}>
                       <FormLabel color='white'>Limite reserva</FormLabel>
                       <NumberInput
@@ -702,11 +714,11 @@ export default function CrearConcierto({ isOpen, onClose }) {
                         </NumberInputStepper>
                       </NumberInput>
                     </FormControl>
-                      
+
                     <Button onClick={() => removeEntrada(i)} display={i === 0 ? 'none' : 'grid'} rounded='full' mt={8}><DeleteIcon /></Button>
                   </HStack>
                 ))}
-    
+
                 {entradas.length < 4 && (
                   <Button onClick={addEntrada} rounded='full'>
                     Agregar<AddIcon ml={1} mt={1} boxSize={3} />
@@ -726,7 +738,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
                   <NumberInput
                     min={limiteMinimo}
                     max={8}
-                    value={formData.limite_reserva} 
+                    value={formData.limite_reserva}
                     onChange={(valueString) =>
                       setFormData((p) => ({ ...p, limite_reserva: valueString }))
                     }
@@ -746,9 +758,9 @@ export default function CrearConcierto({ isOpen, onClose }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

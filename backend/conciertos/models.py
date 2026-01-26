@@ -1,8 +1,10 @@
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from backend.utils.validarImagen import (
-    validar_tamano_imagen, validar_cuadrada, validar_formato_imagen
-)
+from django.db import models
+
+from backend.utils.validarImagen import (validar_cuadrada,
+                                         validar_formato_imagen,
+                                         validar_tamano_imagen)
+
 
 class Categoria(models.Model):
     nombre = models.CharField(

@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import (
-    RegistroClienteView, RegistroUsuarioView, LoginCookieView, RefreshCookieView,
-    LogoutView, UserMeView, ActualizarUsuarioView, ChangePasswordView,
-    AdminUsuarioUpdateView, AdminUsuarioListView, AdminUsuarioDetailView, OrganizadorStatsView
-)
+
+from .views import (ActualizarUsuarioView, AdminUsuarioDetailView,
+                    AdminUsuarioListView, AdminUsuarioUpdateView,
+                    ChangePasswordView, LoginCookieView, LogoutView,
+                    OrganizadorStatsView, RefreshCookieView,
+                    RegistroClienteView, RegistroUsuarioView, UserMeView)
 
 urlpatterns = [
     # todos

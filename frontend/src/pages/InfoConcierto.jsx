@@ -1,18 +1,26 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { 
-  Box, Heading, Text, Image, 
-  Grid, GridItem, AspectRatio, Button,
-  Accordion, useToast, SimpleGrid,
-  Skeleton, SkeletonText, Center
+import { ArrowRightIcon, CalendarIcon, InfoOutlineIcon, TimeIcon } from '@chakra-ui/icons';
+import {
+  Accordion,
+  AspectRatio,
+  Box,
+  Button,
+  Center,
+  Grid, GridItem,
+  Heading,
+  Image,
+  SimpleGrid,
+  Skeleton, SkeletonText,
+  Text,
+  useToast
 } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { IoTicketSharp } from "react-icons/io5";
-import { InfoOutlineIcon, ArrowRightIcon, CalendarIcon, TimeIcon } from '@chakra-ui/icons';
-import { useAuth } from "../services/AuthContext";
+import { useLocation, useNavigate } from 'react-router-dom';
 import EntradaInfo from '../components/ReservaEntrada';
-import formatoPrecio from '../utils/FormatoPrecio'
 import api from '../services/api';
+import { useAuth } from "../services/AuthContext";
+import formatoPrecio from '../utils/FormatoPrecio';
 
 export default function EventoDetalle() {
   const location = useLocation()
@@ -54,7 +62,7 @@ export default function EventoDetalle() {
   }, [concierto])
 
   const TOTAL_MAX = concierto?.limite_reserva_total
-  
+
   // Obtener cantidades de entradas
   const [cantidades, setCantidades] = useState({});
 
@@ -171,11 +179,11 @@ export default function EventoDetalle() {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -200,16 +208,16 @@ export default function EventoDetalle() {
         <SkeletonText noOfLines={2} mb={4} w='50%' skeletonHeight='4' />
       ) : (
         <>
-          <Heading 
-            as='h1' 
+          <Heading
+            as='h1'
             color='gray.200'
             mb={2}
             w='70%'
           >
             {concierto?.titulo}
           </Heading>
-          <Heading 
-            as='h2' 
+          <Heading
+            as='h2'
             color='gray.300'
             mb={4}
             w='70%'
@@ -230,22 +238,22 @@ export default function EventoDetalle() {
               <Skeleton w={400} h={400} borderRadius={10} />
             ) : (
               <Center ml={14}>
-                <Image 
+                <Image
                   src={concierto?.imagen}
-                  maxW="400px" 
-                  minW="400px" 
-                  borderRadius={10} 
-                  filter={mostrar ? 'brightness(50%)' : 'grayscale(1%)'} 
+                  maxW="400px"
+                  minW="400px"
+                  borderRadius={10}
+                  filter={mostrar ? 'brightness(50%)' : 'grayscale(1%)'}
                 />
 
-                <Box 
-                  fontSize='5xl' 
+                <Box
+                  fontSize='5xl'
                   align='center'
                   bg='black'
                   color={concierto?.estado.nombre === 'Cancelado' ? 'rgba(255, 0, 0, 0.8)' : 'white'}
-                  position='absolute' 
-                  display={mostrar ? 'inline-block' : 'none'} 
-                  zIndex={2} 
+                  position='absolute'
+                  display={mostrar ? 'inline-block' : 'none'}
+                  zIndex={2}
                   p={3}
                   border='4px'
                   borderRadius={10}
@@ -305,8 +313,8 @@ export default function EventoDetalle() {
         <GridItem align='center'>
 
           {/* Entradas */}
-          <Heading 
-            as='h2' 
+          <Heading
+            as='h2'
             color='gray.200'
             fontSize='3xl'
             mb={4}
@@ -338,24 +346,24 @@ export default function EventoDetalle() {
             {/* Boton para reservar */}
             <Box align='center' display={concierto?.estado.nombre === 'Programado'  || user.rol !== 'Cliente' ? undefined : 'none'}>
               {user.rol === 'Cliente' ? (
-                <Text 
-                  mt={2} 
-                  fontSize={14} 
+                <Text
+                  mt={2}
+                  fontSize={14}
                   color='gray.200'
                 >
                   <InfoOutlineIcon boxSize={3} mb={0.5} /> Podés reservar hasta {TOTAL_MAX} entradas en total.
                 </Text>
               ) : (
-                <Text 
-                  mt={2} 
-                  fontSize={14} 
+                <Text
+                  mt={2}
+                  fontSize={14}
                   color='gray.200'
                 >
                   <InfoOutlineIcon boxSize={3} mb={0.5} /> Se puede reservar hasta {TOTAL_MAX} entradas en total.
                 </Text>
               )}
 
-              <Button 
+              <Button
                 mt={2}
                 size='lg'
                 rounded='full'
@@ -374,8 +382,8 @@ export default function EventoDetalle() {
           {/* Lugar */}
           <SimpleGrid columns={2} mt={10}>
             <Box align='initial' ml={16}>
-              <Heading 
-                as='h2' 
+              <Heading
+                as='h2'
                 color='gray.200'
                 fontSize='3xl'
                 mb={4}
@@ -398,8 +406,8 @@ export default function EventoDetalle() {
             {loading ? (
               <Skeleton w={300} h={160} borderRadius={12}/>
             ) : (
-              <AspectRatio 
-                maxW="300px" 
+              <AspectRatio
+                maxW="300px"
                 ratio={16 / 9}
               >
                 <iframe

@@ -1,16 +1,21 @@
-from rest_framework import generics, status
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from celery.result import AsyncResult
 from collections import defaultdict
+
 import qrcode
+from celery.result import AsyncResult
+from conciertos.services import actualizar_estado_por_stock
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.db import transaction
-from usuarios.permissions import EsCliente, EsAdministrador
-from .models import Reserva, Entrada
-from .serializers import ReservaCreateSerializer, ReservaActivaSerializer, ConciertoHeaderSerializer, EntradaItemSerializer
-from .services import liberar_reserva, liberar_entrada
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from usuarios.permissions import EsAdministrador, EsCliente
+
+from .models import Entrada, Reserva
+from .serializers import (ConciertoHeaderSerializer, EntradaItemSerializer,
+                          ReservaActivaSerializer, ReservaCreateSerializer)
+from .services import liberar_entrada, liberar_reserva
+
 
 # reserva
 class CreateReservaView(generics.CreateAPIView):
@@ -50,6 +55,7 @@ class CancelarReservaView(generics.GenericAPIView):
             AsyncResult(reserva.task_id).revoke(terminate=False)
 
         liberar_reserva(reserva, cancelada=True)
+        actualizar_estado_por_stock(reserva.concierto)
 
         return Response({"detail": "Reserva cancelada"}, status=status.HTTP_200_OK)
 
@@ -119,6 +125,7 @@ class QuitarEntradaReservaView(generics.GenericAPIView):
             )
 
         liberar_entrada(entrada)
+        actualizar_estado_por_stock(reserva.concierto)
 
         quedan = Entrada.objects.filter(
             reserva=reserva,
@@ -169,12 +176,16 @@ class EntradaListaView(generics.ListAPIView):
 
         if user.es_cliente:
             return Entrada.objects.filter(
-                pago__cliente=user
+                pago__cliente=user,
+            ).exclude(
+                tipo__evento__estado__codigo__in=["finalizado", "cancelado"]
             ).select_related("pago", "tipo").order_by("tipo__precio")
 
         if user.es_administrador:
             return Entrada.objects.filter(
                 pago__isnull=False
+            ).exclude(
+                tipo__evento__estado__codigo__in=["finalizado"]
             ).select_related("pago", "tipo").order_by("tipo__precio")
 
         return Entrada.objects.none()

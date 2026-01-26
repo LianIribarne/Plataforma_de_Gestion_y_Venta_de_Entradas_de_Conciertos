@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { login, logout } from "./authService";
-import { registerForcedLogout } from "./authForcedLogout";
+import { createContext, useContext, useEffect, useState } from "react";
 import api from "./api";
+import { registerForcedLogout } from "./authForcedLogout";
+import { login, logout } from "./authService";
 
 const AuthContext = createContext();
 
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
       if (!saved) return;
 
       try {
-        await api.post("/usuarios/refresh/"); 
+        await api.post("/usuarios/refresh/");
         const res = await api.get("/usuarios/me/");
         setUser(res.data.user);
         localStorage.setItem("user", JSON.stringify(res.data.user));

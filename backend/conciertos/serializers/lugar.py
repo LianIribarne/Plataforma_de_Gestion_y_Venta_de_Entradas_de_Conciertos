@@ -1,6 +1,7 @@
+from conciertos.models import Ciudad, Lugar, Provincia
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from conciertos.models import Provincia, Ciudad, Lugar
+
 
 # PROVINCIA
 class ProvinciaSerializer(serializers.ModelSerializer):
@@ -39,7 +40,7 @@ class LugarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lugar
         fields = ['id', 'nombre', 'direccion', 'provincia', 'activo']
-    
+
     def get_provincia(self, obj):
         ciudad = obj.ciudad
         provincia = ciudad.provincia
@@ -77,7 +78,7 @@ class LugarDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lugar
         fields = ['id', 'nombre', 'direccion', 'provincia', 'activo']
-    
+
     def get_provincia(self, obj):
         ciudad = obj.ciudad
         provincia = ciudad.provincia

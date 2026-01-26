@@ -1,7 +1,9 @@
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+
 from .models import Usuario
-from django.utils import timezone
+
 
 class RegistroClienteSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)

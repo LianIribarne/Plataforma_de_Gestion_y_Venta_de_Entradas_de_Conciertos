@@ -1,19 +1,19 @@
+from conciertos.models import TipoEntrada
+from conciertos.serializers import (CreateTipoEntradaSerializer,
+                                    TipoEntradaAgregarSerializer,
+                                    TipoEntradaCancelarCantidadSerializer,
+                                    TipoEntradaCancelarSerializer,
+                                    TipoEntradaModificarSerializer)
+from conciertos.services import (actualizar_estado_por_stock, agregar_entradas,
+                                 cancelar_cantidad, cancelar_tipo,
+                                 modificar_precio,
+                                 sincronizar_limite_concierto)
 from rest_framework import generics, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 from usuarios.permissions import EsOrganizador
-from conciertos.models import TipoEntrada
-from conciertos.services import (
-    cancelar_tipo, cancelar_cantidad,
-    modificar_precio, sincronizar_limite_concierto,
-    agregar_entradas, actualizar_estado_por_stock
-)
-from conciertos.serializers import (
-    CreateTipoEntradaSerializer, TipoEntradaCancelarSerializer,
-    TipoEntradaCancelarCantidadSerializer, TipoEntradaModificarSerializer,
-    TipoEntradaAgregarSerializer
-)
+
 
 class TipoEntradaCreateView(generics.CreateAPIView):
     queryset = TipoEntrada.objects.all()
@@ -53,7 +53,7 @@ class TipoEntradaCancelarView(generics.GenericAPIView):
         if tipo.evento.estado.codigo in ['cancelado', 'finalizado']:
             return Response(
                 {
-                    "detail": 
+                    "detail":
                     f"El concierto se encuentra {tipo.evento.estado.codigo}, y no se puede cancelar el tipo de entrada."
                 },
                 status=status.HTTP_400_BAD_REQUEST
@@ -100,7 +100,7 @@ class TipoEntradaCancelarCantidadView(generics.GenericAPIView):
         if tipo.evento.estado.codigo in ['cancelado', 'finalizado']:
             return Response(
                 {
-                    "detail": 
+                    "detail":
                     f"El concierto se encuentra {tipo.evento.estado.codigo}, y no se puede cancelar el tipo de entrada."
                 },
                 status=status.HTTP_400_BAD_REQUEST
@@ -155,7 +155,7 @@ class TipoEntradaModificarView(generics.GenericAPIView):
         if tipo.evento.estado.codigo in ['cancelado', 'finalizado']:
             return Response(
                 {
-                    "detail": 
+                    "detail":
                     f"El concierto se encuntra {tipo.evento.estado.codigo}, y no se puede modificar el tipo de entrada."
                 },
                 status=status.HTTP_400_BAD_REQUEST
@@ -212,7 +212,7 @@ class TipoEntradaAgregarEntradasView(generics.GenericAPIView):
         if not tipo.activo:
             return Response(
                 {
-                    "detail": 
+                    "detail":
                     "El tipo de entrada está cancelado y no se puede agregar nuevas entradas."
                 },
                 status=status.HTTP_400_BAD_REQUEST
@@ -221,7 +221,7 @@ class TipoEntradaAgregarEntradasView(generics.GenericAPIView):
         if tipo.evento.estado.codigo in ['cancelado', 'finalizado']:
             return Response(
                 {
-                    "detail": 
+                    "detail":
                     f"El concierto se encuntra {tipo.evento.estado.codigo}, y no se puede agregar más entradas."
                 },
                 status=status.HTTP_400_BAD_REQUEST

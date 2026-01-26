@@ -1,16 +1,32 @@
-import { 
-  Button, FormControl, FormLabel, Input, 
-  Textarea, Box, HStack,
-  Image, Text, Tooltip,
-  Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalFooter, ModalBody, ModalCloseButton,
-  Menu, MenuButton, MenuList, MenuItem,
+import { ChevronDownIcon } from '@chakra-ui/icons';
+import {
+  Box,
+  Button, FormControl, FormLabel,
+  HStack,
+  Image,
+  Input,
+  Menu, MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  Text,
+  Textarea,
+  Tooltip,
   useToast,
 } from "@chakra-ui/react";
-import React, { useState, useEffect } from 'react';
-import { ChevronDownIcon } from '@chakra-ui/icons'
+import React, { useEffect, useState } from 'react';
 import api from "../services/api";
-import convertToWebp from "../utils/convertToWebp"
+import convertToWebp from "../utils/convertToWebp";
 
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
@@ -30,6 +46,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
     artista: null,
     mood: null,
     imagen: null,
+    limite_reserva_total: ""
   })
 
   useEffect(() => {
@@ -62,7 +79,8 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
       lugar: concierto.lugar.id,
       artista: concierto.artista.id,
       mood: concierto.mood.id,
-      imagen: concierto.imagen
+      imagen: concierto.imagen,
+      limite_reserva_total: concierto.limite_reserva_total
     })
     setPreview(concierto.imagen)
   }, [concierto])
@@ -97,7 +115,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
       cleanImage();
       return;
     }
-  
+
     const url = URL.createObjectURL(file);
     const img = new window.Image();
     img.src = url;
@@ -116,11 +134,11 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
           cleanImage();
           return;
         }
-        
+
         convertToWebp({ file, maxSize: 1024, quality: 0.8 })
           .then((webpFile) => {
             const previewUrl = URL.createObjectURL(webpFile);
-            
+
             setFormData(prev => ({ ...prev, imagen: webpFile }));
             setPreview(previewUrl);
           })
@@ -169,7 +187,8 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
     if (formData.lugar === null) e.lugar = "El lugar es obligatorio";
     if (formData.artista === null) e.artista = "El artista es obligatorio";
     if (!formData.mood) e.mood = "El mood es obligatorio";
-    
+    if (!formData.limite_reserva_total || formData.limite_reserva_total > 8 || formData.limite_reserva_total < 2) e.limite_reserva_total = "El limite es obligatorio";
+
     return e
   };
 
@@ -177,7 +196,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const validationErrors = validateForm();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
@@ -193,7 +212,8 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
     if (formData.artista !== null) payload.append('artista_id', formData.artista)
     if (formData.lugar !== null) payload.append('lugar_id', formData.lugar)
     if (formData.imagen instanceof File) payload.append("imagen", formData.imagen)
-  
+    if (formData.limite_reserva_total !== '') payload.append('limite_reserva_total', formData.limite_reserva_total)
+
     try {
       const res = await api.patch(`/conciertos/modificar_concierto/${id}`, payload);
 
@@ -205,25 +225,25 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
         isClosable: true,
         position: "top"
       });
-    
+
       onClose();
     } catch (error) {
       let msg = "Error inesperado";
-    
+
       const data = error?.response?.data;
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
         if (firstError) msg = firstError;
       }
-    
+
       console.log(error);
-    
+
       toast({
         title: "Error",
         description: msg,
         status: "error",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
         position: "top"
       });
@@ -288,12 +308,12 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                       placeholder="Ingrese un titulo"
                       variant='custom'
                       rounded='full'
-                      value={formData.titulo} 
+                      value={formData.titulo}
                       onChange={handleChange("titulo")}
                     />
                   </Tooltip>
                 </FormControl>
-    
+
                 <FormControl mb={2} isInvalid={errors.descripcion}>
                   <FormLabel color='white'>Descripción</FormLabel>
                   <Tooltip
@@ -304,17 +324,17 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                     color="white"
                     hasArrow
                   >
-                    <Textarea 
-                      placeholder='Ingrese una descripción' 
-                      resize='none' 
+                    <Textarea
+                      placeholder='Ingrese una descripción'
+                      resize='none'
                       variant='custom'
                       rounded='2xl'
-                      value={formData.descripcion} 
+                      value={formData.descripcion}
                       onChange={handleChange("descripcion")}
                     />
                   </Tooltip>
                 </FormControl>
-    
+
                 <HStack mb={2}>
                   <FormControl isInvalid={errors.fecha}>
                     <FormLabel color='white'>Fecha</FormLabel>
@@ -330,12 +350,12 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                         type="date"
                         variant='custom'
                         rounded='full'
-                        value={formData.fecha} 
+                        value={formData.fecha}
                         onChange={handleChange("fecha")}
                       />
                     </Tooltip>
                   </FormControl>
-    
+
                   <FormControl isInvalid={errors.show}>
                     <FormLabel color='white'>Show</FormLabel>
                     <Tooltip
@@ -350,12 +370,12 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                         type="time"
                         variant='custom'
                         rounded='full'
-                        value={formData.show} 
+                        value={formData.show}
                         onChange={handleChange("show")}
                       />
                     </Tooltip>
                   </FormControl>
-    
+
                   <FormControl isInvalid={errors.puertas}>
                     <FormLabel color='white'>Puertas</FormLabel>
                     <Tooltip
@@ -370,13 +390,13 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                         type="time"
                         variant='custom'
                         rounded='full'
-                        value={formData.puertas} 
+                        value={formData.puertas}
                         onChange={handleChange("puertas")}
                       />
                     </Tooltip>
                   </FormControl>
                 </HStack>
-    
+
                 <HStack>
                   <FormControl isInvalid={errors.lugar}>
                     <FormLabel color='white'>Lugar</FormLabel>
@@ -398,7 +418,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                           {lugarSel || "Seleccionar lugar"}
                         </MenuButton>
                       </Tooltip>
-    
+
                       <MenuList maxH="200px" overflowY="auto">
                         {lugares.map((l) => (
                           <MenuItem
@@ -419,7 +439,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                       </MenuList>
                     </Menu>
                   </FormControl>
-    
+
                   <FormControl isInvalid={errors.artista}>
                     <FormLabel color='white'>Artista</FormLabel>
                     <Menu>
@@ -440,7 +460,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                           {artistaSel || "Seleccionar artista"}
                         </MenuButton>
                       </Tooltip>
-    
+
                       <MenuList maxH="200px" overflowY="auto">
                         {artistas.map((a) => (
                           <MenuItem
@@ -463,7 +483,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                       </MenuList>
                     </Menu>
                   </FormControl>
-    
+
                   <FormControl isInvalid={errors.mood}>
                     <FormLabel color='white'>Mood</FormLabel>
                     <Menu>
@@ -484,7 +504,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                           {moodSel || "Seleccionar mood"}
                         </MenuButton>
                       </Tooltip>
-    
+
                       <MenuList maxH="200px" overflowY="auto">
                         {moods.map(m => (
                           <MenuItem
@@ -501,11 +521,39 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                     </Menu>
                   </FormControl>
                 </HStack>
+                <FormControl isInvalid={errors.limite_reserva_total} mt={4}>
+                <FormLabel color='white' textAlign='center'>Limite de reserva total</FormLabel>
+                <Tooltip
+                  label={errors.limite_reserva_total}
+                  isOpen={!!errors.limite_reserva_total}
+                  placement="top"
+                  bg="red.500"
+                  color="white"
+                  hasArrow
+                >
+                  <NumberInput
+                    min={2}
+                    max={8}
+                    value={formData.limite_reserva_total}
+                    onChange={(valueString) =>
+                      handleChange("limite_reserva_total")({target: {value: valueString}})
+                    }
+                    variant='custom'
+                    maxW={100}
+                  >
+                    <NumberInputField rounded='full' />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </Tooltip>
+              </FormControl>
               </Box>
-    
-              <Box 
-                w="300px" 
-                ml={2} 
+
+              <Box
+                w="300px"
+                ml={2}
               >
                 <FormControl mb={2} isInvalid={errors.imagen}>
                   <FormLabel color='white'>Imagen (opcional)</FormLabel>
@@ -529,8 +577,8 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                     />
                   </Tooltip>
                 </FormControl>
-    
-                <Box 
+
+                <Box
                   w={250}
                   h={250}
                   bg='whiteAlpha.300'
@@ -550,9 +598,9 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

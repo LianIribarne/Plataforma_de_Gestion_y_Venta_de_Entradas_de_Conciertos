@@ -1,12 +1,13 @@
-from celery.result import AsyncResult
 import secrets
-from django.db.models import Count, Q
-from django.db import transaction
-from django.db.models import Max
+
+from celery.result import AsyncResult
+from conciertos.models import Concierto, ConciertoMeta, TipoEntrada
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Count, Max, Q
 from entradas.models import Entrada, Reserva
-from conciertos.models import Concierto, TipoEntrada, ConciertoMeta
 from entradas.services import liberar_reserva
+
 
 def cancelar_tipo(tipo):
     with transaction.atomic():
@@ -140,8 +141,8 @@ def actualizar_estado_por_stock(concierto):
         tipos_activos
         .annotate(
             disponibles=Count(
-                "entrada",
-                filter=Q(entrada__estado="disponible")
+                "entradas",
+                filter=Q(entradas__estado="disponible")
             )
         )
         .filter(disponibles__gt=0)

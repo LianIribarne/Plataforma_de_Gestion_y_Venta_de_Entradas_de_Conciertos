@@ -1,6 +1,8 @@
-from django.db.models import Count, Q, F, FloatField, ExpressionWrapper
+from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from django.db.models.functions import NullIf
+
 from .models import Usuario
+
 
 def organizador_stats_queryset():
     return (

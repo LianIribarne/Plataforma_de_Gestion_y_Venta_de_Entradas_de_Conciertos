@@ -1,18 +1,19 @@
+from conciertos.models import Concierto, ConciertoMeta
+from conciertos.serializers import (ConciertoCreateSerializer,
+                                    ConciertoDetailSerializer,
+                                    ConciertoListSerializer,
+                                    ConciertoMetaListSerializer,
+                                    ConciertoUpdateSerializer)
+from conciertos.services import cancelar_concierto
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.exceptions import ValidationError
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
 from usuarios.permissions import EsOrganizador
-from conciertos.models import ConciertoMeta, Concierto
-from conciertos.serializers import (
-    ConciertoMetaListSerializer, ConciertoCreateSerializer,
-    ConciertoListSerializer, ConciertoUpdateSerializer,
-    ConciertoDetailSerializer,
-)
-from conciertos.services import cancelar_concierto
+
 
 # conciertoMeta
 class ConciertoMetaListView(generics.ListAPIView):
@@ -164,7 +165,7 @@ class CancelarConciertoView(generics.GenericAPIView):
 
         if concierto.estado.codigo in ['cancelado', 'finalizado']:
             return Response(
-                {"detail": "El concierto ya está cancelado o ya finalizo."},
+                {"detail": "El concierto ya está cancelado o ya finalizó."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -172,7 +173,7 @@ class CancelarConciertoView(generics.GenericAPIView):
 
         return Response(
             {
-                "detail": 
+                "detail":
                 "Concierto cancelado. Tipos y entradas canceladas. Reservas activas liberadas."
             },
             status=status.HTTP_200_OK

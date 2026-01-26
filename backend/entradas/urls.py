@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import (
-    CreateReservaView, CancelarReservaView, ReservaActivaView,
-    QuitarEntradaReservaView, EntradaListaView, entrada_qr_view
-)
+
+from .views import (CancelarReservaView, CreateReservaView, EntradaListaView,
+                    QuitarEntradaReservaView, ReservaActivaView,
+                    entrada_qr_view)
 
 urlpatterns = [
     # crear reserva

@@ -1,14 +1,16 @@
+from conciertos.views import (ArtistaCreateView, ArtistaListView,
+                              ArtistaModificarView, CancelarConciertoView,
+                              CategoriaListView, CiudadListView,
+                              ConciertoCreateView, ConciertoDetailView,
+                              ConciertoListView, ConciertoMetaListView,
+                              ConciertoUpdateView, LugarCreateView,
+                              LugarListView, LugarModificarView, PaisListView,
+                              ProvinciaListView,
+                              TipoEntradaAgregarEntradasView,
+                              TipoEntradaCancelarCantidadView,
+                              TipoEntradaCancelarView, TipoEntradaCreateView,
+                              TipoEntradaModificarView)
 from django.urls import path
-from conciertos.views import (
-    ProvinciaListView, CiudadListView, LugarCreateView, LugarListView,
-    LugarModificarView, CategoriaListView, PaisListView,
-    ArtistaCreateView, ArtistaListView, ArtistaModificarView,
-    ConciertoMetaListView, ConciertoCreateView, ConciertoListView,
-    ConciertoUpdateView, ConciertoDetailView,
-    CancelarConciertoView, TipoEntradaCreateView, TipoEntradaCancelarView,
-    TipoEntradaCancelarCantidadView, TipoEntradaModificarView,
-    TipoEntradaAgregarEntradasView
-)
 
 urlpatterns = [
     # provincia

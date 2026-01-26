@@ -1,11 +1,10 @@
+from conciertos.models import Ciudad, Lugar, Provincia
+from conciertos.serializers import (CiudadSerializer, LugarCreateSerializer,
+                                    LugarModificarSerializer, LugarSerializer,
+                                    ProvinciaSerializer)
 from rest_framework import generics
 from usuarios.permissions import EsAdministrador
-from conciertos.models import Provincia, Ciudad, Lugar
-from conciertos.serializers import (
-    ProvinciaSerializer, CiudadSerializer,
-    LugarCreateSerializer, LugarSerializer,
-    LugarModificarSerializer,
-)
+
 
 # provincia
 class ProvinciaListView(generics.ListAPIView):
@@ -17,7 +16,7 @@ class ProvinciaListView(generics.ListAPIView):
 class CiudadListView(generics.ListAPIView):
     serializer_class = CiudadSerializer
     pagination_class = None
-    
+
     def get_queryset(self):
         queryset = Ciudad.objects.all().order_by('nombre')
         provincia_id = self.request.query_params.get("provincia_id")
@@ -60,7 +59,7 @@ class LugarListView(generics.ListAPIView):
 
         if nombre:
             queryset = queryset.filter(nombre__icontains=nombre)
-        
+
         if activo in ['true', 'false']:
             queryset = queryset.filter(activo=(activo == 'true'))
 

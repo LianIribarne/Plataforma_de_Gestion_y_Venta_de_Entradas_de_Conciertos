@@ -1,7 +1,9 @@
 from celery import shared_task
 from django.utils import timezone
+
 from .models import Reserva
 from .services import liberar_reserva
+
 
 @shared_task
 def expirar_reserva(reserva_id):

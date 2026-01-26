@@ -1,6 +1,8 @@
-from django.db import models
 from django.core.validators import MinValueValidator
+from django.db import models
+
 from backend.utils.generarCodigo import generar_codigo_unico_pago
+
 
 class Pago(models.Model):
     codigo = models.CharField(

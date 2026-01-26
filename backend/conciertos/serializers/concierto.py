@@ -1,17 +1,21 @@
-from rest_framework import serializers
 import secrets
-from django.db import transaction
-from django.utils import timezone, formats
-from entradas.models import Entrada
-from conciertos.models import ConciertoMeta, Concierto, Lugar, Artista, TipoEntrada
-from conciertos.serializers.tipoEntrada import (
-    TipoEntradaCreateSerializer, TipoEntradaMiniSerializer,
-    TipoEntradaConciertoSerializer,
-)
+
+from conciertos.models import (Artista, Concierto, ConciertoMeta, Lugar,
+                               TipoEntrada)
 from conciertos.serializers.artista import ArtistaConciertoSerializer
 from conciertos.serializers.lugar import LugarDetailSerializer
-from backend.utils.images import image_to_webp
+from conciertos.serializers.tipoEntrada import (TipoEntradaConciertoSerializer,
+                                                TipoEntradaCreateSerializer,
+                                                TipoEntradaMiniSerializer)
+from django.db import transaction
+from django.db.models import Max
+from django.utils import formats, timezone
 from django.utils.translation import activate
+from entradas.models import Entrada
+from rest_framework import serializers
+
+from backend.utils.images import image_to_webp
+
 activate("es")
 
 # CONCIERTOMETA
@@ -70,7 +74,7 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
             if data["limite_reserva_total"] < max_cantidad:
                 raise serializers.ValidationError(
                     f"El límite de reserva total del concierto ({data['limite_reserva_total']}) "
-                    f"no puede ser menor a la cantidad del tipo de entrada con más tickets ({max_cantidad})."
+                    f"no puede ser menor al limite de reserva del tipo ({max_cantidad})."
                 )
 
             if len(tipos) > 4:
@@ -196,6 +200,31 @@ class ConciertoUpdateSerializer(serializers.ModelSerializer):
             max_size=1024,
             quality=80
         )
+
+    def validate_fecha(self, fecha):
+        if fecha <= timezone.localdate():
+            raise serializers.ValidationError("La fecha debe ser futura.")
+        return fecha
+
+    def validate_limite_reserva_total(self, limite):
+        concierto = self.instance
+
+        if concierto is None:
+            return limite
+
+        max_cantidad = concierto.tipos_entrada.filter(
+            activo=True
+        ).aggregate(
+            maximo=Max("limite_reserva")
+        )["maximo"]
+
+        if max_cantidad and limite < max_cantidad:
+            raise serializers.ValidationError(
+                f"El límite de reserva total del concierto ({limite}) "
+                f"no puede ser menor al limite de reserva del tipo ({max_cantidad})."
+            )
+
+        return limite
 
 class ConciertoDetailSerializer(serializers.ModelSerializer):
     estado = ConciertoMetaListSerializer()

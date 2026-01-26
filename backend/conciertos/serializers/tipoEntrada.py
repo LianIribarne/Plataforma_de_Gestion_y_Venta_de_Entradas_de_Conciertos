@@ -1,9 +1,12 @@
-from rest_framework import serializers
 import secrets
-from django.db import transaction
+
 from conciertos.models import TipoEntrada
-from conciertos.services import sincronizar_limite_concierto, actualizar_estado_por_stock
+from conciertos.services import (actualizar_estado_por_stock,
+                                 sincronizar_limite_concierto)
+from django.db import transaction
 from entradas.models import Entrada
+from rest_framework import serializers
+
 
 # crear concierto
 class TipoEntradaCreateSerializer(serializers.Serializer):

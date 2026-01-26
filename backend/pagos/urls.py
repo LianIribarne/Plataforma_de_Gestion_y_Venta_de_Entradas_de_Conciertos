@@ -1,7 +1,6 @@
 from django.urls import path
-from .views import (
-    PagarReservaView, PagoListView,
-)
+
+from .views import PagarReservaView, PagoListView
 
 urlpatterns = [
     # pagar reserva

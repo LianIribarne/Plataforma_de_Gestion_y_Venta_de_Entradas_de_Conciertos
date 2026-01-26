@@ -1,5 +1,7 @@
 from django.db import transaction
-from .models import Reserva, Entrada
+
+from .models import Entrada, Reserva
+
 
 def liberar_entrada(entrada: Entrada):
     tipo = entrada.tipo

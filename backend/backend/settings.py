@@ -1,7 +1,8 @@
-from decouple import config, Csv # lee los datos sensibles en el archivo .env
+import os
 from datetime import timedelta
 from pathlib import Path
-import os
+
+from decouple import Csv, config  # lee los datos sensibles en el archivo .env
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -100,6 +101,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",

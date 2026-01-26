@@ -1,9 +1,12 @@
 import secrets
+from datetime import timedelta
+
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
-from datetime import timedelta
-from django.core.validators import MaxValueValidator, MinValueValidator
+
 from backend.utils.generarCodigo import generar_codigo_unico_entrada
+
 
 def generar_qr_token_unico():
     while True:
