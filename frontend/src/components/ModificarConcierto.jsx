@@ -42,6 +42,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
     fecha: "",
     show: "",
     puertas: "",
+    duracion: "",
     lugar: null,
     artista: null,
     mood: null,
@@ -76,6 +77,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
       fecha: concierto.fecha,
       show: concierto.show_hora,
       puertas: concierto.puertas_hora,
+      duracion: concierto.duracion,
       lugar: concierto.lugar.id,
       artista: concierto.artista.id,
       mood: concierto.mood.id,
@@ -184,6 +186,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
     if (!formData.fecha) e.fecha = "La fecha es obligatoria";
     if (!formData.show) e.show = "Es obligatorio";
     if (!formData.puertas) e.puertas = "Es obligatorio";
+    if (!formData.duracion) e.duracion = "Es obligatorio";
     if (formData.lugar === null) e.lugar = "El lugar es obligatorio";
     if (formData.artista === null) e.artista = "El artista es obligatorio";
     if (!formData.mood) e.mood = "El mood es obligatorio";
@@ -208,6 +211,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
     if (formData.fecha !== '') payload.append('fecha', formData.fecha)
     if (formData.show !== '') payload.append('show_hora', formData.show)
     if (formData.puertas !== '') payload.append('puertas_hora', formData.puertas)
+    if (formData.duracion !== '') payload.append('duracion', formData.duracion)
     if (formData.mood !== null) payload.append('mood_id', formData.mood)
     if (formData.artista !== null) payload.append('artista_id', formData.artista)
     if (formData.lugar !== null) payload.append('lugar_id', formData.lugar)
@@ -356,6 +360,26 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                     </Tooltip>
                   </FormControl>
 
+                  <FormControl isInvalid={errors.puertas}>
+                    <FormLabel color='white'>Puertas</FormLabel>
+                    <Tooltip
+                      label={errors.puertas}
+                      isOpen={!!errors.puertas}
+                      placement="top-end"
+                      bg="red.500"
+                      color="white"
+                      hasArrow
+                    >
+                      <Input
+                        type="time"
+                        variant='custom'
+                        rounded='full'
+                        value={formData.puertas}
+                        onChange={handleChange("puertas")}
+                      />
+                    </Tooltip>
+                  </FormControl>
+
                   <FormControl isInvalid={errors.show}>
                     <FormLabel color='white'>Show</FormLabel>
                     <Tooltip
@@ -376,24 +400,21 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
                     </Tooltip>
                   </FormControl>
 
-                  <FormControl isInvalid={errors.puertas}>
-                    <FormLabel color='white'>Puertas</FormLabel>
-                    <Tooltip
-                      label={errors.puertas}
-                      isOpen={!!errors.puertas}
-                      placement="top-end"
-                      bg="red.500"
-                      color="white"
-                      hasArrow
+                  <FormControl isInvalid={errors.duracion}>
+                    <FormLabel color='white'>Duración</FormLabel>
+                    <NumberInput
+                      min={30}
+                      max={300}
+                      value={formData.duracion}
+                      onChange={(valueString) => handleChange("duracion")({target: {value: valueString}})}
+                      variant='custom'
                     >
-                      <Input
-                        type="time"
-                        variant='custom'
-                        rounded='full'
-                        value={formData.puertas}
-                        onChange={handleChange("puertas")}
-                      />
-                    </Tooltip>
+                      <NumberInputField rounded='full' />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
                   </FormControl>
                 </HStack>
 

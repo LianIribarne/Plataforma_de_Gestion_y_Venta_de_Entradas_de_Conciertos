@@ -61,7 +61,7 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Concierto
         fields = [
-            'titulo', 'descripcion', 'mood_id', 'fecha',
+            'titulo', 'descripcion', 'mood_id', 'fecha', 'duracion',
             'show_hora', 'puertas_hora', 'limite_reserva_total',
             'lugar_id', 'artista_id', 'organizador', 'tipos_entrada'
         ]
@@ -189,7 +189,7 @@ class ConciertoUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'titulo', 'descripcion', 'estado_id','mood_id', 'fecha',
             'show_hora', 'puertas_hora', 'limite_reserva_total',
-            'lugar_id', 'artista_id', 'imagen'
+            'lugar_id', 'artista_id', 'imagen', 'duracion'
         ]
 
     def validate_imagen(self, image):
@@ -250,7 +250,8 @@ class ConciertoDetailSerializer(serializers.ModelSerializer):
             'titulo', 'descripcion', 'estado', 'mood', 'fecha',
             'show_hora', 'puertas_hora', 'limite_reserva_total',
             'imagen', 'lugar', 'artista', 'organizador', 'fecha_legible',
-            'tipos_entrada', 'puertas_hora_legible', 'show_hora_legible'
+            'tipos_entrada', 'puertas_hora_legible', 'show_hora_legible',
+            'duracion'
         ]
 
     def get_fecha_legible(self, obj):

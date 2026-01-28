@@ -42,6 +42,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
     fecha: "",
     show: "",
     puertas: "",
+    duracion: "30",
     lugar: null,
     artista: null,
     mood: null,
@@ -56,7 +57,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
 
   // Datos de la/s entrada/s
   const [entradas, setEntradas] = useState([
-    { nombre: "", precio: '500.00', cantidad: 1, limite: 1 }
+    { nombre: "", precio: '100.00', cantidad: 1, limite: 1 }
   ]);
 
   const limiteEntradas = Math.max(...entradas.map(e => Number(e.limite) || 0));
@@ -84,7 +85,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
   };
 
   const addEntrada = () => {
-    setEntradas((p) => [...p, { nombre: "", precio: '500.00', cantidad: 1, limite: 1 }]);
+    setEntradas((p) => [...p, { nombre: "", precio: '100.00', cantidad: 1, limite: 1 }]);
   };
 
   const removeEntrada = (i) => {
@@ -227,6 +228,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
     if (!formData.fecha) e.fecha = "La fecha es obligatoria";
     if (!formData.show) e.show = "Es obligatorio";
     if (!formData.puertas) e.puertas = "Es obligatorio";
+    if (!formData.duracion) e.duracion = "Es obligatorio";
     if (formData.lugar === null) e.lugar = "El lugar es obligatorio";
     if (formData.artista === null) e.artista = "El artista es obligatorio";
     if (!formData.mood) e.mood = "El mood es obligatorio";
@@ -256,6 +258,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
         fecha: formData.fecha,
         show_hora: formData.show,
         puertas_hora: formData.puertas,
+        duracion: formData.duracion,
         mood_id: formData.mood,
         limite_reserva_total: formData.limite_reserva,
         tipos_entrada: entradas.map((e) => ({
@@ -417,6 +420,26 @@ export default function CrearConcierto({ isOpen, onClose }) {
                     </Tooltip>
                   </FormControl>
 
+                  <FormControl isInvalid={errors.puertas}>
+                    <FormLabel color='white'>Puertas</FormLabel>
+                    <Tooltip
+                      label={errors.puertas}
+                      isOpen={!!errors.puertas}
+                      placement="top-end"
+                      bg="red.500"
+                      color="white"
+                      hasArrow
+                    >
+                      <Input
+                        type="time"
+                        variant='custom'
+                        rounded='full'
+                        value={formData.puertas}
+                        onChange={handleChange("puertas")}
+                      />
+                    </Tooltip>
+                  </FormControl>
+
                   <FormControl isInvalid={errors.show}>
                     <FormLabel color='white'>Show</FormLabel>
                     <Tooltip
@@ -437,24 +460,21 @@ export default function CrearConcierto({ isOpen, onClose }) {
                     </Tooltip>
                   </FormControl>
 
-                  <FormControl isInvalid={errors.puertas}>
-                    <FormLabel color='white'>Puertas</FormLabel>
-                    <Tooltip
-                      label={errors.puertas}
-                      isOpen={!!errors.puertas}
-                      placement="top-end"
-                      bg="red.500"
-                      color="white"
-                      hasArrow
+                  <FormControl isInvalid={errors.duracion}>
+                    <FormLabel color='white'>Duración</FormLabel>
+                    <NumberInput
+                      min={30}
+                      max={300}
+                      value={formData.duracion}
+                      onChange={(valueString) => handleChange("duracion")({target: {value: valueString}})}
+                      variant='custom'
                     >
-                      <Input
-                        type="time"
-                        variant='custom'
-                        rounded='full'
-                        value={formData.puertas}
-                        onChange={handleChange("puertas")}
-                      />
-                    </Tooltip>
+                      <NumberInputField rounded='full' />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
                   </FormControl>
                 </HStack>
 

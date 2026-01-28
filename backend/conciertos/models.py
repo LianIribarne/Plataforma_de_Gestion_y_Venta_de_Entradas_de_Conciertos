@@ -127,6 +127,12 @@ class Concierto(models.Model):
     fecha = models.DateField()
     show_hora = models.TimeField()
     puertas_hora = models.TimeField()
+    duracion = models.PositiveIntegerField(
+        validators=[
+            MinValueValidator(30),
+            MaxValueValidator(300)
+        ]
+    )
     limite_reserva_total = models.PositiveIntegerField(
         validators=[
             MinValueValidator(2),
