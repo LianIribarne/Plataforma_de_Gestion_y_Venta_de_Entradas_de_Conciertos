@@ -250,35 +250,43 @@ export default function CrearConcierto({ isOpen, onClose }) {
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
-      const payload = {
-        titulo: formData.titulo,
-        descripcion: formData.descripcion,
-        artista_id: formData.artista,
-        lugar_id: formData.lugar,
-        fecha: formData.fecha,
-        show_hora: formData.show,
-        puertas_hora: formData.puertas,
-        duracion: formData.duracion,
-        mood_id: formData.mood,
-        limite_reserva_total: formData.limite_reserva,
-        tipos_entrada: entradas.map((e) => ({
-          nombre: e.nombre,
-          precio: Number(e.precio),
-          cantidad_total: Number(e.cantidad),
-          limite_reserva: Number(e.limite)
-        }))
+      const fd = new FormData();
+
+      // campos simples
+      fd.append("titulo", formData.titulo);
+      fd.append("descripcion", formData.descripcion);
+      fd.append("artista_id", formData.artista);
+      fd.append("lugar_id", formData.lugar);
+      fd.append("fecha", formData.fecha);
+      fd.append("show_hora", formData.show);
+      fd.append("puertas_hora", formData.puertas);
+      fd.append("duracion", formData.duracion);
+      fd.append("mood_id", formData.mood);
+      fd.append("limite_reserva_total", formData.limite_reserva);
+
+      // 🔑 lista compleja → JSON string
+      fd.append(
+        "tipos_entrada",
+        JSON.stringify(
+          entradas.map((e) => ({
+            nombre: e.nombre,
+            precio: Number(e.precio),
+            cantidad_total: Number(e.cantidad),
+            limite_reserva: Number(e.limite)
+          }))
+        )
+      );
+
+      // 📸 imagen (opcional)
+      if (formData.imagen) {
+        fd.append("imagen", formData.imagen);
       }
 
-      const res = await api.post("/conciertos/crear_concierto/", payload);
-
-      const conciertoId = res?.data?.id;
-
-      if (formData.imagen && conciertoId) {
-        const formDataImg = new FormData();
-        formDataImg.append("imagen", formData.imagen);
-
-        await api.patch(`/conciertos/modificar_concierto/${conciertoId}`, formDataImg);
-      }
+      // 🚀 un solo request
+      const res = await api.post(
+        "/conciertos/crear_concierto/",
+        fd
+      );
 
       const mensaje = res?.data?.message ?? "Se creó con éxito";
       toast({

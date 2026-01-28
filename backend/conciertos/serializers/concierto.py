@@ -1,3 +1,4 @@
+import json
 import secrets
 
 from conciertos.models import (Artista, Concierto, ConciertoMeta, Lugar,
@@ -50,10 +51,11 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
         source="mood",
         write_only=True
     )
-    tipos_entrada = TipoEntradaCreateSerializer(
-        many=True,
-        write_only=True
+    tipos_entrada = serializers.CharField(
+        write_only=True,
+        required=False
     )
+    imagen = serializers.ImageField(required=False)
     organizador = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
@@ -62,25 +64,46 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
         model = Concierto
         fields = [
             'titulo', 'descripcion', 'mood_id', 'fecha', 'duracion',
-            'show_hora', 'puertas_hora', 'limite_reserva_total',
+            'show_hora', 'puertas_hora', 'limite_reserva_total', 'imagen',
             'lugar_id', 'artista_id', 'organizador', 'tipos_entrada'
         ]
 
     def validate(self, data):
-        tipos = data.get("tipos_entrada", [])
+        raw_tipos = self.initial_data.get("tipos_entrada")
 
-        if tipos:
-            max_cantidad = max(t.get("limite_reserva", 0) for t in tipos)
-            if data["limite_reserva_total"] < max_cantidad:
-                raise serializers.ValidationError(
-                    f"El límite de reserva total del concierto ({data['limite_reserva_total']}) "
-                    f"no puede ser menor al limite de reserva del tipo ({max_cantidad})."
-                )
+        if not raw_tipos:
+            raise serializers.ValidationError({
+                "tipos_entrada": "Este campo es requerido."
+            })
 
-            if len(tipos) > 4:
-                raise serializers.ValidationError(
-                    "Solo puede haber 4 tipos de entradas por concierto."
-                )
+        try:
+            tipos = json.loads(raw_tipos)
+        except json.JSONDecodeError:
+            raise serializers.ValidationError({
+                "tipos_entrada": "Debe ser un JSON válido."
+            })
+
+        if not isinstance(tipos, list):
+            raise serializers.ValidationError({
+                "tipos_entrada": "Debe ser una lista."
+            })
+
+        if len(tipos) > 4:
+            raise serializers.ValidationError({
+                "tipos_entrada": "Solo puede haber como maximo 4 tipos de entradas."
+            })
+
+        serializer = TipoEntradaCreateSerializer(data=tipos, many=True)
+        serializer.is_valid(raise_exception=True)
+
+        data["tipos_entrada"] = serializer.validated_data
+
+        max_cantidad = max(t["limite_reserva"] for t in data["tipos_entrada"])
+        if data["limite_reserva_total"] < max_cantidad:
+            raise serializers.ValidationError(
+                f"El límite de reserva total del concierto ({data['limite_reserva_total']}) "
+                f"no puede ser menor al limite de reserva del tipo ({max_cantidad})."
+            )
 
         fecha = data.get("fecha")
 
@@ -92,10 +115,17 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         tipos_data = validated_data.pop("tipos_entrada")
-        artista = validated_data.get("artista")
-        validated_data["imagen"] = artista.imagen
+        imagen = validated_data.pop("imagen", None)
 
-        concierto = Concierto.objects.create(**validated_data)
+        if not imagen:
+            artista = validated_data.get("artista")
+            imagen = artista.imagen
+
+
+        concierto = Concierto.objects.create(
+            imagen=imagen,
+            **validated_data
+        )
 
         for tipo in tipos_data:
             tipo_entrada = TipoEntrada.objects.create(

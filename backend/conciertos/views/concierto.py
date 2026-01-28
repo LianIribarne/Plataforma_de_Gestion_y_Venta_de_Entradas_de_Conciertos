@@ -33,6 +33,7 @@ class ConciertoCreateView(generics.CreateAPIView):
     queryset = Concierto.objects.all()
     serializer_class = ConciertoCreateSerializer
     permission_classes = [EsOrganizador]
+    parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
