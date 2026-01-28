@@ -53,7 +53,7 @@ class CreateTipoEntradaSerializer(serializers.ModelSerializer):
                 {"evento": "No sos el organizador de este concierto."}
             )
 
-        if concierto.estado.codigo in ['cancelado', 'finalizado']:
+        if concierto.estado.codigo in ['en_curso', 'cancelado', 'finalizado']:
             raise serializers.ValidationError(
                 {"evento": "No se puede agregar otro tipo de entrada al concierto."}
             )

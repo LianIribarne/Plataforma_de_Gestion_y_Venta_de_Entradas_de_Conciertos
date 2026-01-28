@@ -122,7 +122,7 @@ class ConciertoUpdateView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         concierto = self.get_object()
 
-        if concierto.estado.codigo in ['cancelado', 'finalizado']:
+        if concierto.estado.codigo in ['en_curso', 'cancelado', 'finalizado']:
             raise ValidationError(
                 {"detail": "No se puede modificar el concierto."}
             )
@@ -164,9 +164,9 @@ class CancelarConciertoView(generics.GenericAPIView):
     def post(self, request, id, **kwargs):
         concierto = get_object_or_404(self.get_queryset(), id=id)
 
-        if concierto.estado.codigo in ['cancelado', 'finalizado']:
+        if concierto.estado.codigo in ['en_curso', 'cancelado', 'finalizado']:
             return Response(
-                {"detail": "El concierto ya está cancelado o ya finalizó."},
+                {"detail": "No se puede cancelar el concierto."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

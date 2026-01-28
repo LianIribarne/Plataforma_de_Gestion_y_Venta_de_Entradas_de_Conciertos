@@ -1,16 +1,25 @@
-import {
-  Box, Text, Heading, Grid,
-  GridItem, Wrap, WrapItem, Button,
-  useDisclosure, IconButton, Tooltip, Badge,
-  Skeleton, HStack,
-} from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import Pago from "../components/Pago";
+import {
+  Badge,
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  Heading,
+  HStack,
+  IconButton,
+  Skeleton,
+  Text,
+  Tooltip,
+  useDisclosure,
+  Wrap, WrapItem,
+} from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Entrada from "../components/Entrada";
 import FiltrosPagos from '../components/FiltrosPagos';
-import api from '../services/api'
+import Pago from "../components/Pago";
+import api from '../services/api';
 
 export default function DetallesUsuarios() {
   const [datos, setDatos] = useState(null);
@@ -25,7 +34,7 @@ export default function DetallesUsuarios() {
   const [verEntradas, setVerEntradas] = useState(true);
 
   const [pagos, setPagos] = useState([])
-  
+
   const fetchPagos = async (filtros) => {
     setLoading(true);
 
@@ -38,7 +47,7 @@ export default function DetallesUsuarios() {
 
     try {
       const response = await api.get(
-        "/pagos/pagos/", 
+        "/pagos/pagos/",
         { params }
       );
 
@@ -53,13 +62,14 @@ export default function DetallesUsuarios() {
   }, []);
 
   const [entradas, setEntradas] = useState([])
-  
+
   const fetchEntradas = async () => {
     setLoading(true);
 
     try {
       const response = await api.get(
-        "/entradas/entradas/"
+        "/entradas/entradas/",
+        {cliente: id}
       );
 
       setEntradas(response.data)
@@ -105,7 +115,7 @@ export default function DetallesUsuarios() {
         value: datos[item.key] ?? ''
       }))
     : [];
-  
+
   const toggleVerEntradas = (eventoId) => {
     setVerEntradas((s) => ({
       ...s,
@@ -115,7 +125,7 @@ export default function DetallesUsuarios() {
 
   return (
     <Box p={5}>
-      <Grid 
+      <Grid
         templateColumns='repeat(3, 1fr)'
         gap={4}
       >
@@ -140,9 +150,9 @@ export default function DetallesUsuarios() {
               </Heading>
               <Wrap justify='center'>
                 {clienteConDatos.map((o, i) => (
-                  <WrapItem 
-                    bg='whiteAlpha.400' 
-                    fontWeight='medium' 
+                  <WrapItem
+                    bg='whiteAlpha.400'
+                    fontWeight='medium'
                     px={2}
                     py={1}
                     borderRadius={10}
@@ -185,10 +195,10 @@ export default function DetallesUsuarios() {
         <GridItem colSpan={3}>
           <Box align='center' mt={4}>
             <Heading color='white' as='span'>Compras realizadas</Heading>
-            <Button 
+            <Button
               bg='whiteAlpha.800'
               color='blackAlpha.800'
-              rounded='full' 
+              rounded='full'
               ml={2}
               mt={-3}
               onClick={onOpen}
@@ -196,10 +206,10 @@ export default function DetallesUsuarios() {
               Filtros
             </Button>
             <Tooltip label={verPagos ? 'Ocultar' : 'Mostrar'} placement='top'>
-              <IconButton  
+              <IconButton
                 bg='whiteAlpha.800'
                 color='blackAlpha.800'
-                rounded='full' 
+                rounded='full'
                 ml={2}
                 mt={-3}
                 onClick={() => setVerPagos(prev => !prev)}
@@ -208,9 +218,9 @@ export default function DetallesUsuarios() {
             </Tooltip>
           </Box>
 
-          <FiltrosPagos 
-            isOpen={isOpen} 
-            onClose={onClose} 
+          <FiltrosPagos
+            isOpen={isOpen}
+            onClose={onClose}
             onApply={fetchPagos}
           />
 
@@ -244,17 +254,17 @@ export default function DetallesUsuarios() {
                 <HStack>
                   <Heading ml={4} color='white' size='lg'>{ev.concierto.titulo}</Heading>
                   <Tooltip label={visibles  ? 'Ocultar' : 'Mostrar'} placement='top'>
-                    <IconButton  
+                    <IconButton
                       bg='whiteAlpha.800'
                       color='blackAlpha.800'
-                      rounded='full' 
+                      rounded='full'
                       ml={2}
                       onClick={() => toggleVerEntradas(ev.concierto.titulo)}
                       icon={visibles ? <ViewOffIcon /> : <ViewIcon />}
                     />
                   </Tooltip>
                 </HStack>
-                  
+
                 <Wrap spacing={3} justify='center' align='center' mt={4} display={visibles ? undefined : 'none'}>
                   {ev.entradas.map((x) => (
                     <WrapItem key={x.codigo}>

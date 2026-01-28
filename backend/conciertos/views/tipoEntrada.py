@@ -97,11 +97,11 @@ class TipoEntradaCancelarCantidadView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if tipo.evento.estado.codigo in ['cancelado', 'finalizado']:
+        if tipo.evento.estado.codigo in ['en_curso', 'cancelado', 'finalizado']:
             return Response(
                 {
                     "detail":
-                    f"El concierto se encuentra {tipo.evento.estado.codigo}, y no se puede cancelar el tipo de entrada."
+                    f"El concierto se encuentra {tipo.evento.estado.nombre}, y no se puede cancelar el tipo de entrada."
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -152,11 +152,11 @@ class TipoEntradaModificarView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if tipo.evento.estado.codigo in ['cancelado', 'finalizado']:
+        if tipo.evento.estado.codigo in ['en_curso', 'cancelado', 'finalizado']:
             return Response(
                 {
                     "detail":
-                    f"El concierto se encuntra {tipo.evento.estado.codigo}, y no se puede modificar el tipo de entrada."
+                    f"El concierto se encuntra {tipo.evento.estado.nombre}, y no se puede modificar el tipo de entrada."
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -218,11 +218,11 @@ class TipoEntradaAgregarEntradasView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if tipo.evento.estado.codigo in ['cancelado', 'finalizado']:
+        if tipo.evento.estado.codigo in ['en_curso', 'cancelado', 'finalizado']:
             return Response(
                 {
                     "detail":
-                    f"El concierto se encuntra {tipo.evento.estado.codigo}, y no se puede agregar más entradas."
+                    f"El concierto se encuntra {tipo.evento.estado.nombre}, y no se puede agregar más entradas."
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )

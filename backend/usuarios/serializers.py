@@ -251,9 +251,10 @@ class OrganizadorStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = [
-            "conciertos_creados", "conciertos_borradores", "conciertos_programados", "conciertos_finalizados",
-            "conciertos_cancelados", "tipos_entrada_creados", "entradas_totales", "entradas_vendidas",
-            "ocupacion_promedio", "conciertos_agotados"
+            "conciertos_creados", "conciertos_borradores", "conciertos_programados",
+            "conciertos_cancelados", "tipos_entrada_creados", "entradas_totales",
+            "ocupacion_promedio", "conciertos_agotados", "conciertos_finalizados",
+            "entradas_vendidas"
         ]
 
     def _valor_o_sin_info(self, value):

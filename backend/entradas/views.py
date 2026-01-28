@@ -174,19 +174,25 @@ class EntradaListaView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
+        qs = (
+            Entrada.objects.filter(pago__isnull=False)
+            .exclude(tipo__evento__estado__codigo__in=["finalizado"])
+            .select_related("pago", "tipo")
+            .order_by("tipo__precio")
+        )
+
         if user.es_cliente:
-            return Entrada.objects.filter(
-                pago__cliente=user,
+            return qs.filter(
+                pago__cliente=user
             ).exclude(
-                tipo__evento__estado__codigo__in=["finalizado", "cancelado"]
-            ).select_related("pago", "tipo").order_by("tipo__precio")
+                tipo__evento__estado__codigo="cancelado"
+            )
 
         if user.es_administrador:
-            return Entrada.objects.filter(
-                pago__isnull=False
-            ).exclude(
-                tipo__evento__estado__codigo__in=["finalizado"]
-            ).select_related("pago", "tipo").order_by("tipo__precio")
+            cliente_id = self.request.query_params.get("cliente")
+            if cliente_id:
+                qs = qs.filter(pago__cliente__id=cliente_id)
+            return qs
 
         return Entrada.objects.none()
 
