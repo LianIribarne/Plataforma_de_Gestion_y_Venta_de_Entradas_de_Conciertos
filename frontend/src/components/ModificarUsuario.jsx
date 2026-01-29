@@ -1,13 +1,20 @@
-import { useState, useEffect } from 'react'
-import {
-  GridItem, Input, InputGroup, InputLeftAddon,
-  RadioGroup, Radio,
-  Stack, Button, FormControl, FormLabel,
-  Tooltip, useToast, Grid, Modal,
-  ModalOverlay, ModalContent, ModalHeader, ModalFooter, 
-  ModalBody, ModalCloseButton,
-} from "@chakra-ui/react";
 import { AtSignIcon, CalendarIcon } from '@chakra-ui/icons';
+import {
+  Button, FormControl, FormLabel,
+  Grid,
+  GridItem, Input, InputGroup, InputLeftAddon,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Radio,
+  RadioGroup,
+  Stack,
+  Tooltip, useToast,
+} from "@chakra-ui/react";
+import { useEffect, useState } from 'react';
 import api from "../services/api";
 
 export default function ModificarUsuario({ isOpen, onClose, id }) {
@@ -44,7 +51,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
 
   useEffect(() => {
     if (!user) return
-    
+
     setFormData({
       nombre: user.first_name || "",
       apellido: user.last_name || "",
@@ -58,10 +65,6 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio";
-
-    if (!formData.apellido.trim()) newErrors.apellido = "El apellido es obligatorio";
 
     if (!formData.email.trim()) {
       newErrors.email = "El email es obligatorio";
@@ -100,7 +103,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
@@ -135,11 +138,11 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -165,7 +168,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
           <form onSubmit={handleSubmit}>
             <GridItem>
               <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-             
+
                 {/* Nombre */}
                 <GridItem>
                   <FormControl isInvalid={!!errors.nombre}>
@@ -191,7 +194,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
                     </Tooltip>
                   </FormControl>
                 </GridItem>
-   
+
                 {/* Apellido */}
                 <GridItem>
                   <FormControl isInvalid={!!errors.apellido}>
@@ -218,7 +221,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
                   </FormControl>
                 </GridItem>
               </Grid>
- 
+
               {/* Email */}
               <FormControl isInvalid={!!errors.email} mt={3} mb={3}>
                 <FormLabel color='white'>Email</FormLabel>
@@ -247,7 +250,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
                   </InputGroup>
                 </Tooltip>
               </FormControl>
- 
+
               {/* Fecha de nacimiento */}
               <FormControl isInvalid={!!errors.fechaNacimiento}>
                 <FormLabel color='white'>Fecha de nacimiento</FormLabel>
@@ -298,9 +301,9 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

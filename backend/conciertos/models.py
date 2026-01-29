@@ -1,5 +1,8 @@
+from datetime import datetime, timedelta
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 from backend.utils.validarImagen import (validar_cuadrada,
                                          validar_formato_imagen,
@@ -147,6 +150,12 @@ class Concierto(models.Model):
             validar_cuadrada
         ]
     )
+    iniciar_task_id = models.CharField(
+        max_length=255, null=True, blank=True
+    )
+    finalizar_task_id = models.CharField(
+        max_length=255, null=True, blank=True
+    )
 
     # Foreing Key
     lugar = models.ForeignKey(
@@ -176,6 +185,18 @@ class Concierto(models.Model):
         related_name="conciertos_por_mood",
         limit_choices_to={"tipo": "mood"}
     )
+
+    @property
+    def fecha_inicio(self):
+        naive = datetime.combine(self.fecha, self.show_hora)
+        return timezone.make_aware(
+            naive,
+            timezone.get_current_timezone()
+        )
+
+    @property
+    def fecha_fin(self):
+        return self.fecha_inicio + timedelta(minutes=self.duracion)
 
     def __str__(self):
         return self.titulo

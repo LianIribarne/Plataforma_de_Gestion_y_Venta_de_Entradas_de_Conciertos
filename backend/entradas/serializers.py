@@ -38,9 +38,21 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
         if len(tipos) != len(set(tipos)):
             raise serializers.ValidationError("No se puede repetir el mismo tipo.")
 
-        estado = value[0]["tipo"].evento.estado.nombre
-        if estado != 'Programado':
-            raise serializers.ValidationError("No se puede reservar en este concierto.")
+        conciertos = {
+            item["tipo"].evento_id for item in value
+        }
+
+        if len(conciertos) != 1:
+            raise serializers.ValidationError(
+                f"No se pueden mezclar tipos de distintos conciertos."
+            )
+
+        concierto = value[0]["tipo"].evento
+
+        if concierto.estado.nombre != 'Programado':
+            raise serializers.ValidationError(
+                "No se puede reservar en este concierto."
+            )
 
         return value
 
@@ -84,11 +96,6 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
                 if tipo.limite_reserva < cantidad:
                     raise serializers.ValidationError(
                         f"Se supera el limite de reserva aceptado, {tipo.nombre}({tipo.limite_reserva})."
-                    )
-
-                if tipo.evento != concierto:
-                    raise serializers.ValidationError(
-                        "No se pueden reservar entradas de distintos conciertos en una misma reserva."
                     )
 
                 disponibles = (

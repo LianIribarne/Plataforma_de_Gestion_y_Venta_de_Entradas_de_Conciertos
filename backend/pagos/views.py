@@ -38,7 +38,7 @@ class PagarReservaView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if reserva.concierto.estado.codigo in ['borrador', 'cancelada', 'finalizada']:
+        if reserva.concierto.estado.codigo in ['borrador', 'en_curso', 'cancelada', 'finalizada']:
             return Response(
                 {"detail": "La reserva ya no es válida"},
                 status=status.HTTP_400_BAD_REQUEST

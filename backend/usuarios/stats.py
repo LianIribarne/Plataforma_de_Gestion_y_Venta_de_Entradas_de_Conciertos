@@ -28,6 +28,11 @@ def organizador_stats_queryset():
                 filter=Q(organizadores__estado__codigo="agotado"),
                 distinct=True
             ),
+            conciertos_en_curso=Count(
+                "organizadores",
+                filter=Q(organizadores__estado__codigo="en_curso"),
+                distinct=True
+            ),
             conciertos_finalizados=Count(
                 "organizadores",
                 filter=Q(organizadores__estado__codigo="finalizado"),

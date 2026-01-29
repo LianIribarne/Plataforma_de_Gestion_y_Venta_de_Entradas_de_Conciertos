@@ -1,5 +1,6 @@
 import secrets
 
+from celery import current_app
 from celery.result import AsyncResult
 from conciertos.models import Concierto, ConciertoMeta, TipoEntrada
 from django.core.exceptions import ValidationError
@@ -96,8 +97,14 @@ def cancelar_concierto(concierto_id: int):
         .get(id=concierto_id)
     )
 
-    if concierto.estado.codigo in ["cancelado", "finalizado"]:
+    if concierto.estado.codigo in ["en_curso", "cancelado", "finalizado"]:
         return concierto
+
+    if concierto.iniciar_task_id:
+        current_app.control.revoke(concierto.iniciar_task_id)
+
+    if concierto.finalizar_task_id:
+        current_app.control.revoke(concierto.finalizar_task_id)
 
     estado_cancelado = ConciertoMeta.objects.get(nombre="Cancelado")
 
@@ -129,7 +136,7 @@ def cancelar_concierto(concierto_id: int):
 def actualizar_estado_por_stock(concierto):
     estado_actual = concierto.estado.codigo
 
-    if estado_actual in ["borrador", "cancelado", "finalizado"]:
+    if estado_actual in ["borrador", "en_curso", "cancelado", "finalizado"]:
         return
 
     tipos_activos = concierto.tipos_entrada.filter(activo=True)

@@ -1,14 +1,22 @@
-import { 
-  Button, FormControl, FormLabel, Input, HStack,
-  Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalFooter, ModalBody, ModalCloseButton,
-  Tooltip, useToast, NumberInput, NumberInputField,
-  NumberInputStepper, NumberIncrementStepper,
+import {
+  Button, FormControl, FormLabel,
+  HStack,
+  Input,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput, NumberInputField,
+  NumberInputStepper,
+  Tooltip, useToast,
 } from "@chakra-ui/react";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import api from '../services/api';
 import formatoPrecio from "../utils/FormatoPrecio";
-import api from '../services/api'
 
 export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, limite_reserva }) {
   const [formData, setFormData] = useState({
@@ -47,7 +55,7 @@ export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, lim
   const handlePrecioChange = (value) => {
     // aceptar números, . y ,
     const clean = value.replace(",", ".");
-    
+
     // solo números con hasta 2 decimales
     if (!/^\d*\.?\d{0,2}$/.test(clean)) return;
 
@@ -58,10 +66,9 @@ export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, lim
   const validateForm = () => {
     const newErrors = {};
 
-    if (formData.nombre === '') newErrors.nombre = "El nombre es obligatorio";
     if ((Number(formData.precio) > 1000000) || (Number(formData.precio) < 500)) newErrors.precio = "Precio inválido"
     if ((Number(formData.limite_reserva) > 6) || (Number(formData.limite_reserva) < 1)) newErrors.limite_reserva = "Limite inválido"
-    
+
     return newErrors;
   };
 
@@ -69,7 +76,7 @@ export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, lim
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
@@ -102,11 +109,11 @@ export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, lim
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -149,7 +156,7 @@ export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, lim
                 />
               </Tooltip>
             </FormControl>
-        
+
             <FormControl isInvalid={!!errors?.precio}>
               <FormLabel color='white'>Precio</FormLabel>
               <NumberInput
@@ -176,7 +183,7 @@ export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, lim
                 </Tooltip>
               </NumberInput>
             </FormControl>
-              
+
             <FormControl isInvalid={!!errors?.limite_reserva}>
               <FormLabel color='white'>Limite reserva</FormLabel>
               <NumberInput
@@ -197,9 +204,9 @@ export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, lim
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

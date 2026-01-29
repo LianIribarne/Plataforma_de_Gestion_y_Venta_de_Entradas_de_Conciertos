@@ -1,12 +1,18 @@
+import { ExternalLinkIcon, ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import {
-  Heading, HStack, Wrap, WrapItem,
-  Text, Box, Checkbox, Button,
-  AbsoluteCenter, Link, Tooltip,
+  AbsoluteCenter,
+  Box,
+  Button,
+  Checkbox,
+  Heading, HStack,
   IconButton,
+  Link,
+  Text,
+  Tooltip,
+  Wrap, WrapItem,
 } from "@chakra-ui/react";
-import { useState, useEffect } from 'react';
-import { ExternalLinkIcon, ViewOffIcon, ViewIcon } from '@chakra-ui/icons';
-import Entrada from '../components/Entrada'
+import { useEffect, useState } from 'react';
+import Entrada from '../components/Entrada';
 import api from "../services/api";
 
 export default function Entradas() {
@@ -53,7 +59,7 @@ export default function Entradas() {
 
   const [entradas, setEntradas] = useState([])
   const [loading, setLoading] = useState(true)
-  
+
   const fetchEntradas = async () => {
     setLoading(true);
 
@@ -72,16 +78,16 @@ export default function Entradas() {
     fetchEntradas();
   }, []);
 
-  return entradas ? (
+  return entradas.length > 0 ? (
     <Box py={5}>
-      <Heading 
-        align='center' 
-        fontSize='5xl' 
-        color='white' 
+      <Heading
+        align='center'
+        fontSize='5xl'
+        color='white'
       >
         Tus Entradas
       </Heading>
-      
+
       {entradas.map((ev) => {
         const allChecked = ev.entradas.every((x) => selected[x.codigo]);
         const visibles = verEntradas[ev.concierto.titulo] ?? true;
@@ -102,10 +108,10 @@ export default function Entradas() {
                 Imprimir
               </Button>
               <Tooltip label={visibles  ? 'Ocultar' : 'Mostrar'} placement='top'>
-                <IconButton  
+                <IconButton
                   bg='whiteAlpha.800'
                   color='blackAlpha.800'
-                  rounded='full' 
+                  rounded='full'
                   ml={2}
                   mb={-3}
                   onClick={() => toggleVerEntradas(ev.concierto.titulo)}
@@ -126,8 +132,8 @@ export default function Entradas() {
                 color='white'
                 display={ev.concierto.estado === 'Cancelado' || !visibles ? 'none' : 'inline-block' }
               />
-              
-              <Text 
+
+              <Text
                 mt={1}
                 ml={2}
                 color='white'
@@ -165,8 +171,8 @@ export default function Entradas() {
                         color='white'
                         display={ev.concierto.estado === 'Cancelado' ? 'none' : 'inline-block' }
                       />
-                      
-                      <Text 
+
+                      <Text
                         mt={1}
                         color='white'
                         fontSize='lg'
@@ -189,8 +195,8 @@ export default function Entradas() {
           .flatMap((ev) =>
             ev.entradas
               .filter((x) => selected[x.codigo])
-              .map((x) => 
-              <Entrada 
+              .map((x) =>
+              <Entrada
                 key={x.codigo}
                 qr={x.qr_url}
                 artista={ev.concierto.artista}
@@ -201,7 +207,7 @@ export default function Entradas() {
                 precio={x.precio}
                 codigo={x.codigo}
                 tipo={x.tipo}
-                estado={ev.concierto.estado} 
+                estado={ev.concierto.estado}
               />)
           )}
       </div>
@@ -214,7 +220,7 @@ export default function Entradas() {
           <b>
             Para adquirir entradas, vaya a la seccion de{' '}
             <Link href='http://localhost:5173/conciertos'>
-              Eventos <ExternalLinkIcon mx='2px' mb={1} />
+              Conciertos <ExternalLinkIcon mx='2px' mb={1} />
             </Link>
           </b>
         </Text>

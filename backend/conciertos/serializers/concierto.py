@@ -1,6 +1,7 @@
 import json
 import secrets
 
+from celery import current_app
 from conciertos.models import (Artista, Concierto, ConciertoMeta, Lugar,
                                TipoEntrada)
 from conciertos.serializers.artista import ArtistaConciertoSerializer
@@ -8,6 +9,7 @@ from conciertos.serializers.lugar import LugarDetailSerializer
 from conciertos.serializers.tipoEntrada import (TipoEntradaConciertoSerializer,
                                                 TipoEntradaCreateSerializer,
                                                 TipoEntradaMiniSerializer)
+from conciertos.tasks import finalizar_concierto, iniciar_concierto
 from django.db import transaction
 from django.db.models import Max
 from django.utils import formats, timezone
@@ -127,6 +129,23 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
             **validated_data
         )
 
+        inicio_task = iniciar_concierto.apply_async(
+            args=[concierto.id],
+            eta=concierto.fecha_inicio
+        )
+
+        fin_task = finalizar_concierto.apply_async(
+            args=[concierto.id],
+            eta=concierto.fecha_fin
+        )
+
+        concierto.iniciar_task_id = inicio_task.id
+        concierto.finalizar_task_id = fin_task.id
+        concierto.save(update_fields=[
+            "iniciar_task_id",
+            "finalizar_task_id"
+        ])
+
         for tipo in tipos_data:
             tipo_entrada = TipoEntrada.objects.create(
                 evento=concierto,
@@ -159,6 +178,7 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
         return concierto
 
 class ConciertoListSerializer(serializers.ModelSerializer):
+    estado = ConciertoMetaListSerializer()
     artista = ArtistaConciertoSerializer()
     fecha = serializers.DateField(format="%d/%m/%Y")
     show_hora = serializers.TimeField(format="%H:%M")
@@ -255,6 +275,41 @@ class ConciertoUpdateSerializer(serializers.ModelSerializer):
             )
 
         return limite
+
+    def update(self, instance, validated_data):
+        old_inicio = instance.fecha_inicio
+        old_fin = instance.fecha_fin
+
+        instance = super().update(instance, validated_data)
+
+        new_inicio = instance.fecha_inicio
+        new_fin = instance.fecha_fin
+
+        if old_inicio != new_inicio or old_fin != new_fin:
+            if instance.iniciar_task_id:
+                current_app.control.revoke(instance.iniciar_task_id)
+
+            if instance.finalizar_task_id:
+                current_app.control.revoke(instance.finalizar_task_id)
+
+            inicio_task = iniciar_concierto.apply_async(
+                args=[instance.id],
+                eta=new_inicio
+            )
+
+            fin_task = finalizar_concierto.apply_async(
+                args=[instance.id],
+                eta=new_fin
+            )
+
+            instance.iniciar_task_id = inicio_task.id
+            instance.finalizar_task_id = fin_task.id
+            instance.save(update_fields=[
+                "iniciar_task_id",
+                "finalizar_task_id"
+            ])
+
+        return instance
 
 class ConciertoDetailSerializer(serializers.ModelSerializer):
     estado = ConciertoMetaListSerializer()

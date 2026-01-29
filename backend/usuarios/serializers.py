@@ -241,6 +241,7 @@ class OrganizadorStatsSerializer(serializers.ModelSerializer):
     conciertos_borradores = serializers.SerializerMethodField()
     conciertos_programados = serializers.SerializerMethodField()
     conciertos_agotados = serializers.SerializerMethodField()
+    conciertos_en_curso = serializers.SerializerMethodField()
     conciertos_finalizados = serializers.SerializerMethodField()
     conciertos_cancelados = serializers.SerializerMethodField()
     tipos_entrada_creados = serializers.SerializerMethodField()
@@ -254,7 +255,7 @@ class OrganizadorStatsSerializer(serializers.ModelSerializer):
             "conciertos_creados", "conciertos_borradores", "conciertos_programados",
             "conciertos_cancelados", "tipos_entrada_creados", "entradas_totales",
             "ocupacion_promedio", "conciertos_agotados", "conciertos_finalizados",
-            "entradas_vendidas"
+            "entradas_vendidas", "conciertos_en_curso"
         ]
 
     def _valor_o_sin_info(self, value):
@@ -271,6 +272,9 @@ class OrganizadorStatsSerializer(serializers.ModelSerializer):
 
     def get_conciertos_agotados(self, obj):
         return self._valor_o_sin_info(obj.conciertos_agotados)
+
+    def get_conciertos_en_curso(self, obj):
+        return self._valor_o_sin_info(obj.conciertos_en_curso)
 
     def get_conciertos_finalizados(self, obj):
         return self._valor_o_sin_info(obj.conciertos_finalizados)

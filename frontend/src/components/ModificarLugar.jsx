@@ -1,13 +1,19 @@
-import { 
-  Button, FormControl, FormLabel, Input, 
-  Menu, MenuButton, MenuList, MenuItem,
-  Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalFooter, ModalBody, ModalCloseButton,
+import { ChevronDownIcon } from '@chakra-ui/icons';
+import {
+  Button, FormControl, FormLabel, Input,
+  Menu, MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Tooltip, useToast,
 } from "@chakra-ui/react";
-import React, { useState, useEffect } from 'react';
-import { ChevronDownIcon } from '@chakra-ui/icons'
-import api from '../services/api'
+import React, { useEffect, useState } from 'react';
+import api from '../services/api';
 
 export default function ModificarLugar({ isOpen, onClose, id }) {
   const [formData, setFormData] = React.useState({
@@ -81,22 +87,8 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
     })
   }, [lugar])
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (formData.provincia === '') newErrors.provincia = "La provincia es obligatoria";
-    if (!formData.lugar) newErrors.lugar = "El nombre del lugar es obligatorio";
-    if (!formData.direccion) newErrors.direccion = "La direccion es obligatoria";
-    
-    return newErrors;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateForm();
-    setErrors(validationErrors);
-  
-    if (Object.keys(validationErrors).length > 0) return;
 
     try {
       const payload = Object.fromEntries(
@@ -128,11 +120,11 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -177,7 +169,7 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
               </Tooltip>
               <MenuList maxH="200px" overflowY="auto">
                 {provincias.map((prov) => (
-                  <MenuItem 
+                  <MenuItem
                     key={prov.id}
                     onClick={() => {
                       setProvinciaSel(prov);
@@ -220,7 +212,7 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
               </Tooltip>
               <MenuList maxH="200px" overflowY="auto">
                 {ciudades.map((c) => (
-                  <MenuItem 
+                  <MenuItem
                     key={c.id}
                     onClick={() =>{
                       setCiudadSel(c);
@@ -248,7 +240,7 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
                 placeholder="Ingrese un nombre"
                 variant='custom'
                 rounded='full'
-                value={formData.lugar} 
+                value={formData.lugar}
                 onChange={handleChange("lugar")}
                 w="400px"
               />
@@ -269,7 +261,7 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
                 placeholder="Ingrese una dirección"
                 variant='custom'
                 rounded='full'
-                value={formData.direccion} 
+                value={formData.direccion}
                 onChange={handleChange("direccion")}
                 w="400px"
               />
@@ -278,9 +270,9 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

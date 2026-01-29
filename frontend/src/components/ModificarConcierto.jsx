@@ -178,31 +178,10 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
     };
   }, [preview]);
 
-  const validateForm = () => {
-    const e = {};
-
-    if (!formData.titulo) e.titulo = "El titulo es obligatorio";
-    if (!formData.descripcion) e.descripcion = "La descripcion es obligatorio";
-    if (!formData.fecha) e.fecha = "La fecha es obligatoria";
-    if (!formData.show) e.show = "Es obligatorio";
-    if (!formData.puertas) e.puertas = "Es obligatorio";
-    if (!formData.duracion) e.duracion = "Es obligatorio";
-    if (formData.lugar === null) e.lugar = "El lugar es obligatorio";
-    if (formData.artista === null) e.artista = "El artista es obligatorio";
-    if (!formData.mood) e.mood = "El mood es obligatorio";
-    if (!formData.limite_reserva_total || formData.limite_reserva_total > 8 || formData.limite_reserva_total < 2) e.limite_reserva_total = "El limite es obligatorio";
-
-    return e
-  };
-
   const toast = useToast()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const validationErrors = validateForm();
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
 
     const payload = new FormData();
 

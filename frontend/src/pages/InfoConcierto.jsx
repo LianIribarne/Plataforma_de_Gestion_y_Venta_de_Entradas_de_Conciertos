@@ -198,7 +198,7 @@ export default function EventoDetalle() {
     }
   };
 
-  const mostrar = ['Agotado', 'Finalizado', 'Cancelado'].includes(concierto?.estado.nombre)
+  const mostrar = ['En Curso', 'Agotado', 'Finalizado', 'Cancelado'].includes(concierto?.estado.nombre)
 
   return (
     <Box px={5} pb={5}>
@@ -266,6 +266,8 @@ export default function EventoDetalle() {
                       'FINALIZADO'
                     ) : concierto?.estado.nombre === 'Cancelado' ? (
                       'CANCELADO'
+                    ) : concierto?.estado.nombre === 'En Curso' ? (
+                      'EN CURSO'
                     ) : (
                       ''
                     )}
@@ -344,24 +346,19 @@ export default function EventoDetalle() {
             </Accordion>
 
             {/* Boton para reservar */}
-            <Box align='center' display={concierto?.estado.nombre === 'Programado'  || user.rol !== 'Cliente' ? undefined : 'none'}>
-              {user.rol === 'Cliente' ? (
-                <Text
-                  mt={2}
-                  fontSize={14}
-                  color='gray.200'
-                >
-                  <InfoOutlineIcon boxSize={3} mb={0.5} /> Podés reservar hasta {TOTAL_MAX} entradas en total.
-                </Text>
-              ) : (
-                <Text
-                  mt={2}
-                  fontSize={14}
-                  color='gray.200'
-                >
-                  <InfoOutlineIcon boxSize={3} mb={0.5} /> Se puede reservar hasta {TOTAL_MAX} entradas en total.
-                </Text>
-              )}
+            <Box align='center'>
+              <Text
+                mt={2}
+                fontSize={14}
+                color='gray.200'
+              >
+                <InfoOutlineIcon boxSize={3} mb={0.5} />
+                {user.rol === 'Cliente' ? (
+                  `Podés reservar hasta ${TOTAL_MAX} entradas en total.`
+                ) : (
+                  `Se puede reservar hasta ${TOTAL_MAX} entradas en total.`
+                )}
+              </Text>
 
               <Button
                 mt={2}

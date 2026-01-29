@@ -1,13 +1,21 @@
-import { 
-  Button, FormControl, FormLabel, Input, 
-  Box, HStack, Image,
-  Menu, MenuButton, MenuList, MenuItem,
-  Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalFooter, ModalBody, ModalCloseButton,
+import { ChevronDownIcon } from '@chakra-ui/icons';
+import {
+  Box,
+  Button, FormControl, FormLabel,
+  HStack, Image,
+  Input,
+  Menu, MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Text, Tooltip, useToast,
 } from "@chakra-ui/react";
-import React, { useState, useEffect } from 'react';
-import { ChevronDownIcon } from '@chakra-ui/icons'
+import React, { useEffect, useState } from 'react';
 import api from "../services/api";
 
 const ALLOWED_IMAGE_TYPES = [
@@ -102,7 +110,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
       cleanImage();
       return;
     }
-  
+
     const url = URL.createObjectURL(file);
     const img = new window.Image();
     img.src = url;
@@ -121,11 +129,11 @@ export default function CrearArtista({ isOpen, onClose, id }) {
           cleanImage();
           return;
         }
-        
+
         convertToWebp({ file, maxSize: 1024, quality: 0.8 })
           .then((webpFile) => {
             const previewUrl = URL.createObjectURL(webpFile);
-            
+
             setFormData(prev => ({ ...prev, imagen: webpFile }));
             setPreview(previewUrl);
           })
@@ -163,35 +171,16 @@ export default function CrearArtista({ isOpen, onClose, id }) {
     };
   }, [preview]);
 
-  const validateForm = () => {
-    const e = {};
-
-    if (!formData.pais_origen) e.pais_origen = "El pais es obligatorio";
-    if (!formData.categoria) e.categoria = "La categoria es obligatorio";
-    
-    return e;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validateForm();
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) return;
 
     const payload = new FormData();
 
-    if (formData.nombre !== "") {
-      payload.append("nombre", formData.nombre);
-    }
+    if (formData.nombre !== "") payload.append("nombre", formData.nombre)
+    if (formData.categoria) payload.append("categoria_id", formData.categoria);
+    if (formData.pais_origen) payload.append("pais_origen_id", formData.pais_origen);
+    if (formData.imagen instanceof File) payload.append("imagen", formData.imagen)
 
-    payload.append("categoria_id", formData.categoria);
-    payload.append("pais_origen_id", formData.pais_origen);
-    
-    if (formData.imagen instanceof File) {
-      payload.append("imagen", formData.imagen);
-    }
-    
     try {
       const res = await api.patch(`/conciertos/modificar_artista/${id}`, payload);
 
@@ -214,11 +203,11 @@ export default function CrearArtista({ isOpen, onClose, id }) {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -274,10 +263,10 @@ export default function CrearArtista({ isOpen, onClose, id }) {
 
   useEffect(() => {
     if (!artista) return
-    
+
     setCategoriaSel(artista[0].categoria.nombre)
     setPaisSel(artista[0].pais_origen.nombre)
-  
+
     setFormData({
       nombre: artista[0].nombre,
       categoria: artista[0].categoria.id,
@@ -296,7 +285,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
         <ModalCloseButton color="white" />
 
         <ModalBody>
-          <HStack 
+          <HStack
             w='fit-content'
             spacing={2}
             align='flex-start'
@@ -316,7 +305,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
                     placeholder="Ingrese un nombre"
                     variant='custom'
                     rounded='full'
-                    value={formData.nombre} 
+                    value={formData.nombre}
                     onChange={handleChange("nombre")}
                   />
                 </Tooltip>
@@ -346,7 +335,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
 
                     <MenuList maxH="200px" overflowY="auto">
                       {paises.map((c) => (
-                        <MenuItem 
+                        <MenuItem
                           key={c.id}
                           onClick={() => {
                             setPaisSel(c.nombre)
@@ -383,7 +372,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
 
                     <MenuList maxH="200px" overflowY="auto">
                       {categorias.map((c) => (
-                        <MenuItem 
+                        <MenuItem
                           key={c.id}
                           onClick={() => {
                             setCategoriaSel(c.nombre)
@@ -422,7 +411,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
               </FormControl>
             </Box>
 
-            <Box 
+            <Box
               h={250}
               w={250}
               bg='whiteAlpha.300'
@@ -441,9 +430,9 @@ export default function CrearArtista({ isOpen, onClose, id }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

@@ -50,7 +50,7 @@ class TipoEntradaCancelarView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if tipo.evento.estado.codigo in ['cancelado', 'finalizado']:
+        if tipo.evento.estado.codigo in ['en_curso', 'cancelado', 'finalizado']:
             return Response(
                 {
                     "detail":
