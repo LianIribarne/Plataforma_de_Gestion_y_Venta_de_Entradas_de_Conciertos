@@ -1,18 +1,28 @@
-import {
-  Box, Text, Heading, Grid,
-  GridItem, Wrap, WrapItem, Button,
-  useDisclosure, IconButton, Tooltip, Badge,
-  Skeleton, HStack, Center,
-} from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import Evento from "../components/Concierto";
-import Pago from "../components/Pago";
+import {
+  Badge,
+  Box,
+  Button,
+  Center,
+  Grid,
+  GridItem,
+  Heading,
+  HStack,
+  IconButton,
+  Skeleton,
+  Text,
+  Tooltip,
+  useDisclosure,
+  Wrap, WrapItem,
+} from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Carrusel from "../components/Artistas";
+import Evento from "../components/Concierto";
 import FiltrosEventos from '../components/FiltrosConciertos';
 import FiltrosPagos from '../components/FiltrosPagos';
-import api from '../services/api'
+import Pago from "../components/Pago";
+import api from '../services/api';
 
 export default function DetallesUsuarios() {
   const [datos, setDatos] = useState(null);
@@ -23,10 +33,10 @@ export default function DetallesUsuarios() {
   const navigate = useNavigate();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { 
-    isOpen: isPagoOpen, 
-    onOpen: onPagoOpen, 
-    onClose: onPagoClose 
+  const {
+    isOpen: isPagoOpen,
+    onOpen: onPagoOpen,
+    onClose: onPagoClose
   } = useDisclosure();
 
   const [verPagos, setVerPagos] = useState(true);
@@ -52,7 +62,7 @@ export default function DetallesUsuarios() {
 
     try {
       const response = await api.get(
-        "/conciertos/conciertos/", 
+        "/conciertos/conciertos/",
         { params }
       );
 
@@ -74,7 +84,7 @@ export default function DetallesUsuarios() {
 
   const [pagos, setPagos] = useState([])
   const [ultimosPagos, setUltimosPagos] = useState([])
-  
+
   const fetchPagos = async (filtros) => {
     setLoading(true);
 
@@ -87,7 +97,7 @@ export default function DetallesUsuarios() {
 
     try {
       const response = await api.get(
-        "/pagos/pagos/", 
+        "/pagos/pagos/",
         { params }
       );
 
@@ -170,7 +180,7 @@ export default function DetallesUsuarios() {
 
   return (
     <Box p={5}>
-      <Grid 
+      <Grid
         templateColumns='repeat(3, 1fr)'
         gap={4}
       >
@@ -195,9 +205,9 @@ export default function DetallesUsuarios() {
                 </Heading>
                 <Wrap justify='center'>
                   {organizadorConDatos.map((o, i) => (
-                    <WrapItem 
-                      bg='whiteAlpha.400' 
-                      fontWeight='medium' 
+                    <WrapItem
+                      bg='whiteAlpha.400'
+                      fontWeight='medium'
                       px={2}
                       py={1}
                       borderRadius={10}
@@ -218,9 +228,9 @@ export default function DetallesUsuarios() {
                 <Heading my={4} fontSize='2xl' align='center'>Conciertos</Heading>
                 <Wrap justify='center'>
                   {conciertosStats.map((c, i) => (
-                    <WrapItem 
-                      bg='whiteAlpha.400' 
-                      fontWeight='medium' 
+                    <WrapItem
+                      bg='whiteAlpha.400'
+                      fontWeight='medium'
                       px={2}
                       py={1}
                       borderRadius={10}
@@ -262,7 +272,6 @@ export default function DetallesUsuarios() {
                     estado={c.estado}
                     fecha={c.fecha}
                     hora={c.show_hora}
-                    tipos_entrada={c.tipos_entrada}
                   />
                 </WrapItem>
               ))}
@@ -290,10 +299,10 @@ export default function DetallesUsuarios() {
         <GridItem colSpan={3}>
           <Box align='center' mt={4}>
             <Heading color='white' as='span'>Conciertos creados</Heading>
-            <Button 
+            <Button
               bg='whiteAlpha.800'
               color='blackAlpha.800'
-              rounded='full' 
+              rounded='full'
               ml={2}
               mt={-3}
               onClick={onOpen}
@@ -301,10 +310,10 @@ export default function DetallesUsuarios() {
               Filtros
             </Button>
             <Tooltip label={verEventos ? 'Ocultar' : 'Mostrar'} placement='top'>
-              <IconButton  
+              <IconButton
                 bg='whiteAlpha.800'
                 color='blackAlpha.800'
-                rounded='full' 
+                rounded='full'
                 ml={2}
                 mt={-3}
                 onClick={() => setVerEventos(prev => !prev)}
@@ -314,8 +323,8 @@ export default function DetallesUsuarios() {
           </Box>
 
           <FiltrosEventos
-            isOpen={isOpen} 
-            onClose={onClose} 
+            isOpen={isOpen}
+            onClose={onClose}
             onApply={fetchConciertos}
             artistaSeleccionado={selectedArtist}
             onClear={handleClearFilters}
@@ -342,7 +351,6 @@ export default function DetallesUsuarios() {
                     estado={c.estado}
                     fecha={c.fecha}
                     hora={c.show_hora}
-                    tipos_entrada={c.tipos_entrada}
                   />
                 </WrapItem>
               ))}
@@ -369,10 +377,10 @@ export default function DetallesUsuarios() {
         <GridItem colSpan={3}>
           <Box align='center' mt={4}>
             <Heading color='white' as='span'>Ventas registradas</Heading>
-            <Button 
+            <Button
               bg='whiteAlpha.800'
               color='blackAlpha.800'
-              rounded='full' 
+              rounded='full'
               ml={2}
               mt={-3}
               onClick={onPagoOpen}
@@ -380,10 +388,10 @@ export default function DetallesUsuarios() {
               Filtros
             </Button>
             <Tooltip label={verPagos ? 'Ocultar' : 'Mostrar'} placement='top'>
-              <IconButton  
+              <IconButton
                 bg='whiteAlpha.800'
                 color='blackAlpha.800'
-                rounded='full' 
+                rounded='full'
                 ml={2}
                 mt={-3}
                 onClick={() => setVerPagos(prev => !prev)}
@@ -392,9 +400,9 @@ export default function DetallesUsuarios() {
             </Tooltip>
           </Box>
 
-          <FiltrosPagos 
-            isOpen={isPagoOpen} 
-            onClose={onPagoClose} 
+          <FiltrosPagos
+            isOpen={isPagoOpen}
+            onClose={onPagoClose}
             onApply={fetchPagos}
           />
 

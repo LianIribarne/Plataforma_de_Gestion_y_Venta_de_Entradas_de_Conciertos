@@ -241,4 +241,4 @@ class TipoEntrada(models.Model):
     )
 
     class Meta:
-        ordering = ['precio']
+        ordering = ['-activo', 'precio']

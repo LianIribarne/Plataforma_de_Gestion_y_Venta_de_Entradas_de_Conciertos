@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { 
-  Box, 
-  Text, 
-  HStack, 
-  useNumberInput, 
-  Input, 
-  Button,
-  AccordionItem,
+import { ArrowRightIcon } from '@chakra-ui/icons';
+import {
   AccordionButton,
-  AccordionPanel,
   AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Badge,
+  Box,
+  Button,
+  HStack,
+  Input,
+  Text,
+  useNumberInput,
 } from '@chakra-ui/react';
+import { useState } from 'react';
 import { IoTicketSharp } from "react-icons/io5";
 import { MdLocalGroceryStore } from "react-icons/md";
-import { ArrowRightIcon } from '@chakra-ui/icons';
 import { useAuth } from "../services/AuthContext";
 
 function Reservar({ value, onChange, max, placeholder }) {
@@ -50,7 +50,7 @@ function Reservar({ value, onChange, max, placeholder }) {
   );
 }
 
-export default function EntradaInfo({ id, tipo, disponibles, reservadas, precio, precioNumber, cantMax, activo, onCantChange }) {
+export default function EntradaInfo({ id, tipo, disponibles, reservadas, precio, precioNumber, cantMax, onCantChange }) {
   const [cant, setCant] = useState(0);
 
   const handleChange = (valor) => {
@@ -61,10 +61,10 @@ export default function EntradaInfo({ id, tipo, disponibles, reservadas, precio,
   const { user } = useAuth();
 
   return (
-    <AccordionItem display={activo && (disponibles > 0 || reservadas > 0) ? undefined : 'none'}>
+    <AccordionItem display={disponibles > 0 || reservadas > 0 ? undefined : 'none'}>
       <h2>
         <AccordionButton>
-          <Badge 
+          <Badge
             colorScheme='blackAlpha'
             position='absolute'
             variant='solid'
@@ -78,11 +78,11 @@ export default function EntradaInfo({ id, tipo, disponibles, reservadas, precio,
             </span>
           </Badge>
           <Box as='span' flex='1' fontSize='xl'>
-            <Text 
-              bg='whiteAlpha.400' 
-              color='whiteAlpha.900' 
-              display="inline-block" 
-              px={2} 
+            <Text
+              bg='whiteAlpha.400'
+              color='whiteAlpha.900'
+              display="inline-block"
+              px={2}
               rounded='full'
             >
               <b>{tipo} <ArrowRightIcon mb={1} boxSize={4} /> {precio}</b>
@@ -92,27 +92,27 @@ export default function EntradaInfo({ id, tipo, disponibles, reservadas, precio,
         </AccordionButton>
       </h2>
       <AccordionPanel pb={4} align='center'>
-        <Text 
-          fontSize='lg' 
-          mb={4} 
-          color='white' 
-          bg='green.400' 
-          display="inline-block" 
-          px={2} 
-          py={1} 
+        <Text
+          fontSize='lg'
+          mb={4}
+          color='white'
+          bg='green.400'
+          display="inline-block"
+          px={2}
+          py={1}
           rounded='full'
         >
           <b>Disponibles <ArrowRightIcon mb={1} boxSize={4} /> {disponibles} <IoTicketSharp style={{ display: 'inline', marginBottom: '-3' }} /></b>
         </Text>
-        <Text 
-          fontSize='lg' 
-          mb={4} 
+        <Text
+          fontSize='lg'
+          mb={4}
           ml={4}
-          color='white' 
-          bg='orange.400' 
-          display="inline-block" 
-          px={2} 
-          py={1} 
+          color='white'
+          bg='orange.400'
+          display="inline-block"
+          px={2}
+          py={1}
           rounded='full'
         >
           <b>Reservadas <ArrowRightIcon mb={1} boxSize={4} /> {reservadas} <IoTicketSharp style={{ display: 'inline', marginBottom: '-3' }} /></b>

@@ -1,11 +1,16 @@
 import {
-  Image, Heading, Wrap, WrapItem,
-  Box, useDisclosure, Button, HStack,
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Image,
   Skeleton, Text,
+  useDisclosure,
+  Wrap, WrapItem,
 } from "@chakra-ui/react";
-import { useState, useEffect } from 'react';
-import Evento from "../components/Concierto";
+import { useEffect, useState } from 'react';
 import Carrusel from "../components/Artistas";
+import Evento from "../components/Concierto";
 import FiltrosEventos from '../components/FiltrosConciertos';
 import api from "../services/api";
 
@@ -40,7 +45,7 @@ export default function Eventos() {
 
     try {
       const response = await api.get(
-        "/conciertos/conciertos/", 
+        "/conciertos/conciertos/",
         { params }
       );
 
@@ -59,7 +64,7 @@ export default function Eventos() {
       {/* Imagen */}
       <Image
         src='/concert.jpg'
-        filter='auto' 
+        filter='auto'
         blur='2px'
         maxW="100hv"
         mt={-48}
@@ -71,11 +76,11 @@ export default function Eventos() {
             "linear-gradient(to top, transparent 0%, black 100%)",
         }}
       />
-      
-      <Box 
-        position='absolute' 
+
+      <Box
+        position='absolute'
         align='center'
-        mt='-50vh' 
+        mt='-50vh'
         left='50%'
         transform='translateX(-50%)'
       >
@@ -91,20 +96,20 @@ export default function Eventos() {
         >
           TU ENTRADA AL SONIDO EN VIVO
         </Heading>
-        
-        <Button 
+
+        <Button
           bg='whiteAlpha.800'
           color='blackAlpha.800'
-          rounded='full' 
-          size='lg' 
+          rounded='full'
+          size='lg'
           onClick={onOpen}
         >
           Filtros
         </Button>
 
         <FiltrosEventos
-          isOpen={isOpen} 
-          onClose={onClose} 
+          isOpen={isOpen}
+          onClose={onClose}
           onApply={fetchConciertos}
           artistaSeleccionado={selectedArtist}
           onClear={handleClearFilters}
@@ -143,7 +148,6 @@ export default function Eventos() {
                   estado={c.estado}
                   fecha={c.fecha}
                   hora={c.show_hora}
-                  tipos_entrada={c.tipos_entrada}
                 />
               </WrapItem>
             ))

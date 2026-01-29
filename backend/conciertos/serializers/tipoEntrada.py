@@ -26,7 +26,7 @@ class TipoEntradaConciertoSerializer(serializers.ModelSerializer):
         fields = [
             "id", "nombre", "precio", "precio_legible",
             "cantidad_total", "limite_reserva", "disponibles",
-            "reservadas", "activo"
+            "reservadas"
         ]
 
     def get_disponibles(self, obj):

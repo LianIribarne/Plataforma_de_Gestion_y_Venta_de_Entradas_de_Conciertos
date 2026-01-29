@@ -33,7 +33,7 @@ import {
   useToast,
   Wrap, WrapItem,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoTicketSharp } from "react-icons/io5";
 import { MdPayments } from "react-icons/md";
 import { TbCancel } from "react-icons/tb";
@@ -48,7 +48,7 @@ import formatoPrecio from "../utils/FormatoPrecio";
 const slugify = (str) =>
   str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 
-export default function Evento({ id, imagen, artista, titulo, genero, estado, fecha, hora, tipos_entrada }) {
+export default function Evento({ id, imagen, artista, titulo, genero, estado, fecha, hora }) {
   const { user } = useAuth();
   const slug = slugify(titulo);
   const toast = useToast()
@@ -235,6 +235,18 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
       console.error("Error al programar:", error);
     }
   }
+
+  const [tipos_entrada, setTiposEntrada] = useState([])
+
+  useEffect(() => {
+    if (!id) return
+
+    api.get(`/conciertos/tipos_concierto/${id}`)
+      .then(res => setTiposEntrada(res.data.results))
+      .catch(err => console.error(err));
+
+    console.log(tipos_entrada)
+  }, [id])
 
   const mostrar = ['en_curso', 'agotado', 'finalizado', 'cancelado'].includes(estado.codigo)
 
@@ -439,7 +451,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
           <ModalCloseButton />
           <ModalBody>
             <Wrap align='center' justify='center' spacing={10}>
-              {tipos_entrada.map((t) => (
+              {tipos_entrada?.map((t) => (
                 <WrapItem key={t.id} align='center' p={4} bg='whiteAlpha.700' borderRadius={20} display='inline-block' maxW={280}>
                   <Heading fontSize='2xl' mb={4} color='blackAlpha.700'>
                     {t.nombre}
@@ -524,6 +536,13 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                 </WrapItem>
               ))}
             </Wrap>
+            <Button
+              onClick={onEntradaClose}
+              rounded='full'
+              size='lg'
+            >
+              Cerrar
+            </Button>
           </ModalBody>
         </ModalContent>
       </Modal>

@@ -8,8 +8,10 @@ from conciertos.views import (ArtistaCreateView, ArtistaListView,
                               ProvinciaListView,
                               TipoEntradaAgregarEntradasView,
                               TipoEntradaCancelarCantidadView,
-                              TipoEntradaCancelarView, TipoEntradaCreateView,
-                              TipoEntradaModificarView)
+                              TipoEntradaCancelarView,
+                              TipoEntradaConciertoView, TipoEntradaCreateView,
+                              TipoEntradaModificarView,
+                              TipoEntradaReservarView)
 from django.urls import path
 
 urlpatterns = [
@@ -51,4 +53,6 @@ urlpatterns = [
     path('cancelar_cantidad_tipo/<int:id>', TipoEntradaCancelarCantidadView.as_view(), name='cancelar_cantidad_tipo'),
     path('modificar_tipo/<int:id>', TipoEntradaModificarView.as_view(), name='modificar_tipo'),
     path('agregar_entradas_tipo/<int:id>', TipoEntradaAgregarEntradasView.as_view(), name='agregar_entradas_tipo'),
+    path('tipos_concierto/<int:id>', TipoEntradaConciertoView.as_view(), name='tipos_concierto'),
+    path('tipos_reservar/<int:id>', TipoEntradaReservarView.as_view(), name='tipos_reservar'),
 ]

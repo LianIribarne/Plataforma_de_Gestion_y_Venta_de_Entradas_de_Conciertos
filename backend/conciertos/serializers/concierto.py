@@ -6,8 +6,7 @@ from conciertos.models import (Artista, Concierto, ConciertoMeta, Lugar,
                                TipoEntrada)
 from conciertos.serializers.artista import ArtistaConciertoSerializer
 from conciertos.serializers.lugar import LugarDetailSerializer
-from conciertos.serializers.tipoEntrada import (TipoEntradaConciertoSerializer,
-                                                TipoEntradaCreateSerializer,
+from conciertos.serializers.tipoEntrada import (TipoEntradaCreateSerializer,
                                                 TipoEntradaMiniSerializer)
 from conciertos.tasks import finalizar_concierto, iniciar_concierto
 from django.db import transaction
@@ -195,14 +194,12 @@ class ConciertoListSerializer(serializers.ModelSerializer):
     fecha = serializers.DateField(format="%d/%m/%Y")
     show_hora = serializers.TimeField(format="%H:%M")
     imagen = serializers.SerializerMethodField()
-    tipos_entrada = TipoEntradaMiniSerializer(many=True)
 
     class Meta:
         model = Concierto
         fields = [
             'id', 'titulo', 'artista', 'fecha',
-            'show_hora', 'imagen', 'tipos_entrada',
-            'estado'
+            'show_hora', 'imagen', 'estado'
         ]
 
     def get_imagen(self, obj):
@@ -339,7 +336,6 @@ class ConciertoDetailSerializer(serializers.ModelSerializer):
         format="%H:%M",
         read_only=True
     )
-    tipos_entrada = TipoEntradaConciertoSerializer(many=True)
 
     class Meta:
         model = Concierto
@@ -347,8 +343,7 @@ class ConciertoDetailSerializer(serializers.ModelSerializer):
             'titulo', 'descripcion', 'estado', 'mood', 'fecha',
             'show_hora', 'puertas_hora', 'limite_reserva_total',
             'imagen', 'lugar', 'artista', 'organizador', 'fecha_legible',
-            'tipos_entrada', 'puertas_hora_legible', 'show_hora_legible',
-            'duracion'
+            'puertas_hora_legible', 'show_hora_legible', 'duracion'
         ]
 
     def get_fecha_legible(self, obj):

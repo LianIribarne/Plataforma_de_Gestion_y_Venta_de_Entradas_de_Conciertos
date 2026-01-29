@@ -1,20 +1,12 @@
-from .lugar import (
-    ProvinciaListView, CiudadListView,
-    LugarCreateView, LugarListView,
-    LugarModificarView
-)
-from .artista import (
-    CategoriaListView, PaisListView,
-    ArtistaCreateView, ArtistaListView,
-    ArtistaModificarView
-)
-from .concierto import (
-    ConciertoMetaListView, ConciertoCreateView,
-    ConciertoListView, ConciertoUpdateView,
-    ConciertoDetailView, CancelarConciertoView
-)
-from .tipoEntrada import (
-    TipoEntradaCreateView, TipoEntradaCancelarView,
-    TipoEntradaCancelarCantidadView, TipoEntradaModificarView,
-    TipoEntradaAgregarEntradasView
-)
+from .artista import (ArtistaCreateView, ArtistaListView, ArtistaModificarView,
+                      CategoriaListView, PaisListView)
+from .concierto import (CancelarConciertoView, ConciertoCreateView,
+                        ConciertoDetailView, ConciertoListView,
+                        ConciertoMetaListView, ConciertoUpdateView)
+from .lugar import (CiudadListView, LugarCreateView, LugarListView,
+                    LugarModificarView, ProvinciaListView)
+from .tipoEntrada import (TipoEntradaAgregarEntradasView,
+                          TipoEntradaCancelarCantidadView,
+                          TipoEntradaCancelarView, TipoEntradaConciertoView,
+                          TipoEntradaCreateView, TipoEntradaModificarView,
+                          TipoEntradaReservarView)

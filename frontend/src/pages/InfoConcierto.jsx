@@ -56,10 +56,12 @@ export default function EventoDetalle() {
   const id = 'toast-activo';
 
   useEffect(() => {
-    if (concierto?.tipos_entrada) {
-      setEntradas(concierto.tipos_entrada)
-    }
-  }, [concierto])
+    if (!id_concierto) return
+
+    api.get(`/conciertos/tipos_reservar/${id_concierto}`)
+      .then(res => setEntradas(res.data.results))
+      .catch(err => console.error(err))
+  }, [id_concierto])
 
   const TOTAL_MAX = concierto?.limite_reserva_total
 
@@ -339,7 +341,6 @@ export default function EventoDetalle() {
                   precio={e.precio_legible}
                   precioNumber={e.precio}
                   cantMax={e.limite_reserva}
-                  activo={e.activo}
                   onCantChange={handleCantidadChange}
                 />
               ))}
@@ -352,7 +353,7 @@ export default function EventoDetalle() {
                 fontSize={14}
                 color='gray.200'
               >
-                <InfoOutlineIcon boxSize={3} mb={0.5} />
+                <InfoOutlineIcon boxSize={3} mb={0.5} />{' '}
                 {user.rol === 'Cliente' ? (
                   `Podés reservar hasta ${TOTAL_MAX} entradas en total.`
                 ) : (

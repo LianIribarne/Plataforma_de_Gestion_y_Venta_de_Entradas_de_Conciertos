@@ -1,19 +1,15 @@
-from .lugar import (
-    ProvinciaSerializer, CiudadSerializer,
-    LugarCreateSerializer, LugarSerializer,
-    LugarModificarSerializer
-)
-from .artista import (
-    CategoriaSerializer, PaisSerializer, ArtistaCreateSerializer,
-    ArtistaSerializer, ArtistaModificarSerializer
-)
-from .concierto import (
-    ConciertoMetaListSerializer, ConciertoCreateSerializer,
-    ConciertoListSerializer, ConciertoUpdateSerializer,
-    ConciertoDetailSerializer,
-)
-from .tipoEntrada import (
-    CreateTipoEntradaSerializer, TipoEntradaCancelarSerializer,
-    TipoEntradaCancelarCantidadSerializer, TipoEntradaModificarSerializer,
-    TipoEntradaAgregarSerializer
-)
+from .artista import (ArtistaCreateSerializer, ArtistaModificarSerializer,
+                      ArtistaSerializer, CategoriaSerializer, PaisSerializer)
+from .concierto import (ConciertoCreateSerializer, ConciertoDetailSerializer,
+                        ConciertoListSerializer, ConciertoMetaListSerializer,
+                        ConciertoUpdateSerializer)
+from .lugar import (CiudadSerializer, LugarCreateSerializer,
+                    LugarModificarSerializer, LugarSerializer,
+                    ProvinciaSerializer)
+from .tipoEntrada import (CreateTipoEntradaSerializer,
+                          TipoEntradaAgregarSerializer,
+                          TipoEntradaCancelarCantidadSerializer,
+                          TipoEntradaCancelarSerializer,
+                          TipoEntradaConciertoSerializer,
+                          TipoEntradaMiniSerializer,
+                          TipoEntradaModificarSerializer)

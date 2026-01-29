@@ -3,6 +3,8 @@ from conciertos.serializers import (CreateTipoEntradaSerializer,
                                     TipoEntradaAgregarSerializer,
                                     TipoEntradaCancelarCantidadSerializer,
                                     TipoEntradaCancelarSerializer,
+                                    TipoEntradaConciertoSerializer,
+                                    TipoEntradaMiniSerializer,
                                     TipoEntradaModificarSerializer)
 from conciertos.services import (actualizar_estado_por_stock, agregar_entradas,
                                  cancelar_cantidad, cancelar_tipo,
@@ -237,3 +239,39 @@ class TipoEntradaAgregarEntradasView(generics.GenericAPIView):
             {"detail": f"Se agregaron {cantidad} entradas correctamente"},
             status=status.HTTP_200_OK
         )
+
+class TipoEntradaConciertoView(generics.ListAPIView):
+    serializer_class = TipoEntradaMiniSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        concierto = self.kwargs.get("id")
+
+        qs = TipoEntrada.objects.filter(evento_id=concierto)
+
+        if user.es_administrador:
+            return qs
+
+        if user.es_organizador:
+            return qs.filter(evento__organizador=user)
+
+        return qs.none()
+
+class TipoEntradaReservarView(generics.ListAPIView):
+    serializer_class = TipoEntradaConciertoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        concierto = self.kwargs.get("id")
+
+        qs = TipoEntrada.objects.filter(evento_id=concierto, activo=True)
+
+        if user.es_administrador:
+            return qs
+
+        if user.es_organizador:
+            return qs.filter(evento__organizador=user)
+
+        return qs.filter(evento__estado__codigo__in=["programado", "agotado"])
