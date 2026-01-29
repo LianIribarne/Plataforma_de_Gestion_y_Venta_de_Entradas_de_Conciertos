@@ -95,6 +95,18 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
                 "tipos_entrada": "Solo puede haber como maximo 4 tipos de entradas."
             })
 
+        nombres = [t.get("nombre").strip().lower() for t in tipos]
+
+        if any(not n for n in nombres):
+            raise serializers.ValidationError({
+                "tipos_entrada": "Cada tipo de entrada debe tener un nombre."
+            })
+
+        if len(nombres) != len(set(nombres)):
+            raise serializers.ValidationError({
+                "tipos_entrada": "No se pueden repetir los nombres de los tipos de entrada."
+            })
+
         serializer = TipoEntradaCreateSerializer(data=tipos, many=True)
         serializer.is_valid(raise_exception=True)
 

@@ -241,5 +241,4 @@ class TipoEntrada(models.Model):
     )
 
     class Meta:
-        unique_together = ("nombre", "evento")
         ordering = ['precio']

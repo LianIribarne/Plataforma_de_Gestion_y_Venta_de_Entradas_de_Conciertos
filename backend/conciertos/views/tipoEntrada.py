@@ -190,21 +190,16 @@ class TipoEntradaModificarView(generics.GenericAPIView):
 
 class TipoEntradaAgregarEntradasView(generics.GenericAPIView):
     serializer_class = TipoEntradaAgregarSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [EsOrganizador]
     lookup_field = "id"
 
     def get_queryset(self):
         user = self.request.user
 
-        qs = TipoEntrada.objects.select_related(
+        return TipoEntrada.objects.select_related(
             "evento",
             "evento__organizador"
-        )
-
-        if user.es_organizador:
-            return qs.filter(evento__organizador=user)
-
-        return qs.none()
+        ).filter(evento__organizador=user)
 
     def post(self, request, *args, **kwargs):
         tipo = self.get_object()

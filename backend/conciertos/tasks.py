@@ -10,7 +10,11 @@ from .models import Concierto, ConciertoMeta
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=60)
 def iniciar_concierto(self, concierto_id):
     with transaction.atomic():
-        concierto = Concierto.objects.select_related('estado').get(id=concierto_id)
+        try:
+            concierto = Concierto.objects.select_related('estado').get(id=concierto_id)
+        except Concierto.DoesNotExist:
+            return
+
         reservas_activas = (
             Reserva.objects
             .select_for_update()
@@ -29,7 +33,10 @@ def iniciar_concierto(self, concierto_id):
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=60)
 def finalizar_concierto(self, concierto_id):
-    concierto = Concierto.objects.select_related('estado').get(id=concierto_id)
+    try:
+        concierto = Concierto.objects.select_related('estado').get(id=concierto_id)
+    except Concierto.DoesNotExist:
+        return
 
     if concierto.estado.codigo == 'en_curso':
         concierto.estado = ConciertoMeta.objects.get(codigo='finalizado')

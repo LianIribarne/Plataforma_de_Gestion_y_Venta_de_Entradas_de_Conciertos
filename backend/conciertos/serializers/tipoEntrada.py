@@ -68,6 +68,15 @@ class CreateTipoEntradaSerializer(serializers.ModelSerializer):
                 "Este concierto ya tiene el máximo de 4 tipos de entrada activos."
             )
 
+        if TipoEntrada.objects.filter(
+            evento=concierto,
+            activo=True,
+            nombre__iexact=attrs["nombre"]
+        ).exists():
+            raise serializers.ValidationError({
+                "nombre": "Ya existe un tipo de entrada activo con este nombre para el concierto."
+            })
+
         return attrs
 
     @transaction.atomic
@@ -140,6 +149,23 @@ class TipoEntradaModificarSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoEntrada
         fields = ["precio", "nombre", "limite_reserva"]
+
+    def validate_nombre(self, value):
+        tipo = self.instance
+        concierto = tipo.evento
+
+        existe = TipoEntrada.objects.filter(
+            evento=concierto,
+            activo=True,
+            nombre__iexact=value
+        ).exclude(pk=tipo.pk).exists()
+
+        if existe:
+            raise serializers.ValidationError(
+                "Ya existe un tipo de entrada activo con este nombre para el concierto."
+            )
+
+        return value
 
 class TipoEntradaAgregarSerializer(serializers.ModelSerializer):
     cantidad = serializers.IntegerField(
