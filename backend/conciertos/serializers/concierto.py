@@ -285,6 +285,42 @@ class ConciertoUpdateSerializer(serializers.ModelSerializer):
 
         return limite
 
+    def validate(self, attrs):
+        concierto = self.instance
+
+        if not concierto:
+            return attrs
+
+        tiene_vendidas = Entrada.objects.filter(
+            tipo__evento=concierto,
+            estado='vendida'
+        ).exists()
+
+        if not tiene_vendidas:
+            return attrs
+
+        errores = {}
+
+        if 'fecha' in attrs and attrs['fecha'] != concierto.fecha:
+            errores['fecha'] = "No se puede modificar la fecha si hay entradas vendidas."
+
+        if 'show_hora' in attrs and attrs['show_hora'] != concierto.show_hora:
+            errores['show_hora'] = "No se puede modificar el horario del show si hay entradas vendidas."
+
+        if 'puertas_hora' in attrs and attrs['puertas_hora'] != concierto.puertas_hora:
+            errores['puertas_hora'] = "No se puede modificar el horario si hay entradas vendidas."
+
+        if 'lugar' in attrs and attrs['lugar'] != concierto.lugar:
+            errores['lugar'] = "No se puede modificar el lugar si hay entradas vendidas."
+
+        if 'artista' in attrs and attrs['artista'] != concierto.artista:
+            errores['artista'] = "No se puede modificar el artista si hay entradas vendidas."
+
+        if errores:
+            raise serializers.ValidationError(errores)
+
+        return attrs
+
     def update(self, instance, validated_data):
         old_inicio = instance.fecha_inicio
         old_fin = instance.fecha_fin
