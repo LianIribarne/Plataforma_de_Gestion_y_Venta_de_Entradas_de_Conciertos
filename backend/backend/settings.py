@@ -15,10 +15,12 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1'
-]
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1,backend,0.0.0.0",
+    cast=Csv(),
+)
+
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
@@ -35,7 +37,7 @@ CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
 # Zona horaria
 CELERY_TIMEZONE = "America/Argentina/Buenos_Aires"
 
-CELERY_ENABLE_UTC = True
+CELERY_ENABLE_UTC = False
 
 # Auto retry si algo falla
 CELERY_TASK_ACKS_LATE = True
