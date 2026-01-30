@@ -1,21 +1,21 @@
-import React from 'react'
+import { AtSignIcon, ExternalLinkIcon, ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import {
-  Box,
   AbsoluteCenter,
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
   Heading,
+  IconButton,
   Input,
   InputGroup,
   InputLeftAddon,
   InputRightAddon,
-  IconButton,
-  Button,
-  FormControl,
-  FormLabel,
   Link,
   Tooltip,
   useToast,
 } from "@chakra-ui/react";
-import { ViewIcon, ViewOffIcon, AtSignIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../services/AuthContext";
 
@@ -59,9 +59,9 @@ export default function Form() {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
-    
+
     try {
       const data = await loginUser(formData.email, formData.password);
 
@@ -84,7 +84,7 @@ export default function Form() {
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const raw = data[firstField];
-      
+
         msg = Array.isArray(raw) ? raw[0] : raw;
       }
 
@@ -100,11 +100,11 @@ export default function Form() {
   };
 
   return (
-    <Box 
-      position="relative" 
-      h="100vh" 
-      textAlign="center" 
-      w='100%' 
+    <Box
+      position="relative"
+      h="100vh"
+      textAlign="center"
+      w='100%'
       bgGradient='linear(to-r, cyan.800, cyan.500, cyan.800)'
     >
       <AbsoluteCenter w="70vh" color="gray.700" axis="both">

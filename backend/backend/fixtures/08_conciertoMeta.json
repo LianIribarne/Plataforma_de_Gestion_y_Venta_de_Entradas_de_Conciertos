@@ -1,0 +1,14 @@
+[
+    {"model": "conciertos.conciertoMeta", "pk": 1, "fields": {"tipo": "estado", "codigo": "borrador", "nombre": "Borrador", "orden": 1}},
+    {"model": "conciertos.conciertoMeta", "pk": 2, "fields": {"tipo": "estado", "codigo": "programado", "nombre": "Programado", "orden": 2}},
+    {"model": "conciertos.conciertoMeta", "pk": 3, "fields": {"tipo": "estado", "codigo": "agotado", "nombre": "Agotado", "orden": 3}},
+    {"model": "conciertos.conciertoMeta", "pk": 4, "fields": {"tipo": "estado", "codigo": "en_curso", "nombre": "En Curso", "orden": 4}},
+    {"model": "conciertos.conciertoMeta", "pk": 5, "fields": {"tipo": "estado", "codigo": "finalizado", "nombre": "Finalizado", "orden": 5}},
+    {"model": "conciertos.conciertoMeta", "pk": 6, "fields": {"tipo": "estado", "codigo": "cancelado", "nombre": "Cancelado", "orden": 6}},
+    {"model": "conciertos.conciertoMeta", "pk": 7, "fields": {"tipo": "mood", "codigo": "chill", "nombre": "Chill", "orden": 1}},
+    {"model": "conciertos.conciertoMeta", "pk": 8, "fields": {"tipo": "mood", "codigo": "romantico", "nombre": "Romántico", "orden": 2}},
+    {"model": "conciertos.conciertoMeta", "pk": 9, "fields": {"tipo": "mood", "codigo": "energico", "nombre": "Enérgico", "orden": 3}},
+    {"model": "conciertos.conciertoMeta", "pk": 10, "fields": {"tipo": "mood", "codigo": "intimo", "nombre": "Íntimo", "orden": 4}},
+    {"model": "conciertos.conciertoMeta", "pk": 11, "fields": {"tipo": "mood", "codigo": "festivo", "nombre": "Festivo", "orden": 5}},
+    {"model": "conciertos.conciertoMeta", "pk": 12, "fields": {"tipo": "mood", "codigo": "intenso", "nombre": "Intenso", "orden": 6}}
+]

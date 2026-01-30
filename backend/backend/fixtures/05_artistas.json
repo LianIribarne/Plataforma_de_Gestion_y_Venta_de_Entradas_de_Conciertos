@@ -1,0 +1,92 @@
+[
+    {
+        "model": "conciertos.artista",
+        "pk": 1,
+        "fields": {
+            "nombre": "Aurora",
+            "imagen": "artistas/aurora.webp",
+            "categoria": 2,
+            "pais_origen": 19
+        }
+    },
+    {
+        "model": "conciertos.artista",
+        "pk": 2,
+        "fields": {
+            "nombre": "Bring Me The Horizon",
+            "imagen": "artistas/bring_me_the_horizon.webp",
+            "categoria": 8,
+            "pais_origen": 16
+        }
+    },
+    {
+        "model": "conciertos.artista",
+        "pk": 3,
+        "fields": {
+            "nombre": "Chaos Chaos",
+            "imagen": "artistas/chaos_chaos.webp",
+            "categoria": 13,
+            "pais_origen": 10
+        }
+    },
+    {
+        "model": "conciertos.artista",
+        "pk": 4,
+        "fields": {
+            "nombre": "Coldplay",
+            "imagen": "artistas/coldplay.webp",
+            "categoria": 2,
+            "pais_origen": 16
+        }
+    },
+    {
+        "model": "conciertos.artista",
+        "pk": 5,
+        "fields": {
+            "nombre": "Foster The People",
+            "imagen": "artistas/foster_the_peole.webp",
+            "categoria": 2,
+            "pais_origen": 10
+        }
+    },
+    {
+        "model": "conciertos.artista",
+        "pk": 6,
+        "fields": {
+            "nombre": "Franz Ferdinand",
+            "imagen": "artistas/franz_ferdinand.webp",
+            "categoria": 1,
+            "pais_origen": 16
+        }
+    },
+    {
+        "model": "conciertos.artista",
+        "pk": 7,
+        "fields": {
+            "nombre": "iDKHOW",
+            "imagen": "artistas/idkhow.webp",
+            "categoria": 14,
+            "pais_origen": 10
+        }
+    },
+    {
+        "model": "conciertos.artista",
+        "pk": 8,
+        "fields": {
+            "nombre": "Phantogram",
+            "imagen": "artistas/phantogram.webp",
+            "categoria": 3,
+            "pais_origen": 10
+        }
+    },
+    {
+        "model": "conciertos.artista",
+        "pk": 9,
+        "fields": {
+            "nombre": "Two Door Cinema Club",
+            "imagen": "artistas/two_door_cinema_club.webp",
+            "categoria": 13,
+            "pais_origen": 16
+        }
+    }
+]

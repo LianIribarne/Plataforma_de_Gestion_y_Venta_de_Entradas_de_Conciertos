@@ -1,0 +1,41 @@
+[
+    {
+        "model": "usuarios.usuario",
+        "pk": 1,
+        "fields": {
+            "first_name": "Lian",
+            "last_name": "Iribarne",
+            "email": "admin@gmail.com",
+            "fecha_nacimiento": "2003-12-18",
+            "genero": "hombre",
+            "password": "pbkdf2_sha256$1000000$SR4SpZFLM0WSk9gKdRDpS2$/M6jSH90fMQwj4CL1X7Y0UYdSF1GLji/7NI5jT9QC3E=",
+            "rol": 1
+        }
+    },
+    {
+        "model": "usuarios.usuario",
+        "pk": 2,
+        "fields": {
+            "first_name": "Lian",
+            "last_name": "Iribarne",
+            "email": "organizador@gmail.com",
+            "fecha_nacimiento": "2003-12-18",
+            "genero": "hombre",
+            "password": "pbkdf2_sha256$1000000$nwCJ4i2fwlcxuHRxZ4fnhY$PGqU7o9/oCmIfp7N05CgffpBkCM5DKWqqvo/bLSsQs4=",
+            "rol": 2
+        }
+    },
+    {
+        "model": "usuarios.usuario",
+        "pk": 3,
+        "fields": {
+            "first_name": "Lian",
+            "last_name": "Iribarne",
+            "email": "cliente@gmail.com",
+            "fecha_nacimiento": "2003-12-18",
+            "genero": "hombre",
+            "password": "pbkdf2_sha256$1000000$3vrVW3x1uaWAA6gZMmadUY$hMDgFZYDhxzyK3SGtODHKqQbTgB9r0qAb2ncpPv1fHc=",
+            "rol": 3
+        }
+    }
+]

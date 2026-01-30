@@ -1,0 +1,5 @@
+[
+    {"model": "usuarios.rol", "pk": 1, "fields": {"nombre": "Administrador"}},
+    {"model": "usuarios.rol", "pk": 2, "fields": {"nombre": "Organizador"}},
+    {"model": "usuarios.rol", "pk": 3, "fields": {"nombre": "Cliente"}}
+]

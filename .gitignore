@@ -41,7 +41,6 @@ db.sqlite3
 
 # Configuración
 .env
-*.yml
 
 # Migraciones
 */migrations/*.py

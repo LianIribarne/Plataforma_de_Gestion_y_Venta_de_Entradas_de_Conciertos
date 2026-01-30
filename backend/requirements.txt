@@ -11,3 +11,5 @@ python-decouple==3.8
 
 pillow==11.3.0
 qrcode==8.2
+
+gunicorn
