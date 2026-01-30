@@ -54,6 +54,12 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
                 "No se puede reservar en este concierto."
             )
 
+        total_solicitado = sum(item["cantidad"] for item in value)
+        if total_solicitado > concierto.limite_reserva_total:
+            raise serializers.ValidationError(
+                f"No podés reservar más de {concierto.limite_reserva_total} entradas en total para este concierto."
+            )
+
         return value
 
     def validate(self, attrs):
@@ -72,17 +78,6 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
 
         with transaction.atomic():
             concierto = items[0]["tipo"].evento
-
-            total_solicitado = sum(item["cantidad"] for item in items)
-            if total_solicitado > concierto.limite_reserva_total:
-                raise serializers.ValidationError(
-                    f"No podés reservar más de {concierto.limite_reserva_total} entradas en total para este concierto."
-                )
-
-            if concierto.estado.codigo != 'programado':
-                raise serializers.ValidationError(
-                    "No podés reservar porque no esta disponible la reserva en este concierto."
-                )
 
             reserva = Reserva.objects.create(
                 cliente=request.user,
@@ -118,7 +113,6 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
                     entrada.reserva = reserva
                     entrada.save()
 
-            # agendar expiración
             result = expirar_reserva.apply_async(
                 args=[reserva.id],
                 eta=reserva.reservar_hasta
