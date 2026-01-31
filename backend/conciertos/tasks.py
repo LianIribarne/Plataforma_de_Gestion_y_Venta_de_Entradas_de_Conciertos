@@ -1,4 +1,5 @@
 from celery import shared_task
+from celery.exceptions import Ignore
 from celery.result import AsyncResult
 from django.db import transaction
 from entradas.models import Reserva
@@ -14,6 +15,13 @@ def iniciar_concierto(self, concierto_id):
             concierto = Concierto.objects.select_related('estado').get(id=concierto_id)
         except Concierto.DoesNotExist:
             return
+
+        if concierto.iniciar_task_id != self.request.id:
+            self.update_state(
+                state="IGNORED",
+                meta={"reason": "task obsoleta"}
+            )
+            raise Ignore()
 
         reservas_activas = (
             Reserva.objects
@@ -37,6 +45,13 @@ def finalizar_concierto(self, concierto_id):
         concierto = Concierto.objects.select_related('estado').get(id=concierto_id)
     except Concierto.DoesNotExist:
         return
+
+    if concierto.finalizar_task_id != self.request.id:
+            self.update_state(
+                state="IGNORED",
+                meta={"reason": "task obsoleta"}
+            )
+            raise Ignore()
 
     if concierto.estado.codigo == 'en_curso':
         concierto.estado = ConciertoMeta.objects.get(codigo='finalizado')
