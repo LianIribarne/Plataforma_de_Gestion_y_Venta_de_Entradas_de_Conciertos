@@ -37,7 +37,7 @@ CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
 # Zona horaria
 CELERY_TIMEZONE = "America/Argentina/Buenos_Aires"
 
-CELERY_ENABLE_UTC = False
+CELERY_ENABLE_UTC = True
 
 # Auto retry si algo falla
 CELERY_TASK_ACKS_LATE = True

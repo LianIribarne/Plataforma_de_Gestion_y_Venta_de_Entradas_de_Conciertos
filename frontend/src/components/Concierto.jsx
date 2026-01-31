@@ -244,8 +244,6 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
     api.get(`/conciertos/tipos_concierto/${id}`)
       .then(res => setTiposEntrada(res.data.results))
       .catch(err => console.error(err));
-
-    console.log(tipos_entrada)
   }, [id])
 
   const mostrar = ['en_curso', 'agotado', 'finalizado', 'cancelado'].includes(estado.codigo)
@@ -540,6 +538,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
               onClick={onEntradaClose}
               rounded='full'
               size='lg'
+              mt={2}
             >
               Cerrar
             </Button>

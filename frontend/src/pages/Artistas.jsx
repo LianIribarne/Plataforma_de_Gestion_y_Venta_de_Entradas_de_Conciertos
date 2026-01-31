@@ -1,16 +1,36 @@
-import { 
-  Box, Heading, Avatar, Badge,
-  Text, Wrap, WrapItem, HStack,
-  Button, Popover, PopoverTrigger, PopoverContent,
-  PopoverHeader, PopoverBody, PopoverArrow, PopoverCloseButton,
-  useDisclosure, Skeleton, useToast, Menu, MenuButton, MenuList, MenuItem, Input,
-  AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader,
-  AlertDialogBody, AlertDialogFooter,
+import { ChevronDownIcon, EditIcon, LockIcon, UnlockIcon } from '@chakra-ui/icons';
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  Avatar, Badge,
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Input,
+  Menu, MenuButton,
+  MenuItem,
+  MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+  Skeleton,
+  Text,
+  useDisclosure,
+  useToast,
+  Wrap, WrapItem,
 } from '@chakra-ui/react';
-import { useState, useEffect, useRef } from 'react'
-import { EditIcon, LockIcon, UnlockIcon, ChevronDownIcon } from '@chakra-ui/icons'
-import ModificarArtista from "../components/ModificarArtista"
-import api from '../services/api'
+import { useEffect, useRef, useState } from 'react';
+import ModificarArtista from "../components/ModificarArtista";
+import api from '../services/api';
 
 function Artista({ id, nombre, imagen, categoria, estadoArtista }) {
   const { isOpen, onToggle, onClose } = useDisclosure();
@@ -23,7 +43,7 @@ function Artista({ id, nombre, imagen, categoria, estadoArtista }) {
   } = useDisclosure();
 
   const [estado, setEstado] = useState(estadoArtista)
-  
+
   const cancelEstadoRef = useRef()
   const {
     isOpen: isEstadoOpen,
@@ -49,7 +69,7 @@ function Artista({ id, nombre, imagen, categoria, estadoArtista }) {
 
       await api.patch(
         `/conciertos/modificar_artista/${id}`,
-        { estado: nuevoEstado }
+        { activo: nuevoEstado }
       )
 
       toast({
@@ -103,7 +123,7 @@ function Artista({ id, nombre, imagen, categoria, estadoArtista }) {
               {estado ? undefined : "Suspendido"}
             </Badge>
           </WrapItem>
-        </PopoverTrigger>   
+        </PopoverTrigger>
 
         <PopoverContent>
           <PopoverArrow />
@@ -112,10 +132,10 @@ function Artista({ id, nombre, imagen, categoria, estadoArtista }) {
           <PopoverBody>
             <Wrap align='center' justify='center'>
               <WrapItem>
-                <Button 
-                  leftIcon={<EditIcon />} 
+                <Button
+                  leftIcon={<EditIcon />}
                   size='sm'
-                  rounded='full' 
+                  rounded='full'
                   variant='solid'
                   onClick={onModificarOpen}
                   colorScheme='teal'
@@ -208,11 +228,11 @@ export default function Artistas() {
     if (filtros.categoria) params.categoria = filtros.categoria;
     if (filtros.pais_origen) params.pais_origen = filtros.pais_origen;
     if (filtros.nombre !== "") params.nombre = filtros.nombre;
-    if (filtros.estado !== null) params.estado = filtros.estado;
+    if (filtros.estado !== null) params.activo = filtros.estado;
 
     try {
       const response = await api.get(
-        "/conciertos/artistas", 
+        "/conciertos/artistas",
         { params }
       );
 
@@ -247,7 +267,7 @@ export default function Artistas() {
           <Menu>
             <MenuButton
               as={Button}
-              rightIcon={<ChevronDownIcon />} 
+              rightIcon={<ChevronDownIcon />}
               rounded="full"
               w="100%"
             >
@@ -275,7 +295,7 @@ export default function Artistas() {
           <Menu>
             <MenuButton
               as={Button}
-              rightIcon={<ChevronDownIcon />} 
+              rightIcon={<ChevronDownIcon />}
               rounded="full"
               w="100%"
             >
@@ -301,10 +321,10 @@ export default function Artistas() {
           </Menu>
 
           <Menu>
-            <MenuButton 
-              as={Button} 
-              rightIcon={<ChevronDownIcon />} 
-              rounded='full' 
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              rounded='full'
               w="100%"
             >
               {filtrosDraft.estado === null
@@ -328,7 +348,7 @@ export default function Artistas() {
               setFiltrosDraft({ ...filtrosDraft, nombre: e.target.value })
             }
           />
-        
+
           <Button
             rounded='full'
             ml={4}
@@ -337,7 +357,7 @@ export default function Artistas() {
           >
             Aplicar filtros
           </Button>
-                      
+
           <Button
             rounded='full'
             w='60%'

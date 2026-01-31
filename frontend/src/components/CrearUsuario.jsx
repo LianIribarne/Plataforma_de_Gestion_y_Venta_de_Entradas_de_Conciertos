@@ -1,13 +1,23 @@
-import React from 'react'
+import { AtSignIcon, CalendarIcon, ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import {
-  GridItem, Input, InputGroup, InputLeftAddon,
-  InputRightAddon, IconButton, RadioGroup, Radio,
-  Stack, Button, FormControl, FormLabel,
-  Tooltip, useToast, Grid, Modal,
-  ModalOverlay, ModalContent, ModalHeader, ModalFooter, 
+  Button, FormControl, FormLabel,
+  Grid,
+  GridItem,
+  IconButton,
+  Input, InputGroup, InputLeftAddon,
+  InputRightAddon,
+  Modal,
   ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Radio,
+  RadioGroup,
+  Stack,
+  Tooltip, useToast,
 } from "@chakra-ui/react";
-import { ViewIcon, ViewOffIcon, AtSignIcon, CalendarIcon } from '@chakra-ui/icons';
+import React from 'react';
 import api from "../services/api";
 
 export default function CrearUsuario({ isOpen, onClose }) {
@@ -76,7 +86,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
@@ -90,7 +100,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
         rol: Number(formData.rol),
       };
 
-      const res = await api.post("/admin/crear_usuario/", payload);
+      const res = await api.post("/usuarios/admin/crear_usuario/", payload);
 
       const mensaje = res?.data?.message ?? "Se creo con éxito";
 
@@ -107,11 +117,11 @@ export default function CrearUsuario({ isOpen, onClose }) {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -137,7 +147,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
           <form onSubmit={handleSubmit}>
             <GridItem>
               <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-             
+
                 {/* Nombre */}
                 <GridItem>
                   <FormControl isInvalid={!!errors.nombre}>
@@ -163,7 +173,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
                     </Tooltip>
                   </FormControl>
                 </GridItem>
-   
+
                 {/* Apellido */}
                 <GridItem>
                   <FormControl isInvalid={!!errors.apellido}>
@@ -190,7 +200,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
                   </FormControl>
                 </GridItem>
               </Grid>
- 
+
               {/* Email */}
               <FormControl isInvalid={!!errors.email} mt={3} mb={3}>
                 <FormLabel color='white'>Email</FormLabel>
@@ -219,7 +229,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
                   </InputGroup>
                 </Tooltip>
               </FormControl>
- 
+
               {/* Fecha de nacimiento */}
               <FormControl isInvalid={!!errors.fechaNacimiento}>
                 <FormLabel color='white'>Fecha de nacimiento</FormLabel>
@@ -248,7 +258,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
                 </Tooltip>
               </FormControl>
             </GridItem>
-           
+
             {/* Contraseña */}
             <FormControl isInvalid={!!errors.password} my={3}>
               <FormLabel color='white'>Contraseña</FormLabel>
@@ -283,7 +293,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
                 </InputGroup>
               </Tooltip>
             </FormControl>
- 
+
             {/* Género */}
             <FormControl>
               <FormLabel color='white'>Género</FormLabel>
@@ -323,9 +333,9 @@ export default function CrearUsuario({ isOpen, onClose }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

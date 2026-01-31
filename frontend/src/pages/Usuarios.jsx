@@ -1,20 +1,38 @@
-import { 
-  Box, Heading, Avatar, Badge,
-  Text, Wrap, WrapItem, HStack,
-  Button, Popover, PopoverTrigger, PopoverContent,
-  PopoverHeader, PopoverBody, PopoverArrow, PopoverCloseButton,
-  useDisclosure, SkeletonCircle, SkeletonText, AlertDialog,
-  AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent,
-  AlertDialogOverlay, useToast, Input, Menu,
-  MenuButton, MenuList, MenuItem,
+import { ChevronDownIcon, EditIcon, InfoIcon, LockIcon, UnlockIcon } from '@chakra-ui/icons';
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter, AlertDialogHeader,
+  AlertDialogOverlay,
+  Avatar, Badge,
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Input, Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+  SkeletonCircle, SkeletonText,
+  Text,
+  useDisclosure,
+  useToast,
+  Wrap, WrapItem,
 } from '@chakra-ui/react';
-import { useState, useEffect, useRef } from 'react'
-import { InfoIcon, EditIcon, LockIcon, UnlockIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { useEffect, useRef, useState } from 'react';
 import { FaKey } from "react-icons/fa";
 import { Link } from 'react-router-dom';
-import ModificarUsuario from "../components/ModificarUsuario";
 import CambiarPasswordUser from "../components/CambiarPasswordUser";
-import api from '../services/api'
+import ModificarUsuario from "../components/ModificarUsuario";
+import api from '../services/api';
 
 function Usuario({ id, email, nombre, apellido, activo, rol }) {
   const { isOpen, onToggle, onClose } = useDisclosure();
@@ -107,7 +125,7 @@ function Usuario({ id, email, nombre, apellido, activo, rol }) {
               </Box>
             </Box>
           </WrapItem>
-        </PopoverTrigger>   
+        </PopoverTrigger>
 
         <PopoverContent>
           <PopoverArrow />
@@ -116,13 +134,13 @@ function Usuario({ id, email, nombre, apellido, activo, rol }) {
           <PopoverBody>
             <Wrap align='center' justify='center'>
               <WrapItem>
-                <Button 
+                <Button
                   as={Link}
                   to={rol === 'Cliente' ? '/usuarios/detalle_cliente' : '/usuarios/detalle_organizador'}
                   state={ id }
-                  leftIcon={<InfoIcon />} 
+                  leftIcon={<InfoIcon />}
                   size='sm'
-                  rounded='full' 
+                  rounded='full'
                   variant='solid'
                   colorScheme='cyan'
                 >
@@ -131,10 +149,10 @@ function Usuario({ id, email, nombre, apellido, activo, rol }) {
               </WrapItem>
 
               <WrapItem>
-                <Button 
-                  leftIcon={<EditIcon />} 
+                <Button
+                  leftIcon={<EditIcon />}
                   size='sm'
-                  rounded='full' 
+                  rounded='full'
                   variant='solid'
                   onClick={onModificarOpen}
                   colorScheme='teal'
@@ -144,10 +162,10 @@ function Usuario({ id, email, nombre, apellido, activo, rol }) {
               </WrapItem>
 
               <WrapItem>
-                <Button 
-                  leftIcon={<FaKey />} 
+                <Button
+                  leftIcon={<FaKey />}
                   size='sm'
-                  rounded='full' 
+                  rounded='full'
                   variant='solid'
                   onClick={onPasswordOpen}
                   colorScheme='orange'
@@ -239,10 +257,10 @@ function Filtros({ draft, setDraft, fetch, inicial }) {
       />
 
       <Menu>
-        <MenuButton 
-          as={Button} 
-          rightIcon={<ChevronDownIcon />} 
-          rounded='full' 
+        <MenuButton
+          as={Button}
+          rightIcon={<ChevronDownIcon />}
+          rounded='full'
           w="100%"
         >
           {draft.estado === ""
@@ -265,7 +283,7 @@ function Filtros({ draft, setDraft, fetch, inicial }) {
       >
         Aplicar filtros
       </Button>
-                  
+
       <Button
         rounded='full'
         w='60%'
@@ -298,7 +316,7 @@ export default function Usuarios() {
     setLoadingOrg(true);
 
     const params = {
-      rol: "organizador"
+      rol: "Organizador"
     };
 
     if (filtros.email) params.email = filtros.email;
@@ -329,7 +347,7 @@ export default function Usuarios() {
     setLoadingCli(true);
 
     const params = {
-      rol: "cliente"
+      rol: "Cliente"
     };
 
     if (filtros.email !== "") params.email = filtros.email;
@@ -358,10 +376,10 @@ export default function Usuarios() {
       <Box align='center'>
         <Heading color='white' mb={4}>Organizadores</Heading>
 
-        <Filtros 
-          draft={filtrosOrgDraft} 
-          setDraft={setFiltrosOrgDraft} 
-          fetch={fetchOrganizadores} 
+        <Filtros
+          draft={filtrosOrgDraft}
+          setDraft={setFiltrosOrgDraft}
+          fetch={fetchOrganizadores}
           inicial={filtrosOrgInicial}
         />
 
@@ -408,10 +426,10 @@ export default function Usuarios() {
       <Box align='center' mt={10}>
         <Heading color='white' mb={4}>Clientes</Heading>
 
-        <Filtros 
-          draft={filtrosCliDraft} 
-          setDraft={setFiltrosCliDraft} 
-          fetch={fetchClientes} 
+        <Filtros
+          draft={filtrosCliDraft}
+          setDraft={setFiltrosCliDraft}
+          fetch={fetchClientes}
           inicial={filtrosCliInicial}
         />
 

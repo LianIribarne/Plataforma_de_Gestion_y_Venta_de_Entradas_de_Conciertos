@@ -1,17 +1,37 @@
-import { 
-  Box, Heading, AspectRatio,
-  Text, Wrap, WrapItem, HStack,
-  Button, Popover, PopoverTrigger, PopoverContent,
-  PopoverHeader, PopoverBody, PopoverArrow, PopoverCloseButton,
-  useDisclosure, Skeleton, AlertDialog, Badge,
-  AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent,
-  AlertDialogOverlay, useToast, Menu, MenuButton, MenuList, MenuItem, Input,
+import { ChevronDownIcon, EditIcon, LockIcon, UnlockIcon } from '@chakra-ui/icons';
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter, AlertDialogHeader,
+  AlertDialogOverlay,
+  AspectRatio,
+  Badge,
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Input,
+  Menu, MenuButton,
+  MenuItem,
+  MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+  Skeleton,
+  Text,
+  useDisclosure,
+  useToast,
+  Wrap, WrapItem,
 } from '@chakra-ui/react';
-import { useState, useEffect, useRef } from 'react'
-import { EditIcon, LockIcon, UnlockIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { useEffect, useRef, useState } from 'react';
 import { FaMapMarkerAlt } from "react-icons/fa";
-import ModificarLugar from "../components/ModificarLugar"
-import api from '../services/api'
+import ModificarLugar from "../components/ModificarLugar";
+import api from '../services/api';
 
 function Lugar({ id, nombre, direccion, ciudad, provincia, estadoLugar }) {
   const { isOpen, onToggle, onClose } = useDisclosure();
@@ -101,10 +121,10 @@ function Lugar({ id, nombre, direccion, ciudad, provincia, estadoLugar }) {
                 {direccion}
                 <FaMapMarkerAlt style={{ display: 'inline', marginLeft: 4 }} />
               </Text>
-              <AspectRatio 
+              <AspectRatio
                 mt={2}
-                minW="200px" 
-                maxW="200px" 
+                minW="200px"
+                maxW="200px"
                 ratio={16 / 9}
               >
                 <iframe
@@ -116,7 +136,7 @@ function Lugar({ id, nombre, direccion, ciudad, provincia, estadoLugar }) {
               </AspectRatio>
             </Box>
           </WrapItem>
-        </PopoverTrigger>   
+        </PopoverTrigger>
 
         <PopoverContent>
           <PopoverArrow />
@@ -125,10 +145,10 @@ function Lugar({ id, nombre, direccion, ciudad, provincia, estadoLugar }) {
           <PopoverBody>
             <Wrap align='center' justify='center'>
               <WrapItem>
-                <Button 
-                  leftIcon={<EditIcon />} 
+                <Button
+                  leftIcon={<EditIcon />}
                   size='sm'
-                  rounded='full' 
+                  rounded='full'
                   variant='solid'
                   onClick={onModificarOpen}
                   colorScheme='teal'
@@ -197,13 +217,13 @@ function Lugar({ id, nombre, direccion, ciudad, provincia, estadoLugar }) {
 export default function Lugares() {
   const [lugares, setLugares] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [provincias, setProvincias] = useState([]);
   const [ciudades, setCiudades] = useState([]);
-  
+
   const [provinciaSel, setProvinciaSel] = useState(null);
   const [ciudadSel, setCiudadSel] = useState(null);
-  
+
   const filtrosInicial = {
     provincia: null,
     ciudad: null,
@@ -221,11 +241,11 @@ export default function Lugares() {
     if (filtros.provincia) params.provincia = filtros.provincia;
     if (filtros.ciudad) params.ciudad = filtros.ciudad;
     if (filtros.nombre !== "") params.nombre = filtros.nombre;
-    if (filtros.estado !== null) params.estado = filtros.estado;
+    if (filtros.estado !== null) params.activo = filtros.estado;
 
     try {
       const response = await api.get(
-        "/conciertos/lugares", 
+        "/conciertos/lugares",
         { params }
       );
 
@@ -295,7 +315,7 @@ export default function Lugares() {
           <Menu>
             <MenuButton
               as={Button}
-              rightIcon={<ChevronDownIcon />} 
+              rightIcon={<ChevronDownIcon />}
               rounded="full"
               w="100%"
             >
@@ -324,7 +344,7 @@ export default function Lugares() {
           <Menu>
             <MenuButton
               as={Button}
-              rightIcon={<ChevronDownIcon />} 
+              rightIcon={<ChevronDownIcon />}
               rounded="full"
               w="100%"
               isDisabled={!provinciaSel}
@@ -351,10 +371,10 @@ export default function Lugares() {
           </Menu>
 
           <Menu>
-            <MenuButton 
-              as={Button} 
-              rightIcon={<ChevronDownIcon />} 
-              rounded='full' 
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              rounded='full'
               w="100%"
             >
               {filtrosDraft.estado === null
@@ -378,7 +398,7 @@ export default function Lugares() {
               setFiltrosDraft({ ...filtrosDraft, nombre: e.target.value })
             }
           />
-        
+
           <Button
             rounded='full'
             ml={4}
@@ -387,7 +407,7 @@ export default function Lugares() {
           >
             Aplicar filtros
           </Button>
-                      
+
           <Button
             rounded='full'
             w='60%'
@@ -431,14 +451,14 @@ export default function Lugares() {
                       <Heading size="lg" mb={2} color="white">
                         {provincia.nombre}
                       </Heading>
-  
+
                       {Object.values(provincia.ciudades).map((ciudad) => (
                         <Box key={ciudad.id} mb={4} align="center">
-                        
+
                           <Heading size="md" mb={3} color="white">
                             - {ciudad.nombre} -
                           </Heading>
-                      
+
                           <Wrap justify="center" spacing="10px">
                             {ciudad.lugares.map((lugar) => (
                               <Lugar
@@ -452,7 +472,7 @@ export default function Lugares() {
                               />
                             ))}
                           </Wrap>
-                          
+
                         </Box>
                       ))}
                     </Box>

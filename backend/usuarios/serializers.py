@@ -198,7 +198,7 @@ class AdminUsuarioSerializer(serializers.ModelSerializer):
         return value
 
 class AdminUsuarioListSerializer(serializers.ModelSerializer):
-    rol = serializers.CharField(source="rol.get_nombre_display")
+    rol = serializers.CharField(source="rol.nombre")
 
     class Meta:
         model = Usuario
@@ -225,7 +225,7 @@ class AdminUsuarioDetailSerializer(serializers.ModelSerializer):
     def get_rol(self, obj):
         return {
             "id": obj.rol.id,
-            "nombre": obj.rol.get_nombre_display()
+            "nombre": obj.rol.nombre
         }
 
     def get_is_active(self, obj):

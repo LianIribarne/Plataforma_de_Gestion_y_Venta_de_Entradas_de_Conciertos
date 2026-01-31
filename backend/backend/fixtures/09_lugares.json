@@ -1,0 +1,20 @@
+[
+    {
+        "model": "conciertos.lugar",
+        "pk": 1,
+        "fields": {
+            "nombre": "Teatro Gran Rex",
+            "direccion": "Av. Corrientes 857",
+            "ciudad": 81
+        }
+    },
+    {
+        "model": "conciertos.lugar",
+        "pk": 2,
+        "fields": {
+            "nombre": "Estadio Luna Park",
+            "direccion": "Av. Eduardo Madero 470",
+            "ciudad": 81
+        }
+    }
+]

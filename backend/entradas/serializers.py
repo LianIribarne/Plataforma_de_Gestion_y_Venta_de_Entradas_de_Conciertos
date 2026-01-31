@@ -44,7 +44,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
 
         if len(conciertos) != 1:
             raise serializers.ValidationError(
-                f"No se pueden mezclar tipos de distintos conciertos."
+                "No se pueden mezclar tipos de distintos conciertos."
             )
 
         concierto = value[0]["tipo"].evento

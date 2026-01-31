@@ -61,7 +61,7 @@ export default function EntradaInfo({ id, tipo, disponibles, reservadas, precio,
   const { user } = useAuth();
 
   return (
-    <AccordionItem display={disponibles > 0 || reservadas > 0 ? undefined : 'none'}>
+    <AccordionItem display={disponibles > 0 || reservadas > 0 || user.rol !== 'Cliente' ? undefined : 'none'}>
       <h2>
         <AccordionButton>
           <Badge

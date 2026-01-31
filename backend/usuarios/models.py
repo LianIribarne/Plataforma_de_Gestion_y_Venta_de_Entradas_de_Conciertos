@@ -147,15 +147,15 @@ class Usuario(AbstractUser):
     # Verificaciones de si el usuario es de tal rol
     @property
     def es_administrador(self):
-        return self.rol.nombre == 'admin'
+        return self.rol.nombre == 'Administrador'
 
     @property
     def es_organizador(self):
-        return self.rol.nombre == 'organizador'
+        return self.rol.nombre == 'Organizador'
 
     @property
     def es_cliente(self):
-        return self.rol.nombre == 'cliente'
+        return self.rol.nombre == 'Cliente'
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} ({self.email} - {self.rol.nombre})'

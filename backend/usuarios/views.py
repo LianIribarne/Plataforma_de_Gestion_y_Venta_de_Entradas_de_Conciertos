@@ -51,11 +51,11 @@ class LoginCookieView(APIView):
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "rol": user.rol.get_nombre_display(),
+                "rol": user.rol.nombre,
                 "nombre": user.first_name,
                 "apellido": user.last_name,
                 "fecha_nacimiento": user.fecha_nacimiento.strftime("%d/%m/%Y"),
-                "genero": user.get_genero_display(),
+                "genero": user.genero,
             }
         }, status=status.HTTP_200_OK)
 
@@ -151,11 +151,11 @@ class UserMeView(APIView):
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "rol": user.rol.get_nombre_display(),
+                "rol": user.rol.nombre,
                 "nombre": user.first_name,
                 "apellido": user.last_name,
                 "fecha_nacimiento": user.fecha_nacimiento.strftime("%d/%m/%Y"),
-                "genero": user.get_genero_display(),
+                "genero": user.genero,
             }
         }, status=status.HTTP_200_OK)
 
@@ -225,7 +225,7 @@ class AdminUsuarioListView(generics.ListAPIView):
     serializer_class = AdminUsuarioListSerializer
 
     def get_queryset(self):
-        qs = Usuario.objects.exclude(rol__nombre='admin')
+        qs = Usuario.objects.exclude(rol__nombre='Administrador')
 
         email = self.request.query_params.get("email")
         nombre = self.request.query_params.get("nombre")
