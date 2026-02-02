@@ -142,7 +142,8 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
 
         inicio_task = iniciar_concierto.apply_async(
             args=[concierto.id],
-            eta=concierto.fecha_inicio
+            eta=concierto.fecha_inicio,
+            expires=concierto.fecha_fin
         )
 
         fin_task = finalizar_concierto.apply_async(
@@ -339,7 +340,8 @@ class ConciertoUpdateSerializer(serializers.ModelSerializer):
 
             inicio_task = iniciar_concierto.apply_async(
                 args=[instance.id],
-                eta=new_inicio
+                eta=new_inicio,
+                expires=new_fin
             )
 
             fin_task = finalizar_concierto.apply_async(
