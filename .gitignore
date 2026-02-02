@@ -49,7 +49,6 @@ db.sqlite3
 
 # Archivos estáticos y media
 staticfiles/
-media/
 
 # ---- Node / React ----
 build/
