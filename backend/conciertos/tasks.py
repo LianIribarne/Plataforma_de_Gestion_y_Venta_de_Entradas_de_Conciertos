@@ -72,7 +72,7 @@ def finalizar_concierto(self, concierto_id):
                 )
                 raise Ignore()
 
-        if concierto.estado.codigo != 'en_curso':
+        if concierto.estado.codigo not in ['programado', 'agotado', 'en_curso']:
             return
 
         concierto.estado = ConciertoMeta.objects.get(codigo='finalizado')

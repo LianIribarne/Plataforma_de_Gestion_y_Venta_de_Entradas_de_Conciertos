@@ -1,12 +1,27 @@
 services:
+  backend_init:
+    profiles: ["init"]
+    build: ./backend
+    container_name: backend_init
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py loaddata backend/fixtures/*.json &&
+        python manage.py seed_conciertos
+      "
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+
   backend:
     build: ./backend
     container_name: django_backend
     command: >
       sh -c "
-        python manage.py migrate &&
-        python manage.py loaddata backend/fixtures/*.json &&
-        python manage.py seed_conciertos &&
         python manage.py sync_conciertos &&
         gunicorn backend.wsgi:application --bind 0.0.0.0:8000
       "
@@ -18,8 +33,10 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   celery:
     build: ./backend
@@ -30,9 +47,8 @@ services:
     env_file:
       - ./backend/.env.docker
     depends_on:
-      - backend
-      - db
-      - redis
+      redis:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -56,6 +72,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U integrador_user -d integrador"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7
@@ -64,6 +85,11 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
   postgres_data:
