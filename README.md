@@ -1,5 +1,10 @@
 # Plataforma de Gestión y Venta de Entradas para Conciertos
 
+## Autor
+
+Desarrollado por **Lian Iribarne**
+Proyecto de portfolio
+
 ## Objetivo
 
 Desarrollar una aplicación web con frontend y backend que permita gestionar conciertos, vender entradas, gestionar usuarios.
@@ -133,3 +138,8 @@ Elimina:
 - redes
 - volúmenes
 - imágenes generadas por Docker
+
+## License
+
+This project is licensed under the MIT License.
+© 2026 Lian Iribarne — Proyecto de portfolio
