@@ -5,6 +5,8 @@
 Desarrollado por **Lian Iribarne**
 Proyecto de portfolio
 
+![Portada](/assets/Portada.png)
+
 ## Objetivo
 
 Desarrollar una aplicación web con frontend y backend que permita gestionar conciertos, vender entradas, gestionar usuarios.
