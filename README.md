@@ -57,13 +57,15 @@ Otros:
 
 ## Documentación
 
-La documentación completa del sistema está en:
+La documentación completa del sistema se encuentra en la carpeta `docs/`, incluyendo:
 
-- docs/requerimientos.md
-- docs/historias-de-usuario.md
-- docs/diagramas.md
-- docs/diseño-tecnico.md
-- docs/prototipo-ui.md
+- Requerimientos del sistema
+- Historias de usuario
+- Diagramas
+- Diseño tecnico
+- Prototipo ui
+<!-- - Documentación de la API
+- Validaciones y reglas de negocio -->
 
 ## Ejecutar el proyecto
 
