@@ -7,11 +7,11 @@ El sistema se utilizará en un contexto comercial online, donde los clientes pod
 
 ### Actores y usuarios finales
 
-| Actor / Usuario   | Descripción                                                                                  | Responsabilidades                                                                                                                                |
-| ----------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Cliente**       | Persona que ingresa a la plataforma para ver conciertos y poder adquirir entradas del mismo. | Ver conciertos, reservar y comprar entradas. Visualizar pagos realizados y entradas adquiridas.                                                  |
-| **Organizador**   | Persona que crea y gestiona sus conciertos, y pone en venta las entradas.                    | Crear y gestionar conciertos y entradas. Visualizar ventas.                                                                                      |
-| **Administrador** | Persona que gestiona la plataforma, a los usuarios, y los conciertos.                        | Gestionar plataforma. Crear organizadores y/o administradores, artistas y lugares. Ver conciertos, usuarios, pagos, entradas, artistas, lugares. |
+| Actor / Usuario | Descripción                                                                                  | Responsabilidades                                                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cliente         | Persona que ingresa a la plataforma para ver conciertos y poder adquirir entradas del mismo. | Ver conciertos, reservar y comprar entradas. Visualizar pagos realizados y entradas adquiridas.                                                  |
+| Organizador     | Persona que crea y gestiona sus conciertos, y pone en venta las entradas.                    | Crear y gestionar conciertos y entradas. Visualizar ventas.                                                                                      |
+| Administrador   | Persona que gestiona la plataforma, a los usuarios, y los conciertos.                        | Gestionar plataforma. Crear organizadores y/o administradores, artistas y lugares. Ver conciertos, usuarios, pagos, entradas, artistas, lugares. |
 
 ## Características
 
@@ -24,22 +24,29 @@ El sistema se utilizará en un contexto comercial online, donde los clientes pod
 
 ## Tecnologías
 
-- **Frontend:**
-  - React
-  - Chakra UI v2
-  - react-router-dom
-  - Vite
-- **Backend:**
-  - Django
-  - django REST framework
-  - drf simple JWT
-  - Cors
-  - Celery
-  - Redis
-- **Base de datos:**
-  - PostgreSQL
-- **Otros:**
-  - Docker
+Frontend:
+
+- React
+- Chakra UI v2
+- react-router-dom
+- Vite
+
+Backend:
+
+- Django
+- django REST framework
+- drf simple JWT
+- Cors
+- Celery
+- Redis
+
+Base de datos:
+
+- PostgreSQL
+
+Otros:
+
+- Docker
 
 ## Documentación
 
@@ -87,6 +94,16 @@ Este comando ejecuta:
 - migraciones de base de datos
 - carga de fixtures
 - seed de conciertos
+
+#### Usuarios de prueba
+
+Después de ejecutar el comando de carga de datos, se crean los siguientes usuarios para probar la aplicación.
+
+| Rol           | Email                   | Password |
+| ------------- | ----------------------- | -------- |
+| Cliente       | cliente@example.com     | 12345678 |
+| Organizador   | organizador@example.com | 12345678 |
+| Administrador | admin@example.com       | 12345678 |
 
 ### 4. Acceder a la aplicación
 
