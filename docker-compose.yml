@@ -1,7 +1,7 @@
 services:
   backend_init:
     profiles: ["init"]
-    build: ./backend
+    build: ./src/backend
     container_name: backend_init
     command: >
       sh -c "
@@ -10,15 +10,15 @@ services:
         python manage.py seed_conciertos
       "
     volumes:
-      - ./backend:/app
+      - ./src/backend:/app
     env_file:
-      - ./backend/.env.docker
+      - ./src/backend/.env.docker
     depends_on:
       db:
         condition: service_healthy
 
   backend:
-    build: ./backend
+    build: ./src/backend
     container_name: django_backend
     command: >
       sh -c "
@@ -26,10 +26,10 @@ services:
         gunicorn backend.wsgi:application --bind 0.0.0.0:8000
       "
     volumes:
-      - ./backend:/app
-      - ./backend/media:/app/media
+      - ./src/backend:/app
+      - ./src/backend/media:/app/media
     env_file:
-      - ./backend/.env.docker
+      - ./src/backend/.env.docker
     ports:
       - "8000:8000"
     depends_on:
@@ -39,22 +39,22 @@ services:
         condition: service_healthy
 
   celery:
-    build: ./backend
+    build: ./src/backend
     container_name: celery_worker
     command: celery -A backend worker -l info
     volumes:
-      - ./backend:/app
+      - ./src/backend:/app
     env_file:
-      - ./backend/.env.docker
+      - ./src/backend/.env.docker
     depends_on:
       redis:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build: ./src/frontend
     container_name: react_frontend
     volumes:
-      - ./frontend:/app
+      - ./src/frontend:/app
       - /app/node_modules
     ports:
       - "5173:5173"
