@@ -11,6 +11,7 @@ Proyecto de portfolio
 ## Objetivo
 
 Desarrollar una aplicación web con frontend y backend que permita gestionar conciertos, vender entradas, gestionar usuarios en Argentina.
+
 El sistema se utilizará en un contexto comercial online, donde los clientes podrán visualizar los conciertos con sus respectivas entradas, reservar y comprar las mismas, y gestionar su perfil. Al mismo tiempo, los organizadores tendrán control sobre la creación, gestión y visualización de conciertos, así como del proceso de ventas, y los administradores podrán gestionar conciertos, lugares, y a los propios usuarios.
 
 ### Actores y usuarios finales
