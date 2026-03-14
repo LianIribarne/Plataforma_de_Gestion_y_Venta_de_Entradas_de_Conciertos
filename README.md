@@ -3,13 +3,14 @@
 ## Autor
 
 Desarrollado por **Lian Iribarne**
+
 Proyecto de portfolio
 
 ![Portada](/assets/Portada.png)
 
 ## Objetivo
 
-Desarrollar una aplicación web con frontend y backend que permita gestionar conciertos, vender entradas, gestionar usuarios.
+Desarrollar una aplicación web con frontend y backend que permita gestionar conciertos, vender entradas, gestionar usuarios en Argentina.
 El sistema se utilizará en un contexto comercial online, donde los clientes podrán visualizar los conciertos con sus respectivas entradas, reservar y comprar las mismas, y gestionar su perfil. Al mismo tiempo, los organizadores tendrán control sobre la creación, gestión y visualización de conciertos, así como del proceso de ventas, y los administradores podrán gestionar conciertos, lugares, y a los propios usuarios.
 
 ### Actores y usuarios finales
@@ -102,17 +103,34 @@ Este comando ejecuta:
 
 - migraciones de base de datos
 - carga de fixtures
-- seed de conciertos
+  - roles
+  - usuarios
+  - paises
+  - categorias
+  - artistas
+  - provincias
+  - ciudades
+  - conciertoMeta
+  - lugares
+- seed de concierto
 
-#### Usuarios de prueba
+#### Datos de prueba
 
-Después de ejecutar el comando de carga de datos, se crean los siguientes usuarios para probar la aplicación.
+Después de ejecutar el comando de carga de datos, se crean los siguientes datos para probar la aplicación.
+
+##### Usuarios de prueba
 
 | Rol           | Email                   | Password |
 | ------------- | ----------------------- | -------- |
 | Cliente       | cliente@example.com     | 12345678 |
 | Organizador   | organizador@example.com | 12345678 |
 | Administrador | admin@example.com       | 12345678 |
+
+##### Concierto de prueba
+
+Se crea un concierto de prueba programado para comenzar 15 minutos después de la carga de los datos. Durante ese período previo es posible realizar reservas y completar el proceso de pago.
+
+Una vez que el concierto comienza, ya no se permitirán nuevas reservas ni pagos. Posteriormente, 30 minutos después de su inicio, el concierto finalizará. A partir de ese momento, los clientes que hayan adquirido entradas ya no podrán visualizar las entradas correspondientes a ese concierto.
 
 ### 4. Acceder a la aplicación
 
@@ -146,4 +164,5 @@ Elimina:
 ## License
 
 This project is licensed under the MIT License.
+
 © 2026 Lian Iribarne — Proyecto de portfolio
