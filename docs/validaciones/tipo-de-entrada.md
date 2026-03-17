@@ -1,5 +1,7 @@
 # Validaciones de Tipo de Entrada
 
+Este documento describe las validaciones de datos y reglas de acceso aplicadas en los endpoints relacionados con tipos de entrada dentro de la API.
+
 ## Permisos de acceso
 
 #### Cliente
