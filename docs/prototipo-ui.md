@@ -1,5 +1,7 @@
 # Prototipo ui
 
+En este documento se presentan algunas de las imágenes de prototipo de la interfaz de usuario más relevantes del sistema.
+
 ### Home
 
 ![Home](/assets/prototipo/home.png)

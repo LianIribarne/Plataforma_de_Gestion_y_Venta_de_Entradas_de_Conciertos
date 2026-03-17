@@ -66,8 +66,9 @@ La documentación completa del sistema se encuentra en la carpeta `docs/`, inclu
 - Diagramas
 - Diseño tecnico
 - Prototipo ui
-<!-- - Documentación de la API
-- Validaciones y reglas de negocio -->
+<!-- - Documentación de la API -->
+- Validaciones y reglas de negocio
+- Procesos asíncronos
 
 ## Ejecutar el proyecto
 

@@ -1,5 +1,7 @@
 # Historias de usuario
 
+En este documento se presentan algunas de las historias de usuario más relevantes del sistema.
+
 ### Registro de usuario #1
 
 Como cliente quiero poder registrarme en la plataforma con mis datos personales y un correo valido, para poder acceder a la compra de entradas y gestionar mi perfil.
