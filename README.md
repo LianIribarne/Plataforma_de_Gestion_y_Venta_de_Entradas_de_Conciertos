@@ -66,9 +66,12 @@ La documentación completa del sistema se encuentra en la carpeta `docs/`, inclu
 - Diagramas
 - Diseño tecnico
 - Prototipo ui
-<!-- - Documentación de la API -->
 - Validaciones y reglas de negocio
 - Procesos asíncronos
+
+La documentación interactiva de la API (Swagger) está disponible en:
+
+http://localhost:8000/api/docs/
 
 ## Ejecutar el proyecto
 

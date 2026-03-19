@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "entradas",
     "pagos",
     "usuarios",
+    "drf_spectacular",
 ]
 
 REST_FRAMEWORK = {
@@ -80,7 +81,14 @@ REST_FRAMEWORK = {
         "usuarios.authentication.JWTAuthenticationFromCookie",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 10
+    "PAGE_SIZE": 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API',
+    'DESCRIPTION': 'Documentación automática',
+    'VERSION': '1.0.0',
 }
 
 MIDDLEWARE = [
