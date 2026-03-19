@@ -1,11 +1,11 @@
 from conciertos.models import TipoEntrada
-from conciertos.serializers import (CreateTipoEntradaSerializer,
-                                    TipoEntradaAgregarSerializer,
+from conciertos.serializers import (TipoEntradaAgregarSerializer,
                                     TipoEntradaCancelarCantidadSerializer,
                                     TipoEntradaCancelarSerializer,
                                     TipoEntradaConciertoSerializer,
-                                    TipoEntradaMiniSerializer,
-                                    TipoEntradaModificarSerializer)
+                                    TipoEntradaCreateSerializer,
+                                    TipoEntradaDetailSerializer,
+                                    TipoEntradaUpdateSerializer)
 from conciertos.services import (actualizar_estado_por_stock, agregar_entradas,
                                  cancelar_cantidad, cancelar_tipo,
                                  modificar_precio,
@@ -19,7 +19,7 @@ from usuarios.permissions import EsOrganizador
 
 class TipoEntradaCreateView(generics.CreateAPIView):
     queryset = TipoEntrada.objects.all()
-    serializer_class = CreateTipoEntradaSerializer
+    serializer_class = TipoEntradaCreateSerializer
     permission_classes = [EsOrganizador]
 
 class TipoEntradaCancelarView(generics.GenericAPIView):
@@ -124,8 +124,8 @@ class TipoEntradaCancelarCantidadView(generics.GenericAPIView):
             status=status.HTTP_200_OK
         )
 
-class TipoEntradaModificarView(generics.GenericAPIView):
-    serializer_class = TipoEntradaModificarSerializer
+class TipoEntradaUpdateView(generics.GenericAPIView):
+    serializer_class = TipoEntradaUpdateSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
 
@@ -240,8 +240,8 @@ class TipoEntradaAgregarEntradasView(generics.GenericAPIView):
             status=status.HTTP_200_OK
         )
 
-class TipoEntradaConciertoView(generics.ListAPIView):
-    serializer_class = TipoEntradaMiniSerializer
+class TipoEntradaDetailView(generics.ListAPIView):
+    serializer_class = TipoEntradaDetailSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -258,7 +258,7 @@ class TipoEntradaConciertoView(generics.ListAPIView):
 
         return qs.none()
 
-class TipoEntradaReservarView(generics.ListAPIView):
+class TipoEntradaConciertoView(generics.ListAPIView):
     serializer_class = TipoEntradaConciertoSerializer
     permission_classes = [IsAuthenticated]
 

@@ -9,7 +9,7 @@ from rest_framework import serializers
 
 
 # crear concierto
-class TipoEntradaCreateSerializer(serializers.Serializer):
+class TipoEntradaCreateConciertoSerializer(serializers.Serializer):
     nombre = serializers.CharField(max_length=100)
     precio = serializers.DecimalField(max_digits=10, decimal_places=2)
     cantidad_total = serializers.IntegerField(min_value=1)
@@ -38,7 +38,7 @@ class TipoEntradaConciertoSerializer(serializers.ModelSerializer):
     def get_precio_legible(self, obj):
         return f"${obj.precio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-class CreateTipoEntradaSerializer(serializers.ModelSerializer):
+class TipoEntradaCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoEntrada
         fields = ['nombre', 'precio', 'cantidad_total', 'limite_reserva', 'evento']
@@ -108,7 +108,7 @@ class CreateTipoEntradaSerializer(serializers.ModelSerializer):
 
         return tipo
 
-class TipoEntradaMiniSerializer(serializers.ModelSerializer):
+class TipoEntradaDetailSerializer(serializers.ModelSerializer):
     disponibles = serializers.SerializerMethodField()
     vendidas = serializers.SerializerMethodField()
     reservadas = serializers.SerializerMethodField()
@@ -145,7 +145,7 @@ class TipoEntradaCancelarCantidadSerializer(serializers.ModelSerializer):
         model = TipoEntrada
         fields = ["cantidad"]
 
-class TipoEntradaModificarSerializer(serializers.ModelSerializer):
+class TipoEntradaUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoEntrada
         fields = ["precio", "nombre", "limite_reserva"]

@@ -146,7 +146,7 @@ class ConciertoDetailView(generics.RetrieveAPIView):
 
         return qs.none()
 
-class CancelarConciertoView(generics.GenericAPIView):
+class ConciertoCancelarView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):

@@ -124,7 +124,7 @@ class ReservaCreateSerializer(serializers.ModelSerializer):
 
         return reserva
 
-class ReservaActivaSerializer(serializers.ModelSerializer):
+class ReservaSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
     precio_total_reserva = serializers.SerializerMethodField()
 
@@ -193,7 +193,7 @@ class ConciertoHeaderSerializer(serializers.Serializer):
     def get_show_hora(self, obj):
         return obj.show_hora.strftime("%H:%M")
 
-class EntradaItemSerializer(serializers.ModelSerializer):
+class EntradaSerializer(serializers.ModelSerializer):
     tipo = serializers.CharField(source="tipo.nombre")
     precio = serializers.SerializerMethodField()
     qr_url = serializers.SerializerMethodField()

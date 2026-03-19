@@ -58,7 +58,7 @@ class ArtistaSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.imagen.url)
         return None
 
-class ArtistaModificarSerializer(serializers.ModelSerializer):
+class ArtistaUpdateSerializer(serializers.ModelSerializer):
     categoria_id = serializers.PrimaryKeyRelatedField(
         queryset=Categoria.objects.all(),
         source="categoria",

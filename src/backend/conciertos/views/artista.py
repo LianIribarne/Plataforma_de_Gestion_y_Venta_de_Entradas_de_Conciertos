@@ -1,8 +1,7 @@
 from conciertos.models import Artista, Categoria, Pais
-from conciertos.serializers import (ArtistaCreateSerializer,
-                                    ArtistaModificarSerializer,
-                                    ArtistaSerializer, CategoriaSerializer,
-                                    PaisSerializer)
+from conciertos.serializers import (ArtistaCreateSerializer, ArtistaSerializer,
+                                    ArtistaUpdateSerializer,
+                                    CategoriaSerializer, PaisSerializer)
 from rest_framework import generics
 from rest_framework.parsers import FormParser, MultiPartParser
 from usuarios.permissions import EsAdministrador
@@ -60,8 +59,8 @@ class ArtistaListView(generics.ListAPIView):
 
         return queryset
 
-class ArtistaModificarView(generics.RetrieveUpdateAPIView):
+class ArtistaUpdateView(generics.RetrieveUpdateAPIView):
     permission_classes = [EsAdministrador]
-    serializer_class = ArtistaModificarSerializer
+    serializer_class = ArtistaUpdateSerializer
     queryset = Artista.objects.all()
     lookup_field = "id"

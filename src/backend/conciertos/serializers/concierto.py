@@ -6,8 +6,8 @@ from conciertos.models import (Artista, Concierto, ConciertoMeta, Lugar,
                                TipoEntrada)
 from conciertos.serializers.artista import ArtistaConciertoSerializer
 from conciertos.serializers.lugar import LugarDetailSerializer
-from conciertos.serializers.tipoEntrada import (TipoEntradaCreateSerializer,
-                                                TipoEntradaMiniSerializer)
+from conciertos.serializers.tipoEntrada import \
+    TipoEntradaCreateConciertoSerializer
 from conciertos.tasks import finalizar_concierto, iniciar_concierto
 from django.db import transaction
 from django.db.models import Max
@@ -106,7 +106,7 @@ class ConciertoCreateSerializer(serializers.ModelSerializer):
                 "tipos_entrada": "No se pueden repetir los nombres de los tipos de entrada."
             })
 
-        serializer = TipoEntradaCreateSerializer(data=tipos, many=True)
+        serializer = TipoEntradaCreateConciertoSerializer(data=tipos, many=True)
         serializer.is_valid(raise_exception=True)
 
         data["tipos_entrada"] = serializer.validated_data

@@ -1,6 +1,6 @@
 from conciertos.models import Ciudad, Lugar, Provincia
 from conciertos.serializers import (CiudadSerializer, LugarCreateSerializer,
-                                    LugarModificarSerializer, LugarSerializer,
+                                    LugarSerializer, LugarUpdateSerializer,
                                     ProvinciaSerializer)
 from rest_framework import generics
 from usuarios.permissions import EsAdministrador
@@ -65,8 +65,8 @@ class LugarListView(generics.ListAPIView):
 
         return queryset
 
-class LugarModificarView(generics.RetrieveUpdateAPIView):
+class LugarUpdateView(generics.RetrieveUpdateAPIView):
     permission_classes = [EsAdministrador]
-    serializer_class = LugarModificarSerializer
+    serializer_class = LugarUpdateSerializer
     queryset = Lugar.objects.all()
     lookup_field = "id"

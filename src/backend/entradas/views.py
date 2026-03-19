@@ -12,13 +12,13 @@ from rest_framework.response import Response
 from usuarios.permissions import EsAdministrador, EsCliente
 
 from .models import Entrada, Reserva
-from .serializers import (ConciertoHeaderSerializer, EntradaItemSerializer,
-                          ReservaActivaSerializer, ReservaCreateSerializer)
+from .serializers import (ConciertoHeaderSerializer, EntradaSerializer,
+                          ReservaCreateSerializer, ReservaSerializer)
 from .services import liberar_entrada, liberar_reserva
 
 
 # reserva
-class CreateReservaView(generics.CreateAPIView):
+class ReservaCreateView(generics.CreateAPIView):
     queryset = Reserva.objects.all()
     serializer_class = ReservaCreateSerializer
     permission_classes = [EsCliente]
@@ -59,7 +59,7 @@ class CancelarReservaView(generics.GenericAPIView):
 
         return Response({"detail": "Reserva cancelada"}, status=status.HTTP_200_OK)
 
-class ReservaActivaView(generics.RetrieveAPIView):
+class ReservaView(generics.RetrieveAPIView):
     permission_classes = [EsCliente]
 
     def get(self, request):
@@ -76,7 +76,7 @@ class ReservaActivaView(generics.RetrieveAPIView):
                 "reserva": None
             })
 
-        serializer = ReservaActivaSerializer(reserva)
+        serializer = ReservaSerializer(reserva)
 
         return Response({
             "tiene_reserva": True,
@@ -168,7 +168,7 @@ def entrada_qr_view(request, token):
     )
     return response
 
-class EntradaListaView(generics.ListAPIView):
+class EntradaListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -210,7 +210,7 @@ class EntradaListaView(generics.ListAPIView):
         for concierto, entradas in agrupado.items():
             response.append({
                 "concierto": ConciertoHeaderSerializer(concierto).data,
-                "entradas": EntradaItemSerializer(
+                "entradas": EntradaSerializer(
                     entradas,
                     many=True,
                     context={"request": request}

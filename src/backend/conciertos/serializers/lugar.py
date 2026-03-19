@@ -54,7 +54,7 @@ class LugarSerializer(serializers.ModelSerializer):
             }
         }
 
-class LugarModificarSerializer(serializers.ModelSerializer):
+class LugarUpdateSerializer(serializers.ModelSerializer):
     ciudad_id = serializers.PrimaryKeyRelatedField(
         queryset=Ciudad.objects.all(),
         source="ciudad",
