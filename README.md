@@ -95,7 +95,7 @@ Esto iniciará:
 
 ### 3. Cargar datos iniciales
 
-En otra terminal ejecutar:
+En una nueva terminal, dentro del directorio raíz del proyecto, ejecutar:
 
 ```bash
 docker compose run --rm backend_init
