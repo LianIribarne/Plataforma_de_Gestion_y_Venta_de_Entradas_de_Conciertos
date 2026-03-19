@@ -1,14 +1,23 @@
-import React from 'react'
-import {
-  GridItem, Input, InputGroup, InputLeftAddon,
-  RadioGroup, Radio, ModalBody, ModalCloseButton,
-  Stack, Button, FormControl, FormLabel,
-  Tooltip, useToast, Grid, Modal,
-  ModalOverlay, ModalContent, ModalHeader, ModalFooter, 
-} from "@chakra-ui/react";
 import { AtSignIcon, CalendarIcon } from '@chakra-ui/icons';
+import {
+  Button, FormControl, FormLabel,
+  Grid,
+  GridItem, Input, InputGroup, InputLeftAddon,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Radio,
+  RadioGroup,
+  Stack,
+  Tooltip, useToast,
+} from "@chakra-ui/react";
+import React from 'react';
 import { useAuth } from "../services/AuthContext";
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 
 export default function ActualizarPerfil({ isOpen, onClose }) {
   const toast = useToast();
@@ -104,7 +113,7 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
@@ -116,7 +125,7 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
         genero: formData.genero,
       };
 
-      const res = await api.patch("/usuarios/actualizar_perfil/", payload);
+      const res = await api.patch(endpoints.usuarios.actualizar_perfil, payload);
 
       const mensaje = res?.data?.message ?? "Perfil actualizado correctamente.";
 
@@ -138,11 +147,11 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
 
       const data = error?.response?.data;
       console.log(data)
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -168,7 +177,7 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
           <form onSubmit={handleSubmit}>
             <GridItem>
               <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-             
+
                 {/* Nombre */}
                 <GridItem>
                   <FormControl isInvalid={!!errors.nombre}>
@@ -194,7 +203,7 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
                     </Tooltip>
                   </FormControl>
                 </GridItem>
-   
+
                 {/* Apellido */}
                 <GridItem>
                   <FormControl isInvalid={!!errors.apellido}>
@@ -221,7 +230,7 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
                   </FormControl>
                 </GridItem>
               </Grid>
- 
+
               {/* Email */}
               <FormControl isInvalid={!!errors.email} mt={3} mb={3}>
                 <FormLabel color='white'>Email</FormLabel>
@@ -250,7 +259,7 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
                   </InputGroup>
                 </Tooltip>
               </FormControl>
- 
+
               {/* Fecha de nacimiento */}
               <FormControl isInvalid={!!errors.fechaNacimiento}>
                 <FormLabel color='white'>Fecha de nacimiento</FormLabel>
@@ -279,7 +288,7 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
                 </Tooltip>
               </FormControl>
             </GridItem>
- 
+
             {/* Género */}
             <FormControl mt={2}>
               <FormLabel color='white'>Género</FormLabel>
@@ -301,9 +310,9 @@ export default function ActualizarPerfil({ isOpen, onClose }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
             _hover={{transform: "scale(1.1)"}}

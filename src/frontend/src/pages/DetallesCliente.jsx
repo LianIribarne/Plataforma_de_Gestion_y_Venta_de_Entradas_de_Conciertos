@@ -20,6 +20,7 @@ import Entrada from "../components/Entrada";
 import FiltrosPagos from '../components/FiltrosPagos';
 import Pago from "../components/Pago";
 import api from '../services/api';
+import { endpoints } from "../services/endpoints";
 
 export default function DetallesUsuarios() {
   const [datos, setDatos] = useState(null);
@@ -34,6 +35,7 @@ export default function DetallesUsuarios() {
   const [verEntradas, setVerEntradas] = useState(true);
 
   const [pagos, setPagos] = useState([])
+  const [ultimosPagos, setUltimosPagos] = useState([])
 
   const fetchPagos = async (filtros) => {
     setLoading(true);
@@ -47,11 +49,22 @@ export default function DetallesUsuarios() {
 
     try {
       const response = await api.get(
-        "/pagos/pagos/",
+        endpoints.pagos.pagos,
         { params }
       );
 
       setPagos(response.data.results);
+
+      const res = await api.get(
+        endpoints.pagos.pagos,
+        {
+          params: {
+            cliente: id
+          }
+        }
+      );
+
+      setUltimosPagos(res.data.results)
     } finally {
       setLoading(false);
     }
@@ -68,8 +81,12 @@ export default function DetallesUsuarios() {
 
     try {
       const response = await api.get(
-        "/entradas/entradas/",
-        {cliente: id}
+        endpoints.entradas.entradas,
+        {
+          params: {
+            cliente: id
+          }
+        }
       );
 
       setEntradas(response.data)
@@ -89,7 +106,7 @@ export default function DetallesUsuarios() {
       try {
         setLoading(true);
 
-        const response = await api.get(`/usuarios/admin/detalles_usuario/${id}`);
+        const response = await api.get(endpoints.usuarios.detalles_usuario(id));
 
         const payload = response.data;
 
@@ -183,7 +200,7 @@ export default function DetallesUsuarios() {
             </HStack>
           ) : (
             <Wrap spacing={10} align='center' justify='center'>
-              {pagos.slice(0, 3).map((p) => (
+              {ultimosPagos.slice(0, 3).map((p) => (
                 <WrapItem align='center' key={p.codigo}>
                   <Pago {...p}/>
                 </WrapItem>

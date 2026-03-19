@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { endpoints } from "../services/endpoints";
 import formatoPrecio from "../utils/FormatoPrecio";
 
 export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, limite_reserva }) {
@@ -88,7 +89,7 @@ export default function ModificarTipo({ isOpen, onClose, id, nombre, precio, lim
         }).filter(([_, value]) => value !== "" && value !== null && value !== undefined)
       )
 
-      const res = await api.patch(`/conciertos/modificar_tipo/${id}`, payload);
+      const res = await api.patch(endpoints.conciertos.modificar_tipo(id), payload);
 
       const mensaje = res?.data?.message ?? "Se modifico con éxito";
 

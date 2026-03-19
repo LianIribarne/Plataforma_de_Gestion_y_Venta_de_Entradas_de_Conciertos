@@ -1,14 +1,23 @@
-import { 
-  Button, FormControl, FormLabel, Input, HStack,
-  Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalFooter, ModalBody, ModalCloseButton,
-  Tooltip, useToast, NumberInput, NumberInputField,
-  NumberInputStepper, NumberIncrementStepper,
+import {
+  Button, FormControl, FormLabel,
+  HStack,
+  Input,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput, NumberInputField,
+  NumberInputStepper,
+  Tooltip, useToast,
 } from "@chakra-ui/react";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import api from '../services/api';
+import { endpoints } from "../services/endpoints";
 import formatoPrecio from "../utils/FormatoPrecio";
-import api from '../services/api'
 
 export default function CrearTipo({ isOpen, onClose, concierto }) {
   const [formData, setFormData] = useState({
@@ -49,7 +58,7 @@ export default function CrearTipo({ isOpen, onClose, concierto }) {
 
   const handlePrecioChange = (value) => {
     const clean = value.replace(",", ".");
-    
+
     if (!/^\d*\.?\d{0,2}$/.test(clean)) return;
 
     setFormData((p) => ({ ...p, precio: clean }));
@@ -63,7 +72,7 @@ export default function CrearTipo({ isOpen, onClose, concierto }) {
     if ((Number(formData.precio) > 1000000) || (Number(formData.precio) < 500)) newErrors.precio = "Precio inválido"
     if ((Number(formData.cantidad) > 10000) || (Number(formData.cantidad) < 1)) newErrors.cantidad = "Cantidad inválida"
     if ((Number(formData.limite_reserva) > 6) || (Number(formData.limite_reserva) < 1)) newErrors.limite_reserva = "Limite inválido"
-    
+
     return newErrors;
   };
 
@@ -71,7 +80,7 @@ export default function CrearTipo({ isOpen, onClose, concierto }) {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
@@ -83,7 +92,7 @@ export default function CrearTipo({ isOpen, onClose, concierto }) {
         evento: formData.evento
       }
 
-      const res = await api.post("/conciertos/agregar_tipo/", payload);
+      const res = await api.post(endpoints.conciertos.agregar_tipo, payload);
 
       const mensaje = res?.data?.message ?? "Se creo con éxito";
 
@@ -104,11 +113,11 @@ export default function CrearTipo({ isOpen, onClose, concierto }) {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -151,7 +160,7 @@ export default function CrearTipo({ isOpen, onClose, concierto }) {
                 />
               </Tooltip>
             </FormControl>
-        
+
             <FormControl isInvalid={!!errors?.precio}>
               <FormLabel color='white'>Precio</FormLabel>
               <NumberInput
@@ -178,7 +187,7 @@ export default function CrearTipo({ isOpen, onClose, concierto }) {
                 </Tooltip>
               </NumberInput>
             </FormControl>
-              
+
             <FormControl isInvalid={!!errors?.cantidad}>
               <FormLabel color='white'>Cantidad</FormLabel>
               <NumberInput
@@ -216,9 +225,9 @@ export default function CrearTipo({ isOpen, onClose, concierto }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

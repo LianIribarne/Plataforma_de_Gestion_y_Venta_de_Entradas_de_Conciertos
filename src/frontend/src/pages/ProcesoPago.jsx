@@ -1,20 +1,39 @@
-import { 
-  Wrap, WrapItem, Button, FormControl,
-  FormLabel, Input, Stat, StatLabel,
-  StatNumber, StatHelpText, Text, Heading,
-  Image, InputGroup, InputRightElement, Flex,
-  Tooltip, Select, Box, SimpleGrid, IconButton,
-  useToast, AlertDialog, AlertDialogBody, AlertDialogFooter,
-  AlertDialogHeader, AlertDialogContent, AlertDialogOverlay,
-  AlertDialogCloseButton, useDisclosure,
+import { LockIcon, MinusIcon, TimeIcon, UnlockIcon } from "@chakra-ui/icons";
+import {
+  AlertDialog, AlertDialogBody,
+  AlertDialogCloseButton,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  Heading,
+  IconButton,
+  Image,
+  Input,
+  InputGroup, InputRightElement,
+  SimpleGrid,
+  Stat,
+  StatHelpText,
+  StatLabel,
+  StatNumber,
+  Text,
+  Tooltip,
+  useDisclosure,
+  useToast,
+  Wrap, WrapItem
 } from "@chakra-ui/react";
-import { useState, useEffect, useRef } from 'react';
-import { useAuth } from "../services/AuthContext";
+import { useEffect, useRef, useState } from 'react';
 import { MdLocalGroceryStore } from "react-icons/md";
-import { LockIcon, UnlockIcon, MinusIcon, TimeIcon } from "@chakra-ui/icons"
 import { useNavigate } from 'react-router-dom';
-import useCountdown from '../utils/Temporizador'
 import api from "../services/api";
+import { useAuth } from "../services/AuthContext";
+import { endpoints } from "../services/endpoints";
+import useCountdown from '../utils/Temporizador';
 
 export default function ProcesoPago() {
   const [formData, setFormData] = useState({
@@ -26,17 +45,17 @@ export default function ProcesoPago() {
     direccion: "",
   });
 
-  const { 
-    isOpen: isCancelarOpen, 
-    onOpen: onCancelarOpen, 
-    onClose: onCancelarClose 
+  const {
+    isOpen: isCancelarOpen,
+    onOpen: onCancelarOpen,
+    onClose: onCancelarClose
   } = useDisclosure()
   const cancelCancelarRef = useRef()
 
-  const { 
-    isOpen: isQuitarOpen, 
-    onOpen: onQuitarOpen, 
-    onClose: onQuitarClose 
+  const {
+    isOpen: isQuitarOpen,
+    onOpen: onQuitarOpen,
+    onClose: onQuitarClose
   } = useDisclosure()
   const cancelQuitarRef = useRef()
 
@@ -96,17 +115,17 @@ export default function ProcesoPago() {
 
   const validarVencimiento = (fecha) => {
     if (!fecha || fecha.length !== 5) return false;
-        
+
     const mes = parseInt(fecha.slice(0, 2), 10);
     const anio = parseInt("20" + fecha.slice(3, 5));
-        
+
     const hoy = new Date();
     const mesActual = hoy.getMonth() + 1;
     const anioActual = hoy.getFullYear();
-        
+
     if (anio < anioActual) return false;
     if (anio === anioActual && mes < mesActual) return false;
-        
+
     return true;
   };
 
@@ -167,9 +186,9 @@ export default function ProcesoPago() {
     const ok =
       formData.numero.length === 19 &&
       formData.fecha.length === 5 &&
-      formData.cvv.length === 3 && 
-      formData.nombre && 
-      formData.apellido && 
+      formData.cvv.length === 3 &&
+      formData.nombre &&
+      formData.apellido &&
       formData.direccion;
 
     setCompleto(ok);
@@ -177,7 +196,7 @@ export default function ProcesoPago() {
 
   const quitarEntrada = async () => {
     try {
-      const res = await api.post(`/entradas/quitar_entrada/${quitarId}`)
+      const res = await api.post(endpoints.entradas.quitar_entrada(quitarId))
 
       const mensaje = res?.data?.detail ?? "Se quito la entrada";
 
@@ -195,11 +214,11 @@ export default function ProcesoPago() {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -225,7 +244,7 @@ export default function ProcesoPago() {
 
   useEffect(() => {
     if (timeLeft?.total === 0) {
-      fetchReservaActiva(); 
+      fetchReservaActiva();
       navigate("/conciertos");
       window.location.reload();
     }
@@ -233,7 +252,7 @@ export default function ProcesoPago() {
 
   const cancelarReserva = async () => {
     try {
-      const res = await api.post("/entradas/cancelar_reserva/")
+      const res = await api.post(endpoints.entradas.cancelar_reserva)
 
       const mensaje = res?.data?.detail ?? "Se cancelo";
 
@@ -252,11 +271,11 @@ export default function ProcesoPago() {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -271,11 +290,26 @@ export default function ProcesoPago() {
     }
   }
 
-  const [open, setOpen] = useState(true) 
+  const [open, setOpen] = useState(true)
 
   const handleComprar = async () => {
+    fetchReservaActiva()
+
+    if (tieneReservaActiva) {
+      toast({
+        title: "Error",
+        description: "No se puede realizar la compra, porque el concierto ya se encuentra en curso.",
+        status: "error",
+        duration: 8000,
+        isClosable: true,
+        position: 'top',
+      });
+
+      navigate("/conciertos")
+    }
+
     try {
-      const res = await api.post("/pagos/pagar_reserva/")
+      const res = await api.post(endpoints.pagos.pagar_reserva)
 
       const mensaje = res?.data?.detail ?? "Se realizo la compra";
 
@@ -294,11 +328,11 @@ export default function ProcesoPago() {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -317,15 +351,15 @@ export default function ProcesoPago() {
     <>
       <Box p={5}>
         <Box
-          mb={8} 
-          align='center' 
-          color='white' 
+          mb={8}
+          align='center'
+          color='white'
         >
-          <Heading 
-            display="inline-block" 
-            bg={timeLeft?.minutes < 2 ? 'blackAlpha.800' : 'whiteAlpha.400'} 
+          <Heading
+            display="inline-block"
+            bg={timeLeft?.minutes < 2 ? 'blackAlpha.800' : 'whiteAlpha.400'}
             px={3}
-            py={2} 
+            py={2}
             borderRadius={20}
             color={timeLeft?.minutes < 2 ? 'red.500' : 'white'}
           >
@@ -338,14 +372,14 @@ export default function ProcesoPago() {
         </Box>
 
         <form onSubmit={handleSubmit}>
-        <SimpleGrid 
+        <SimpleGrid
           columns={2}
           spacing={4}
           w='80%'
           ml='10%'
           align='center'
         >
-          <Box 
+          <Box
             align='center'
             p={5}
             bg='whiteAlpha.400'
@@ -391,7 +425,7 @@ export default function ProcesoPago() {
                   </InputGroup>
                 </Tooltip>
               </FormControl>
-                
+
               <FormControl isInvalid={errors.fecha} maxW={160}>
                 <FormLabel color='white'>Fecha de caducidad</FormLabel>
                 <Tooltip
@@ -415,7 +449,7 @@ export default function ProcesoPago() {
                   />
                 </Tooltip>
               </FormControl>
-                
+
               <FormControl isInvalid={errors.cvv} maxW={70}>
                 <FormLabel color='white'>CVV</FormLabel>
                 <Tooltip
@@ -509,7 +543,7 @@ export default function ProcesoPago() {
             </FormControl>
           </Box>
 
-          <Box 
+          <Box
             align='center'
             p={5}
             bg='whiteAlpha.400'
@@ -518,12 +552,12 @@ export default function ProcesoPago() {
           >
             <Heading>Información de Compra</Heading>
             <Heading mb={6} mt={2} fontSize='2xl'>
-              <MdLocalGroceryStore 
-                style={{ 
-                  display: 'inline-block', 
-                  marginBottom: -6, 
+              <MdLocalGroceryStore
+                style={{
+                  display: 'inline-block',
+                  marginBottom: -6,
                   marginRight: 4,
-                }} 
+                }}
               />
               Entradas
             </Heading>
@@ -537,12 +571,12 @@ export default function ProcesoPago() {
                         <StatNumber>{r.precio_total_tipo}</StatNumber>
                         <StatHelpText>Precio unidad{" "}{r.precio_unitario}</StatHelpText>
                       </Stat>
-                      <IconButton 
-                        position='absolute' 
-                        mt='-2vh' 
+                      <IconButton
+                        position='absolute'
+                        mt='-2vh'
                         ml={-2}
-                        size='xs' 
-                        colorScheme="red" 
+                        size='xs'
+                        colorScheme="red"
                         rounded='full'
                         icon={<MinusIcon />}
                         onClick={() => handleQuitarClick(r.tipo_id)}
@@ -560,9 +594,9 @@ export default function ProcesoPago() {
             </Box>
 
             <Box display='inline-block'>
-              <Button 
-                mt={6} 
-                colorScheme="red" 
+              <Button
+                mt={6}
+                colorScheme="red"
                 rounded='full'
                 size='lg'
                 onClick={() => {onCancelarOpen(), setOpen(false)}}
@@ -570,9 +604,9 @@ export default function ProcesoPago() {
                 Cancelar
               </Button>
 
-              <Button 
-                mt={6} 
-                colorScheme="whiteAlpha" 
+              <Button
+                mt={6}
+                colorScheme="whiteAlpha"
                 type="submit"
                 rounded='full'
                 size='lg'
@@ -585,15 +619,15 @@ export default function ProcesoPago() {
             </Box>
 
             <Box display='inline' ml={2}>
-              {!completo ? 
-                <LockIcon 
-                  boxSize={10} 
-                  mt={5} 
+              {!completo ?
+                <LockIcon
+                  boxSize={10}
+                  mt={5}
                   color='whiteAlpha.600'
-                /> : 
-                <UnlockIcon 
-                  boxSize={10} 
-                  mt={5} 
+                /> :
+                <UnlockIcon
+                  boxSize={10}
+                  mt={5}
                   color='whiteAlpha.600'
                 />
               }

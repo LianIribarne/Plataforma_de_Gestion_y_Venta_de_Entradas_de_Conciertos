@@ -13,6 +13,7 @@ import Carrusel from "../components/Artistas";
 import Evento from "../components/Concierto";
 import FiltrosEventos from '../components/FiltrosConciertos';
 import api from "../services/api";
+import { endpoints } from "../services/endpoints";
 
 export default function Eventos() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -45,7 +46,7 @@ export default function Eventos() {
 
     try {
       const response = await api.get(
-        "/conciertos/conciertos/",
+        endpoints.conciertos.conciertos,
         { params }
       );
 

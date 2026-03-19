@@ -33,6 +33,7 @@ import { Link } from 'react-router-dom';
 import CambiarPasswordUser from "../components/CambiarPasswordUser";
 import ModificarUsuario from "../components/ModificarUsuario";
 import api from '../services/api';
+import { endpoints } from '../services/endpoints';
 
 function Usuario({ id, email, nombre, apellido, activo, rol }) {
   const { isOpen, onToggle, onClose } = useDisclosure();
@@ -76,7 +77,7 @@ function Usuario({ id, email, nombre, apellido, activo, rol }) {
       setActivoState(nuevoEstado)
 
       await api.patch(
-        `/usuarios/admin/modificar_usuario/${id}`,
+        endpoints.usuarios.modificar_usuario(id),
         { is_active: nuevoEstado }
       )
 
@@ -325,7 +326,7 @@ export default function Usuarios() {
 
     try {
       const response = await api.get(
-        "/usuarios/admin/listar_usuarios",
+        endpoints.usuarios.usuarios,
         { params }
       );
 
@@ -356,7 +357,7 @@ export default function Usuarios() {
 
     try {
       const response = await api.get(
-        "/usuarios/admin/listar_usuarios",
+        endpoints.usuarios.usuarios,
         { params }
       );
 

@@ -1,13 +1,18 @@
 import {
-  Heading, Box, AbsoluteCenter, Wrap,
-  WrapItem, useDisclosure, Button,
+  AbsoluteCenter,
+  Box,
+  Button,
+  Heading,
   Spinner,
+  Wrap,
+  WrapItem, useDisclosure,
 } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { useLocation } from 'react-router-dom';
-import { useEffect, useState } from "react"
-import Pago from '../components/Pago';
 import FiltrosPagos from '../components/FiltrosPagos';
+import Pago from '../components/Pago';
 import api from "../services/api";
+import { endpoints } from "../services/endpoints";
 
 export default function Pagos() {
   const location = useLocation()
@@ -15,7 +20,7 @@ export default function Pagos() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [pagos, setPagos] = useState([])
   const [loading, setLoading] = useState(true)
-  
+
   const fetchPagos = async (filtros) => {
     setLoading(true);
 
@@ -28,7 +33,7 @@ export default function Pagos() {
 
     try {
       const response = await api.get(
-        "/pagos/pagos/", 
+        endpoints.pagos.pagos,
         { params }
       );
 
@@ -45,10 +50,10 @@ export default function Pagos() {
   return (
     <Box p={5} align='center'>
       <Heading mb={6} align='center' color='gray.50' size='2xl'>Ventas</Heading>
-      <Button 
+      <Button
         bg='whiteAlpha.800'
         color='blackAlpha.800'
-        rounded='full' 
+        rounded='full'
         onClick={onOpen}
         mb={6}
       >
@@ -74,9 +79,9 @@ export default function Pagos() {
         )}
       </Wrap>
 
-      <FiltrosPagos 
-        isOpen={isOpen} 
-        onClose={onClose} 
+      <FiltrosPagos
+        isOpen={isOpen}
+        onClose={onClose}
         onApply={fetchPagos}
       />
     </Box>

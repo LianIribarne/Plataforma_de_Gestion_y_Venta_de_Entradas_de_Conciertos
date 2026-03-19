@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 
 export default function ModificarUsuario({ isOpen, onClose, id }) {
   const toast = useToast();
@@ -26,7 +27,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
     const fetchUser = async () => {
       try {
         const { data } = await api.get(
-          `/usuarios/admin/detalles_usuario/${id}`
+          endpoints.usuarios.detalles_usuario(id)
         )
         setUser(data)
       } catch (err) {
@@ -117,7 +118,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
         }).filter(([_, value]) => value !== "" && value !== null && value !== undefined)
       )
 
-      const res = await api.patch(`/usuarios/admin/modificar_usuario/${id}`, payload);
+      const res = await api.patch(endpoints.usuarios.modificar_usuario(id), payload);
 
       const mensaje = res?.data?.message ?? "Se modifico con éxito";
 

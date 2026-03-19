@@ -25,6 +25,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from 'react';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 import convertToWebp from "../utils/convertToWebp";
 import formatoPrecio from "../utils/formatoPrecio";
 
@@ -284,7 +285,7 @@ export default function CrearConcierto({ isOpen, onClose }) {
 
       // 🚀 un solo request
       const res = await api.post(
-        "/conciertos/crear_concierto/",
+        endpoints.conciertos.crear_concierto,
         fd
       );
 
@@ -326,7 +327,11 @@ export default function CrearConcierto({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/lugares/?activo=true")
+    api.get(endpoints.conciertos.lugares, {
+      params: {
+        activo: true
+      }
+    })
       .then(res => setLugares(res.data))
       .catch(console.error)
   }, [isOpen])
@@ -337,7 +342,11 @@ export default function CrearConcierto({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/artistas/?activo=true")
+    api.get(endpoints.conciertos.artistas, {
+      params: {
+        activo: true
+      }
+    })
       .then(res => setArtistas(res.data.results))
       .catch(console.error)
   }, [isOpen])
@@ -350,7 +359,11 @@ export default function CrearConcierto({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/concierto-meta/?tipo=mood")
+    api.get(endpoints.conciertos.conciertoMeta, {
+      params: {
+        tipo: "mood"
+      }
+    })
       .then(res => setMoods(res.data.results))
       .catch(console.error)
   }, [isOpen])

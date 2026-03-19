@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from 'react';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 import convertToWebp from "../utils/convertToWebp";
 
 const ALLOWED_IMAGE_TYPES = [
@@ -154,7 +155,7 @@ export default function CrearArtista({ isOpen, onClose }) {
     console.log(formData)
 
     try {
-      const res = await api.post("/conciertos/crear_artista/", payload);
+      const res = await api.post(endpoints.conciertos.crear_artista, payload);
 
       const mensaje = res?.data?.message ?? "Se creo con éxito";
 
@@ -196,7 +197,7 @@ export default function CrearArtista({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/conciertos/categorias/")
+    api.get(endpoints.conciertos.categorias)
       .then(res => setCategorias(res.data))
       .catch(err => console.error(err));
   }, [isOpen]);
@@ -207,7 +208,7 @@ export default function CrearArtista({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/conciertos/paises/")
+    api.get(endpoints.conciertos.paises)
       .then(res => setPaises(res.data))
       .catch(err => console.error(err));
   }, [isOpen]);

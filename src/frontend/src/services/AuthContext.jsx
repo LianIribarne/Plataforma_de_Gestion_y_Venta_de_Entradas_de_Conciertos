@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import api from "./api";
 import { registerForcedLogout } from "./authForcedLogout";
 import { login, logout } from "./authService";
+import { endpoints } from "./endpoints";
 
 const AuthContext = createContext();
 
@@ -23,7 +24,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       if (isCliente) {
-        const res = await api.get("/entradas/reserva_activa/");
+        const res = await api.get(endpoints.entradas.detalles_reserva);
         setReservaActiva(res.data.reserva);
         setTieneReservaActiva(res.data.tiene_reserva);
       }
@@ -56,8 +57,8 @@ export const AuthProvider = ({ children }) => {
       if (!saved) return;
 
       try {
-        await api.post("/usuarios/refresh/");
-        const res = await api.get("/usuarios/me/");
+        await api.post(endpoints.usuarios.refresh);
+        const res = await api.get(endpoints.usuarios.me);
         setUser(res.data.user);
         localStorage.setItem("user", JSON.stringify(res.data.user));
       } catch (err) {

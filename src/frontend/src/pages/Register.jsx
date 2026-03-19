@@ -1,14 +1,24 @@
-import React from 'react'
+import { AtSignIcon, CalendarIcon, ExternalLinkIcon, ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import {
-  Box, AbsoluteCenter, Heading, Grid,
-  GridItem, Input, InputGroup, InputLeftAddon,
-  InputRightAddon, IconButton, RadioGroup, Radio,
-  Stack, Button, FormControl, FormLabel,
-  Tooltip, useToast, Link,
+  AbsoluteCenter,
+  Box,
+  Button, FormControl, FormLabel,
+  Grid,
+  GridItem,
+  Heading,
+  IconButton,
+  Input, InputGroup, InputLeftAddon,
+  InputRightAddon,
+  Link,
+  Radio,
+  RadioGroup,
+  Stack,
+  Tooltip, useToast,
 } from "@chakra-ui/react";
-import { ViewIcon, ViewOffIcon, AtSignIcon, CalendarIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import React from 'react';
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 
 export default function Form() {
   const [show, setShow] = React.useState(false);
@@ -76,7 +86,7 @@ export default function Form() {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
@@ -89,7 +99,7 @@ export default function Form() {
         genero: formData.genero,
       };
 
-      const res = await api.post("/usuarios/registro/", payload);
+      const res = await api.post(endpoints.usuarios.registrarse, payload);
 
       const mensaje = res?.data?.message ?? "Registro exitoso";
 
@@ -107,11 +117,11 @@ export default function Form() {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -127,11 +137,11 @@ export default function Form() {
   };
 
   return (
-    <Box 
-      position="relative" 
-      h="100vh" 
-      w='100%' 
-      textAlign="center" 
+    <Box
+      position="relative"
+      h="100vh"
+      w='100%'
+      textAlign="center"
       bgGradient='linear(to-r, cyan.800, cyan.500, cyan.800)'
     >
       <AbsoluteCenter w="70vh" color="gray.700" axis="both">
@@ -144,7 +154,7 @@ export default function Form() {
 
           <GridItem>
             <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-              
+
               {/* Nombre */}
               <GridItem>
                 <FormControl isInvalid={!!errors.nombre}>
@@ -170,7 +180,7 @@ export default function Form() {
                   </Tooltip>
                 </FormControl>
               </GridItem>
-  
+
               {/* Apellido */}
               <GridItem>
                 <FormControl isInvalid={!!errors.apellido}>
@@ -255,7 +265,7 @@ export default function Form() {
               </Tooltip>
             </FormControl>
           </GridItem>
-            
+
           {/* Contraseña */}
           <FormControl isInvalid={!!errors.password} my={3}>
             <FormLabel color='white'>Contraseña</FormLabel>

@@ -32,6 +32,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FaMapMarkerAlt } from "react-icons/fa";
 import ModificarLugar from "../components/ModificarLugar";
 import api from '../services/api';
+import { endpoints } from '../services/endpoints';
 
 function Lugar({ id, nombre, direccion, ciudad, provincia, estadoLugar }) {
   const { isOpen, onToggle, onClose } = useDisclosure();
@@ -69,7 +70,7 @@ function Lugar({ id, nombre, direccion, ciudad, provincia, estadoLugar }) {
       setEstado(nuevoEstado)
 
       await api.patch(
-        `/conciertos/modificar_lugar/${id}`,
+        endpoints.conciertos.modificar_lugar(id),
         { activo: nuevoEstado }
       )
 
@@ -245,7 +246,7 @@ export default function Lugares() {
 
     try {
       const response = await api.get(
-        "/conciertos/lugares",
+        endpoints.conciertos.lugares,
         { params }
       );
 
@@ -256,7 +257,7 @@ export default function Lugares() {
   };
 
   useEffect(() => {
-    api.get("/conciertos/provincias")
+    api.get(endpoints.conciertos.provincias)
       .then(res => setProvincias(res.data))
       .catch(console.error);
   }, []);
@@ -269,8 +270,10 @@ export default function Lugares() {
       return;
     }
 
-    api.get("/conciertos/ciudades", {
-      params: { provincia_id: provinciaSel.id }
+    api.get(endpoints.conciertos.ciudades, {
+      params: {
+        provincia_id: provinciaSel.id
+      }
     })
       .then(res => setCiudades(res.data))
       .catch(console.error);

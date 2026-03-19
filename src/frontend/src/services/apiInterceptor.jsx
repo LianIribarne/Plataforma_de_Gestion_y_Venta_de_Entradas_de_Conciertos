@@ -1,6 +1,7 @@
 import api from "./api";
-import { refreshToken } from "./authService";
 import { forceLogout } from "./authForcedLogout";
+import { refreshToken } from "./authService";
+import { endpoints } from "./endpoints";
 
 api.interceptors.request.use((config) => {
   if (config.data instanceof FormData) {
@@ -18,10 +19,10 @@ const processQueue = (error) => {
 };
 
 const AUTH_ENDPOINTS = [
-  "/usuarios/login/",
-  "/usuarios/refresh/",
-  "/usuarios/register/",
-  "/usuarios/logout/",
+  endpoints.usuarios.login,
+  endpoints.usuarios.refresh,
+  endpoints.usuarios.registrarse,
+  endpoints.usuarios.logout,
 ];
 
 api.interceptors.response.use(

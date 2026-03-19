@@ -14,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { endpoints } from '../services/endpoints';
 
 export default function ModificarLugar({ isOpen, onClose, id }) {
   const [formData, setFormData] = React.useState({
@@ -38,7 +39,7 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/conciertos/provincias/")
+    api.get(endpoints.conciertos.provincias)
       .then(res => setProvincias(res.data))
       .catch(err => console.error(err));
   }, [isOpen]);
@@ -46,7 +47,11 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
   useEffect(() => {
     if (!provinciaSel) return;
 
-    api.get(`/conciertos/ciudades/?provincia_id=${provinciaSel.id}`)
+    api.get(endpoints.conciertos.ciudades, {
+      params: {
+        provincia_id: provinciaSel.id
+      }
+    })
       .then(res => setCiudades(res.data))
       .catch(err => console.error(err));
   }, [provinciaSel]);
@@ -99,7 +104,7 @@ export default function ModificarLugar({ isOpen, onClose, id }) {
         }).filter(([_, value]) => value !== "" && value !== null && value !== undefined)
       )
 
-      const res = await api.patch(`/conciertos/modificar_lugar/${id}`, payload);
+      const res = await api.patch(endpoints.conciertos.modificar_lugar(id), payload);
 
       const mensaje = res?.data?.message ?? "Se modifico con éxito";
 

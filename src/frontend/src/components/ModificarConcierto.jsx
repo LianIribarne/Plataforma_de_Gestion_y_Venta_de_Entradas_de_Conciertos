@@ -26,6 +26,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from 'react';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 import convertToWebp from "../utils/convertToWebp";
 
 const ALLOWED_IMAGE_TYPES = [
@@ -53,7 +54,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
   useEffect(() => {
     const fetchConcierto = async () => {
       try {
-        const data = await api.get(`/conciertos/detalles_concierto/${id}`)
+        const data = await api.get(endpoints.conciertos.detalles_concierto(id))
         setConcierto(data.data)
       } catch (err) {
         console.log(err)
@@ -198,7 +199,7 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
     if (formData.limite_reserva_total !== '') payload.append('limite_reserva_total', formData.limite_reserva_total)
 
     try {
-      const res = await api.patch(`/conciertos/modificar_concierto/${id}`, payload);
+      const res = await api.patch(endpoints.conciertos.modificar_concierto(id), payload);
 
       const mensaje = res?.data?.message ?? "Se modifico con éxito";
       toast({
@@ -239,7 +240,11 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/lugares/?activo=true")
+    api.get(endpoints.conciertos.lugares, {
+      params: {
+        activo: true
+      }
+    })
       .then(res => setLugares(res.data))
       .catch(console.error)
   }, [isOpen])
@@ -250,7 +255,11 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/artistas/?activo=true")
+    api.get(endpoints.conciertos.artistas, {
+      params: {
+        activo: true
+      }
+    })
       .then(res => setArtistas(res.data.results))
       .catch(console.error)
   }, [isOpen])
@@ -261,7 +270,11 @@ export default function ModificarConcierto({ isOpen, onClose, id }) {
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/concierto-meta/?tipo=mood")
+    api.get(endpoints.conciertos.conciertoMeta, {
+      params: {
+        tipo: "mood"
+      }
+    })
       .then(res => setMoods(res.data.results))
       .catch(console.error)
   }, [isOpen])

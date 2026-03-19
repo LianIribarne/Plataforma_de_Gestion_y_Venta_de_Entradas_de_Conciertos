@@ -31,6 +31,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import ModificarArtista from "../components/ModificarArtista";
 import api from '../services/api';
+import { endpoints } from '../services/endpoints';
 
 function Artista({ id, nombre, imagen, categoria, estadoArtista }) {
   const { isOpen, onToggle, onClose } = useDisclosure();
@@ -68,7 +69,7 @@ function Artista({ id, nombre, imagen, categoria, estadoArtista }) {
       setEstado(nuevoEstado)
 
       await api.patch(
-        `/conciertos/modificar_artista/${id}`,
+        endpoints.conciertos.modificar_artista(id),
         { activo: nuevoEstado }
       )
 
@@ -232,7 +233,7 @@ export default function Artistas() {
 
     try {
       const response = await api.get(
-        "/conciertos/artistas",
+        endpoints.conciertos.artistas,
         { params }
       );
 
@@ -247,13 +248,13 @@ export default function Artistas() {
   }, []);
 
   useEffect(() => {
-    api.get("/conciertos/categorias/")
+    api.get(endpoints.conciertos.categorias)
       .then(res => setCategorias(res.data))
       .catch(err => console.error(err))
   }, [])
 
   useEffect(() => {
-    api.get("/conciertos/paises/")
+    api.get(endpoints.conciertos.paises)
       .then(res => setPaises(res.data))
       .catch(err => console.error(err))
   }, [])

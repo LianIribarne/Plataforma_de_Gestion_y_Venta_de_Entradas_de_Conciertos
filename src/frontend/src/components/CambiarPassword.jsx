@@ -1,14 +1,20 @@
-import React from 'react'
-import {
-  Input, InputGroup,
-  InputRightAddon, IconButton,
-  Button, FormControl, FormLabel,
-  Tooltip, useToast, Modal,
-  ModalOverlay, ModalContent, ModalHeader, ModalFooter, 
-  ModalBody, ModalCloseButton,
-} from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import {
+  Button, FormControl, FormLabel,
+  IconButton,
+  Input, InputGroup,
+  InputRightAddon,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Tooltip, useToast,
+} from "@chakra-ui/react";
+import React from 'react';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 
 export default function CambiarPassword({ isOpen, onClose }) {
   const [show, setShow] = React.useState(false);
@@ -52,7 +58,7 @@ export default function CambiarPassword({ isOpen, onClose }) {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
@@ -61,7 +67,7 @@ export default function CambiarPassword({ isOpen, onClose }) {
         new_password: formData.new_password,
       };
 
-      const res = await api.put("/usuarios/actualizar_password/", payload);
+      const res = await api.put(endpoints.usuarios.actualizar_password, payload);
 
       const mensaje = res?.data?.message ?? "Contraseña cambiada correctamente.";
 
@@ -81,11 +87,11 @@ export default function CambiarPassword({ isOpen, onClose }) {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -109,7 +115,7 @@ export default function CambiarPassword({ isOpen, onClose }) {
 
         <ModalBody align='center'>
           <form onSubmit={handleSubmit}>
-           
+
             {/* Contraseña */}
             <FormControl isInvalid={!!errors.password} my={3}>
               <FormLabel color='white'>Contraseña actual</FormLabel>
@@ -183,9 +189,9 @@ export default function CambiarPassword({ isOpen, onClose }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

@@ -20,6 +20,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import EntradaInfo from '../components/ReservaEntrada';
 import api from '../services/api';
 import { useAuth } from "../services/AuthContext";
+import { endpoints } from '../services/endpoints';
 import formatoPrecio from '../utils/FormatoPrecio';
 
 export default function EventoDetalle() {
@@ -37,7 +38,7 @@ export default function EventoDetalle() {
       try {
         setLoading(true)
 
-        const response = await api.get(`/conciertos/detalles_concierto/${id_concierto}`)
+        const response = await api.get(endpoints.conciertos.detalles_concierto(id_concierto))
 
         const payload = response.data
 
@@ -58,7 +59,7 @@ export default function EventoDetalle() {
   useEffect(() => {
     if (!id_concierto) return
 
-    api.get(`/conciertos/tipos_reservar/${id_concierto}`)
+    api.get(endpoints.conciertos.tipos_reservar(id_concierto))
       .then(res => setEntradas(res.data.results))
       .catch(err => console.error(err))
   }, [id_concierto])
@@ -120,16 +121,16 @@ export default function EventoDetalle() {
           description: `Total del precio por las entradas $${formatoPrecio(montoTotal)}`,
           position: 'top-right',
           containerStyle: {
-            marginTop: 32,
+            marginTop: 32
           },
-          status: 'info',
+          status: 'success',
           duration: null,
         });
       } else {
         toast.update(id, {
           title: 'Precio total',
           description: `Total del precio por las entradas $${formatoPrecio(montoTotal)}`,
-          status: 'info',
+          status: 'success',
         });
       }
       return;
@@ -163,7 +164,7 @@ export default function EventoDetalle() {
 
       if (payload.items.length === 0) return;
 
-      const res = await api.post("/entradas/reservar/", payload);
+      const res = await api.post(endpoints.entradas.reservar, payload);
 
       const mensaje = res?.data?.message ?? "Reserva creada exitosamente";
 
@@ -200,7 +201,7 @@ export default function EventoDetalle() {
     }
   };
 
-  const mostrar = ['En Curso', 'Agotado', 'Finalizado', 'Cancelado'].includes(concierto?.estado.nombre)
+  const mostrar = ['Borrador', 'En Curso', 'Agotado', 'Finalizado', 'Cancelado'].includes(concierto?.estado.nombre)
 
   return (
     <Box px={5} pb={5}>
@@ -262,7 +263,9 @@ export default function EventoDetalle() {
                   borderColor={concierto?.estado.nombre === 'Cancelado' ? 'rgba(255, 0, 0, 0.8)' : 'white'}
                 >
                   <b>
-                    {concierto?.estado.nombre === 'Agotado' ? (
+                    {concierto?.estado.nombre === 'Borrador' ? (
+                      'BORRADOR'
+                    ) : concierto?.estado.nombre === 'Agotado' ? (
                       'AGOTADO'
                     ) : concierto?.estado.nombre === 'Finalizado' ? (
                       'FINALIZADO'

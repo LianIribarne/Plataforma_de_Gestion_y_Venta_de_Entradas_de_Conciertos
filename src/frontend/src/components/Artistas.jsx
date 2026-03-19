@@ -1,7 +1,8 @@
-import { Box, HStack, Avatar, IconButton, Tooltip, SkeletonCircle } from "@chakra-ui/react";
 import { ArrowLeftIcon, ArrowRightIcon } from "@chakra-ui/icons";
-import { useRef, useState, useEffect } from "react";
+import { Avatar, Box, HStack, IconButton, SkeletonCircle, Tooltip } from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
 import api from "../services/api";
+import { endpoints } from "../services/endpoints";
 
 export default function Carrusel({ onSelectArtista, artistaSeleccionado }) {
   const scrollRef = useRef(null);
@@ -21,7 +22,7 @@ export default function Carrusel({ onSelectArtista, artistaSeleccionado }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get("/conciertos/artistas/")
+    api.get(endpoints.conciertos.artistas)
       .then(res => setArtistas(res.data.results))
       .catch(err => console.error(err))
       .finally(setLoading(false))
@@ -55,21 +56,21 @@ export default function Carrusel({ onSelectArtista, artistaSeleccionado }) {
           </HStack>
         ) : (
           artistas.map((a) => (
-            <Tooltip 
-              key={a.id}  
-              label={a.nombre} 
-              hasArrow  
-              placement="top"  
-              bg="gray.100" 
+            <Tooltip
+              key={a.id}
+              label={a.nombre}
+              hasArrow
+              placement="top"
+              bg="gray.100"
               color='gray.900'
               closeOnClick={false}
               openDelay={250}
             >
-              <Avatar 
-                key={a.id} 
-                name={a.nombre} 
-                src={a?.imagen} 
-                boxSize="100px" 
+              <Avatar
+                key={a.id}
+                name={a.nombre}
+                src={a?.imagen}
+                boxSize="100px"
                 onClick={() => onSelectArtista({ id: a.id, nombre: a.nombre })}
                 filter={artistaSeleccionado === '' || artistaSeleccionado.nombre === a.nombre ? 'grayscale(1%)' : 'blur(2px)'}
                 sx={{

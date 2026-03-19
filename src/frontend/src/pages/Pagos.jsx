@@ -1,18 +1,24 @@
 import {
-  Heading, Box, AbsoluteCenter, Wrap,
-  WrapItem, Button, useDisclosure,
+  AbsoluteCenter,
+  Box,
+  Button,
+  Heading,
   Spinner,
+  useDisclosure,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react"
-import Pago from '../components/Pago';
+import { useEffect, useState } from "react";
 import FiltrosPagos from "../components/FiltrosPagos";
-import api from '../services/api'
+import Pago from '../components/Pago';
+import api from '../services/api';
+import { endpoints } from "../services/endpoints";
 
 export default function Pagos() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [pagos, setPagos] = useState([])
   const [loading, setLoading] = useState(true)
-  
+
   const fetchPagos = async (filtros) => {
     setLoading(true);
 
@@ -25,7 +31,7 @@ export default function Pagos() {
 
     try {
       const response = await api.get(
-        "/pagos/pagos/", 
+        endpoints.pagos.pagos,
         { params }
       );
 
@@ -42,10 +48,10 @@ export default function Pagos() {
   return (
     <Box p={5} align='center'>
       <Heading mb={6} align='center' color='gray.50' size='2xl'>Tus pagos</Heading>
-      <Button 
+      <Button
         bg='whiteAlpha.800'
         color='blackAlpha.800'
-        rounded='full' 
+        rounded='full'
         onClick={onOpen}
         mb={6}
       >
@@ -71,9 +77,9 @@ export default function Pagos() {
         )}
       </Wrap>
 
-      <FiltrosPagos 
-        isOpen={isOpen} 
-        onClose={onClose} 
+      <FiltrosPagos
+        isOpen={isOpen}
+        onClose={onClose}
         onApply={fetchPagos}
       />
     </Box>

@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from 'react';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
@@ -182,7 +183,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
     if (formData.imagen instanceof File) payload.append("imagen", formData.imagen)
 
     try {
-      const res = await api.patch(`/conciertos/modificar_artista/${id}`, payload);
+      const res = await api.patch(endpoints.conciertos.modificar_artista(id), payload);
 
       const mensaje = res?.data?.message ?? "Se modifico con éxito";
 
@@ -228,7 +229,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/conciertos/categorias/")
+    api.get(endpoints.conciertos.categorias)
       .then(res => setCategorias(res.data))
       .catch(err => console.error(err));
   }, [isOpen]);
@@ -239,7 +240,7 @@ export default function CrearArtista({ isOpen, onClose, id }) {
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/conciertos/paises/")
+    api.get(endpoints.conciertos.paises)
       .then(res => setPaises(res.data))
       .catch(err => console.error(err));
   }, [isOpen]);
@@ -249,7 +250,11 @@ export default function CrearArtista({ isOpen, onClose, id }) {
   useEffect(() => {
     const fetchArtista = async () => {
       try {
-        const { data } = await api.get(`/conciertos/artistas/?id=${id}`)
+        const { data } = await api.get(endpoints.conciertos.artistas, {
+          params: {
+            id: id
+          }
+        })
         setArtista(data.results)
       } catch (err) {
         console.log(err)

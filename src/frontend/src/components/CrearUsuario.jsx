@@ -19,6 +19,7 @@ import {
 } from "@chakra-ui/react";
 import React from 'react';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 
 export default function CrearUsuario({ isOpen, onClose }) {
   const [show, setShow] = React.useState(false);
@@ -100,7 +101,7 @@ export default function CrearUsuario({ isOpen, onClose }) {
         rol: Number(formData.rol),
       };
 
-      const res = await api.post("/usuarios/admin/crear_usuario/", payload);
+      const res = await api.post(endpoints.usuarios.crear_usuario, payload);
 
       const mensaje = res?.data?.message ?? "Se creo con éxito";
 

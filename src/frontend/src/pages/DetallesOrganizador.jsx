@@ -23,6 +23,7 @@ import FiltrosEventos from '../components/FiltrosConciertos';
 import FiltrosPagos from '../components/FiltrosPagos';
 import Pago from "../components/Pago";
 import api from '../services/api';
+import { endpoints } from '../services/endpoints';
 
 export default function DetallesUsuarios() {
   const [datos, setDatos] = useState(null);
@@ -62,13 +63,20 @@ export default function DetallesUsuarios() {
 
     try {
       const response = await api.get(
-        "/conciertos/conciertos/",
+        endpoints.conciertos.conciertos,
         { params }
       );
 
       setConciertos(response.data.results);
 
-      const res = await api.get("/conciertos/conciertos/", { organizador: id });
+      const res = await api.get(
+        endpoints.conciertos.conciertos,
+        {
+          params: {
+            organizador: id
+          }
+        }
+      );
 
       setUltimosConciertos(res.data.results)
     } catch (err) {
@@ -97,13 +105,20 @@ export default function DetallesUsuarios() {
 
     try {
       const response = await api.get(
-        "/pagos/pagos/",
+        endpoints.pagos.pagos,
         { params }
       );
 
       setPagos(response.data.results);
 
-      const res = await api.get("/pagos/pagos/", { organizador: id });
+      const res = await api.get(
+        endpoints.pagos.pagos,
+        {
+          params: {
+            organizador: id
+          }
+        }
+      );
 
       setUltimosPagos(res.data.results)
     } finally {
@@ -128,8 +143,8 @@ export default function DetallesUsuarios() {
   useEffect(() => {
     const fetchOrganizador = async () => {
       try {
-        const response = await api.get(`/usuarios/admin/detalles_usuario/${id}`);
-        const responseStats = await api.get(`/usuarios/estadisticas_organizador/${id}`)
+        const response = await api.get(endpoints.usuarios.detalles_usuario(id));
+        const responseStats = await api.get(endpoints.usuarios.estadisticas_organizador(id))
 
         const payload = response.data;
         const payloadStats = responseStats.data

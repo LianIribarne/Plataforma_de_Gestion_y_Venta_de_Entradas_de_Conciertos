@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from 'react';
 import Entrada from '../components/Entrada';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 
 export default function Entradas() {
   const [selected, setSelected] = useState({});
@@ -65,7 +66,7 @@ export default function Entradas() {
 
     try {
       const response = await api.get(
-        "/entradas/entradas/"
+        endpoints.entradas.entradas
       );
 
       setEntradas(response.data)

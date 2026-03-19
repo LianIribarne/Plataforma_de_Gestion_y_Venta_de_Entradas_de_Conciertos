@@ -1,12 +1,18 @@
-import { useState, useEffect } from 'react';
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
-  Box, Button, Drawer, DrawerOverlay,
-  DrawerContent, DrawerBody, Menu, MenuButton,
-  MenuList, MenuItem, Input,
+  Box, Button, Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerOverlay,
+  Input,
+  Menu, MenuButton,
+  MenuItem,
+  MenuList,
 } from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons'
-import api from '../services/api'
+import { useEffect, useState } from 'react';
+import api from '../services/api';
 import { useAuth } from "../services/AuthContext";
+import { endpoints } from '../services/endpoints';
 
 export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSeleccionado, onClear }) {
   const [categoria, setCategoria] = useState(null);
@@ -40,7 +46,7 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
       rango_horario,
       artista,
     });
-    onClose(); 
+    onClose();
   };
 
   useEffect(() => {
@@ -59,7 +65,11 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/concierto-meta/?tipo=mood")
+    api.get(endpoints.conciertos.conciertoMeta, {
+      params: {
+        tipo: "mood"
+      }
+    })
       .then(res => setMoods(res.data.results))
       .catch(console.error)
   }, [isOpen])
@@ -70,7 +80,11 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/concierto-meta/?tipo=estado")
+    api.get(endpoints.conciertos.conciertoMeta, {
+      params: {
+        tipo: "estado"
+      }
+    })
       .then(res => setEstados(res.data.results))
       .catch(console.error)
   }, [isOpen])
@@ -81,7 +95,7 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
   useEffect(() => {
     if (!isOpen) return
 
-    api.get("/conciertos/provincias/")
+    api.get(endpoints.conciertos.provincias)
       .then(res => setProvincias(res.data))
       .catch(console.error)
   }, [isOpen])
@@ -92,7 +106,7 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/conciertos/categorias/")
+    api.get(endpoints.conciertos.categorias)
       .then(res => setCategorias(res.data))
       .catch(err => console.error(err));
   }, [isOpen]);
@@ -107,10 +121,10 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
 
           {/* CATEGORIA */}
           <Menu>
-            <MenuButton 
-              as={Button} 
-              rightIcon={<ChevronDownIcon />} 
-              rounded='full' 
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              rounded='full'
               mb={6}
               w="100%"
               bg="whiteAlpha.800"
@@ -134,10 +148,10 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
 
           {/* PROVINCIA */}
           <Menu>
-            <MenuButton 
-              as={Button} 
-              rightIcon={<ChevronDownIcon />} 
-              rounded='full' 
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              rounded='full'
               mb={6}
               w="100%"
               bg="whiteAlpha.800"
@@ -161,10 +175,10 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
 
           {/* ESTADO */}
           <Menu>
-            <MenuButton 
-              as={Button} 
-              rightIcon={<ChevronDownIcon />} 
-              rounded='full' 
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              rounded='full'
               mb={6}
               w="100%"
               bg="whiteAlpha.800"
@@ -189,10 +203,10 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
 
           {/* MOOD */}
           <Menu>
-            <MenuButton 
-              as={Button} 
-              rightIcon={<ChevronDownIcon />} 
-              rounded='full' 
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              rounded='full'
               mb={6}
               w="100%"
               bg="whiteAlpha.800"
@@ -217,9 +231,9 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
           {/* RANGO HORARIO */}
           <Menu>
             <MenuButton
-              as={Button} 
-              rightIcon={<ChevronDownIcon />} 
-              rounded='full' 
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              rounded='full'
               mb={6}
               w="100%"
               bg="whiteAlpha.800"
@@ -234,7 +248,7 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
           </Menu>
 
           {/* ARTISTA */}
-          <Input 
+          <Input
             placeholder={`Artista: ${ artistaNombre || 'Todos'}`}
             _placeholder={{ opacity: 1, color: 'gray.900', fontWeight: 'semibold', textAlign: 'center' }}
             variant='custom'
@@ -247,8 +261,8 @@ export default function FiltrosEventos({ isOpen, onClose, onApply, artistaSelecc
             <Button rounded='full' mr={3} onClick={onClose} colorScheme='blackAlpha'>
               Cerrar
             </Button>
-            <Button 
-              rounded='full' 
+            <Button
+              rounded='full'
               onClick={() => {
                 limpiar();
                 onClear();

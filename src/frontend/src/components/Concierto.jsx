@@ -43,6 +43,7 @@ import ModificarConcierto from '../components/ModificarConcierto';
 import ModificarTipo from '../components/ModificarTipo';
 import api from "../services/api";
 import { useAuth } from "../services/AuthContext";
+import { endpoints } from '../services/endpoints';
 import formatoPrecio from "../utils/FormatoPrecio";
 
 const slugify = (str) =>
@@ -136,12 +137,12 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
       let mensaje = ""
       if (modoCancelarTodo) {
         await api.post(
-          `/conciertos/cancelar_tipo/${entradaSeleccionada}`
+          endpoints.conciertos.cancelar_tipo(entradaSeleccionada)
         )
         mensaje = "Se cancelo con exito el tipo de entrada."
       } else {
         await api.post(
-          `/conciertos/cancelar_cantidad_tipo/${entradaSeleccionada}`,
+          endpoints.conciertos.cancelar_cantidad_tipo(entradaSeleccionada),
           {cantidad: cantidadCancelar}
         )
         mensaje = `Se cancelo con exito las ${cantidadCancelar} entradas.`
@@ -171,7 +172,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
 
     try {
       await api.post(
-        `/conciertos/agregar_entradas_tipo/${entradaSeleccionada}`,
+        endpoints.conciertos.agregar_entradas_tipo(entradaSeleccionada),
         {cantidad: cantidadAgregar}
       )
 
@@ -195,7 +196,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
 
   const handleCancelarConciertoSubmit = async () => {
     try {
-      const res = await api.post(`/conciertos/cancelar_concierto/${id}`)
+      const res = await api.post(endpoints.conciertos.cancelar_concierto(id))
 
       const mensaje = res?.data?.message ?? "Se cancelo con exito";
 
@@ -220,7 +221,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
 
       payload.append('estado_id', 2)
 
-      await api.patch(`/conciertos/modificar_concierto/${id}`, payload)
+      await api.patch(endpoints.conciertos.modificar_concierto(id), payload)
 
       toast({
         title: "Se programo con exito",
@@ -241,12 +242,12 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
   useEffect(() => {
     if (!id) return
 
-    api.get(`/conciertos/tipos_concierto/${id}`)
+    api.get(endpoints.conciertos.tipos_concierto(id))
       .then(res => setTiposEntrada(res.data.results))
       .catch(err => console.error(err));
   }, [id])
 
-  const mostrar = ['en_curso', 'agotado', 'finalizado', 'cancelado'].includes(estado.codigo)
+  const mostrar = ['borrador', 'en_curso', 'agotado', 'finalizado', 'cancelado'].includes(estado.codigo)
 
   return (
     <Box maxW={250}>
@@ -297,7 +298,9 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
               borderColor={cancelado ? 'rgba(255, 0, 0, 0.8)' : 'white'}
             >
               <b>
-                {estado.codigo === 'agotado' ? (
+                {estado.codigo === 'borrador' ? (
+                  'BORRADOR'
+                ) : estado.codigo === 'agotado' ? (
                   'AGOTADO'
                 ) : estado.codigo === 'finalizado' ? (
                   'FINALIZADO'
@@ -391,7 +394,6 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                           Ventas
                         </MenuItem>
                         <MenuItem
-                          color='gray'
                           onClick={handleProgramar}
                           icon={<BellIcon boxSize={5} ml={-0.5} />}
                           display={
@@ -400,7 +402,7 @@ export default function Evento({ id, imagen, artista, titulo, genero, estado, fe
                             undefined : 'none'
                           }
                         >
-                          Programar
+                          Publicar
                         </MenuItem>
                         <MenuItem
                           color='red'

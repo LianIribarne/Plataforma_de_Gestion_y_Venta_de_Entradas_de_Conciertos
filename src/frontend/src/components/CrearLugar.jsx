@@ -1,13 +1,20 @@
-import { 
-  Button, FormControl, FormLabel, Input, 
-  Menu, MenuButton, MenuList, MenuItem,
-  Modal, ModalOverlay, ModalContent, ModalHeader,
-  ModalFooter, ModalBody, ModalCloseButton,
+import { ChevronDownIcon } from '@chakra-ui/icons';
+import {
+  Button, FormControl, FormLabel, Input,
+  Menu, MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Tooltip, useToast,
 } from "@chakra-ui/react";
-import React, { useState, useEffect } from 'react';
-import { ChevronDownIcon } from '@chakra-ui/icons'
-import api from '../services/api'
+import { useEffect, useState } from 'react';
+import api from '../services/api';
+import { endpoints } from "../services/endpoints";
 
 export default function CrearLugar({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -30,7 +37,7 @@ export default function CrearLugar({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/conciertos/provincias/")
+    api.get(endpoints.conciertos.provincias)
       .then(res => setProvincias(res.data))
       .catch(err => console.error(err));
   }, [isOpen]);
@@ -38,7 +45,11 @@ export default function CrearLugar({ isOpen, onClose }) {
   useEffect(() => {
     if (!provinciaSel) return;
 
-    api.get(`/conciertos/ciudades/?provincia_id=${provinciaSel.id}`)
+    api.get(endpoints.conciertos.ciudades, {
+      params: {
+        provincia_id: provinciaSel.id
+      }
+    })
       .then(res => setCiudades(res.data))
       .catch(err => console.error(err));
   }, [provinciaSel]);
@@ -55,7 +66,7 @@ export default function CrearLugar({ isOpen, onClose }) {
     if (formData.ciudad === '') newErrors.ciudad = "La ciudad es obligatoria";
     if (!formData.lugar) newErrors.lugar = "El nombre del lugar es obligatorio";
     if (!formData.direccion) newErrors.direccion = "La direccion es obligatoria";
-    
+
     return newErrors;
   };
 
@@ -63,7 +74,7 @@ export default function CrearLugar({ isOpen, onClose }) {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
@@ -73,7 +84,7 @@ export default function CrearLugar({ isOpen, onClose }) {
         ciudad_id: formData.ciudad,
       };
 
-      const res = await api.post("/conciertos/registrar_lugar/", payload);
+      const res = await api.post(endpoints.conciertos.registrar_lugar, payload);
 
       const mensaje = res?.data?.message ?? "Se creo con éxito";
 
@@ -100,11 +111,11 @@ export default function CrearLugar({ isOpen, onClose }) {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -149,7 +160,7 @@ export default function CrearLugar({ isOpen, onClose }) {
               </Tooltip>
               <MenuList maxH="200px" overflowY="auto">
                 {provincias.map((prov) => (
-                  <MenuItem 
+                  <MenuItem
                     key={prov.id}
                     onClick={() => {
                       setProvinciaSel(prov);
@@ -192,7 +203,7 @@ export default function CrearLugar({ isOpen, onClose }) {
               </Tooltip>
               <MenuList maxH="200px" overflowY="auto">
                 {ciudades.map((c) => (
-                  <MenuItem 
+                  <MenuItem
                     key={c.id}
                     onClick={() =>{
                       setCiudadSel(c);
@@ -220,7 +231,7 @@ export default function CrearLugar({ isOpen, onClose }) {
                 placeholder="Ingrese un nombre"
                 variant='custom'
                 rounded='full'
-                value={formData.lugar} 
+                value={formData.lugar}
                 onChange={handleChange("lugar")}
                 w="400px"
               />
@@ -241,7 +252,7 @@ export default function CrearLugar({ isOpen, onClose }) {
                 placeholder="Ingrese una dirección"
                 variant='custom'
                 rounded='full'
-                value={formData.direccion} 
+                value={formData.direccion}
                 onChange={handleChange("direccion")}
                 w="400px"
               />
@@ -250,9 +261,9 @@ export default function CrearLugar({ isOpen, onClose }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react'
-import {
-  Input, InputGroup,
-  InputRightAddon, IconButton,
-  Button, FormControl, FormLabel,
-  Tooltip, useToast, Modal,
-  ModalOverlay, ModalContent, ModalHeader, ModalFooter, 
-  ModalBody, ModalCloseButton,
-} from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import {
+  Button, FormControl, FormLabel,
+  IconButton,
+  Input, InputGroup,
+  InputRightAddon,
+  Modal,
+  ModalBody, ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Tooltip, useToast,
+} from "@chakra-ui/react";
+import { useEffect, useState } from 'react';
 import api from "../services/api";
+import { endpoints } from '../services/endpoints';
 
 export default function ModificarUsuario({ isOpen, onClose, id }) {
   const [show, setShow] = useState(false);
@@ -44,11 +50,11 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
     e.preventDefault();
     const validationErrors = validateForm();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
-      const res = await api.patch(`/usuarios/admin/modificar_usuario/${id}`, {password: formData.password});
+      const res = await api.patch(endpoints.usuarios.modificar_usuario(id), {password: formData.password});
 
       const mensaje = res?.data?.message ?? "Se cambio con éxito";
 
@@ -69,11 +75,11 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
       let msg = "Error inesperado";
 
       const data = error?.response?.data;
-        
+
       if (data && typeof data === "object") {
         const firstField = Object.keys(data)[0];
         const firstError = data[firstField]?.[0];
-      
+
         if (firstError) msg = firstError;
       }
 
@@ -97,7 +103,7 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
 
         <ModalBody align='center'>
           <form onSubmit={handleSubmit}>
-            
+
             {/* Contraseña */}
             <FormControl isInvalid={!!errors.password} my={3}>
               <FormLabel color='white'>Nueva Contraseña</FormLabel>
@@ -136,9 +142,9 @@ export default function ModificarUsuario({ isOpen, onClose, id }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button 
+          <Button
             colorScheme="red"
-            mr={3} 
+            mr={3}
             onClick={onClose}
             rounded='full'
           >

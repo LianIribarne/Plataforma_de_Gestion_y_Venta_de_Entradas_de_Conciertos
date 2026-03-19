@@ -1,14 +1,23 @@
 import {
-  Heading, Box, Avatar, Grid,
-  GridItem, Wrap, WrapItem, Text,
-  Button, HStack, useToast, useDisclosure,
+  Avatar,
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  Heading,
+  HStack,
+  Text,
+  useDisclosure,
+  useToast,
+  Wrap, WrapItem,
 } from "@chakra-ui/react";
-import { useAuth } from "../services/AuthContext";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react"
+import ActualizarPerfil from "../components/ActulizarPerfil";
+import CambiarPassword from "../components/CambiarPassword";
 import api from "../services/api";
-import ActualizarPerfil from "../components/ActulizarPerfil"
-import CambiarPassword from "../components/CambiarPassword"
+import { useAuth } from "../services/AuthContext";
+import { endpoints } from "../services/endpoints";
 
 export default function Perfil() {
   const { logoutUser } = useAuth();
@@ -28,7 +37,7 @@ export default function Perfil() {
     onOpen: onPasswordOpen,
     onClose: onPasswordClose
   } = useDisclosure();
-  
+
   const handleLogout = async () => {
     try {
       const res = await logoutUser();
@@ -52,7 +61,7 @@ export default function Perfil() {
   useEffect(() => {
     const fetchOrganizador = async () => {
       try {
-        const responseStats = await api.get(`/usuarios/estadisticas_organizador/${user?.id}`)
+        const responseStats = await api.get(endpoints.usuarios.estadisticas_organizador(user?.id))
 
         const payloadStats = responseStats.data
 
@@ -94,8 +103,8 @@ export default function Perfil() {
         </GridItem>
         <GridItem align='center' mt={user.rol === 'Organizador' ? 0 : 32} ml={-40}>
           <Wrap align='center' justify='center' spacing={10} w='70%'>
-            <WrapItem 
-              display='inline-block' 
+            <WrapItem
+              display='inline-block'
               align='center'
               p={4}
               bg='whiteAlpha.400'
@@ -104,8 +113,8 @@ export default function Perfil() {
               <Heading size='lg'>Email</Heading>
               <Text>{user.email}</Text>
             </WrapItem>
-            <WrapItem 
-              display='inline-block' 
+            <WrapItem
+              display='inline-block'
               align='center'
               p={4}
               bg='whiteAlpha.400'
@@ -114,8 +123,8 @@ export default function Perfil() {
               <Heading size='lg'>Fecha de nacimiento</Heading>
               <Text>{user.fecha_nacimiento}</Text>
             </WrapItem>
-            <WrapItem 
-              display='inline-block' 
+            <WrapItem
+              display='inline-block'
               align='center'
               p={4}
               bg='whiteAlpha.400'
@@ -124,8 +133,8 @@ export default function Perfil() {
               <Heading size='lg'>Genero</Heading>
               <Text>{user.genero}</Text>
             </WrapItem>
-            <WrapItem 
-              display='inline-block' 
+            <WrapItem
+              display='inline-block'
               align='center'
               p={4}
               bg='whiteAlpha.400'
@@ -136,25 +145,25 @@ export default function Perfil() {
             </WrapItem>
           </Wrap>
           <HStack spacing={10} align='center' justify='center' mt={20}>
-            <Button 
-              size='lg' 
-              rounded='full' 
-              colorScheme="red" 
+            <Button
+              size='lg'
+              rounded='full'
+              colorScheme="red"
               onClick={handleLogout}
               _hover={{transform: 'scale(1.1)'}}
             >
               Cerrar Sesion
             </Button>
-            <Button 
-              size='lg' 
+            <Button
+              size='lg'
               rounded='full'
               onClick={onActualizarOpen}
               _hover={{transform: 'scale(1.1)'}}
             >
               Actualizar Perfil
             </Button>
-            <Button 
-              size='lg' 
+            <Button
+              size='lg'
               rounded='full'
               onClick={onPasswordOpen}
               _hover={{transform: 'scale(1.1)'}}
@@ -168,9 +177,9 @@ export default function Perfil() {
           <Heading mb={4}>Sobre tus conciertos</Heading>
           <Wrap justify='center' spacing={4} align='center'>
             {conciertosStats.map((c, i) => (
-              <WrapItem 
-                bg='whiteAlpha.400' 
-                fontWeight='medium' 
+              <WrapItem
+                bg='whiteAlpha.400'
+                fontWeight='medium'
                 px={2}
                 py={1}
                 borderRadius={10}
@@ -191,7 +200,7 @@ export default function Perfil() {
       </Grid>
 
       <ActualizarPerfil isOpen={isActualizarOpen} onClose={onActualizarClose}/>
-      
+
       <CambiarPassword isOpen={isPasswordOpen} onClose={onPasswordClose}/>
     </Box>
   )
