@@ -36,7 +36,15 @@ class Reserva(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.reservar_hasta = timezone.now() + timedelta(minutes=15)
+            ahora = timezone.now()
+            tiempo_restante = self.concierto.fecha_inicio - ahora
+            limite = timedelta(minutes=15)
+
+            if tiempo_restante <= timedelta(0):
+                raise ValueError("El concierto ya comenzó o finalizó")
+
+            self.reservar_hasta = ahora + min(tiempo_restante, limite)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
