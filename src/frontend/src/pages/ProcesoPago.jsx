@@ -293,21 +293,6 @@ export default function ProcesoPago() {
   const [open, setOpen] = useState(true)
 
   const handleComprar = async () => {
-    fetchReservaActiva()
-
-    if (tieneReservaActiva) {
-      toast({
-        title: "Error",
-        description: "No se puede realizar la compra, porque el concierto ya se encuentra en curso.",
-        status: "error",
-        duration: 8000,
-        isClosable: true,
-        position: 'top',
-      });
-
-      navigate("/conciertos")
-    }
-
     try {
       const res = await api.post(endpoints.pagos.pagar_reserva)
 
