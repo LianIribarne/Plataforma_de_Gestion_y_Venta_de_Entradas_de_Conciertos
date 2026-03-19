@@ -22,12 +22,14 @@ Como organizador quiero poder crear un concierto con sus respectivos datos, para
 
 ### Reserva de entradas #3
 
-Como cliente quiero poder reservar entradas por un tiempo limitado de 15 minutos, para asegurarme de comprarlas antes de que se agoten.
+Como cliente quiero poder reservar entradas por un tiempo limitado, para asegurarme de comprarlas antes de que se agoten.
 
 **Criterios de aceptación:**
 
-- El sistema debe bloquear las entradas reservadas durante 15 minutos.
+- El sistema debe bloquear las entradas reservadas por un tiempo dinámico, con un máximo de 15 minutos.
+- Si el concierto inicia en menos de 15 minutos, el tiempo de reserva se ajusta automáticamente al tiempo restante hasta el inicio.
 - Si no se completa la compra en ese tiempo, las entradas vuelven a estar disponibles.
+- No se deben permitir reservas si el concierto ya ha comenzado.
 - El cliente debe recibir una notificación visual del tiempo restante.
 
 ### Compra de entradas #4

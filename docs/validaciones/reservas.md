@@ -29,7 +29,7 @@ Para crear una reserva deben cumplirse las siguientes condiciones:
 - No se puede incluir el mismo tipo de entrada más de una vez en una reserva.
 
 Al crearse una reserva, las entradas pasan de estado disponible a reservado.
-Simultáneamente, se programa una tarea asíncrona que establece un tiempo de expiración de 15 minutos desde su creación.
+Simultáneamente, se programa una tarea asíncrona que establece un tiempo de expiración dinámico desde su creación, definido como el menor entre 15 minutos y el tiempo restante hasta el inicio del concierto.
 
 Si la reserva no es confirmada mediante el pago dentro de ese período:
 
